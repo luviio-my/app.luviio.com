@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appluviio by Luviio — Simple tools for your digital identity & business</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --accent: #3B82F6;
+    --accent-hover: #2563EB;
+    --accent-light: #EFF6FF;
+    --accent-subtle: #DBEAFE;
+    --bg: #FFFFFF;
+    --bg-secondary: #F8FAFC;
+    --text: #0F172A;
+    --text-secondary: #64748B;
+    --text-muted: #94A3B8;
+    --border: #E2E8F0;
+    --card: #FFFFFF;
+    --success: #22C55E;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:var(--text); background:var(--bg); -webkit-font-smoothing:antialiased; }
+  .page { display:none; opacity:0; transition:opacity .3s ease; }
+  .page.active { display:block; opacity:1; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 24px; border-radius:12px; font-weight:600; font-size:14px; border:none; cursor:pointer; transition:all .2s ease; text-decoration:none; font-family:inherit; }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 12px rgba(59,130,246,.3); }
+  .btn-secondary { background:var(--bg-secondary); color:var(--text); border:1px solid var(--border); }
+  .btn-secondary:hover { background:var(--border); }
+  .btn-ghost { background:transparent; color:var(--text-secondary); }
+  .btn-ghost:hover { background:var(--bg-secondary); color:var(--text); }
+  .btn-danger { background:#FEF2F2; color:var(--danger); }
+  .btn-danger:hover { background:#FEE2E2; }
+  .btn-sm { padding:6px 14px; font-size:13px; border-radius:8px; }
+  .btn-lg { padding:14px 32px; font-size:16px; border-radius:14px; }
+  .btn:disabled { opacity:.5; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
+  .input { width:100%; padding:10px 16px; border:1.5px solid var(--border); border-radius:12px; font-size:14px; font-family:inherit; transition:all .2s; background:var(--bg); color:var(--text); outline:none; }
+  .input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+  .input::placeholder { color:var(--text-muted); }
+  .input:disabled { background:var(--bg-secondary); color:var(--text-muted); cursor:not-allowed; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; }
+  .card-hover { transition:all .25s ease; }
+  .card-hover:hover { border-color:var(--accent-subtle); box-shadow:0 8px 30px rgba(0,0,0,.06); transform:translateY(-2px); }
+  .label { display:block; font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
+  .toast-container { position:fixed; top:20px; right:20px; z-index:10000; display:flex; flex-direction:column; gap:8px; }
+  .toast { padding:14px 20px; border-radius:12px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px; animation:slideIn .3s ease; min-width:280px; max-width:400px; box-shadow:0 8px 30px rgba(0,0,0,.12); }
+  .toast-success { background:#F0FDF4; color:#166534; border:1px solid #BBF7D0; }
+  .toast-error { background:#FEF2F2; color:#991B1B; border:1px solid #FECACA; }
+  .toast-info { background:var(--accent-light); color:#1E40AF; border:1px solid var(--accent-subtle); }
+  @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+  @keyframes slideOut { from { transform:translateX(0); opacity:1; } to { transform:translateX(100%); opacity:0; } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
+  .fade-up { animation:fadeUp .6s ease both; }
+  .fade-up-1 { animation-delay:.1s; }
+  .fade-up-2 { animation-delay:.2s; }
+  .fade-up-3 { animation-delay:.3s; }
+  .fade-up-4 { animation-delay:.4s; }
+  .fade-up-5 { animation-delay:.5s; }
+  .nav-link { padding:8px 16px; border-radius:10px; font-size:14px; font-weight:500; color:var(--text-secondary); transition:all .2s; cursor:pointer; text-decoration:none; white-space:nowrap; }
+  .nav-link:hover { color:var(--text); background:var(--bg-secondary); }
+  .nav-link.active { color:var(--accent); background:var(--accent-light); }
+  .tool-icon { width:56px; height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; }
+  .stat-card { text-align:center; padding:20px; }
+  .stat-number { font-size:32px; font-weight:800; color:var(--text); line-height:1; }
+  .stat-label { font-size:13px; color:var(--text-muted); margin-top:6px; }
+  .link-item { display:flex; align-items:center; gap:12px; padding:12px; border:1px solid var(--border); border-radius:12px; cursor:grab; transition:all .2s; }
+  .link-item:hover { border-color:var(--accent-subtle); background:var(--accent-light); }
+  .link-item.dragging { opacity:.5; transform:scale(.98); }
+  .link-item .drag-handle { color:var(--text-muted); cursor:grab; }
+  .preview-phone { width:320px; min-height:580px; background:#fff; border:8px solid #1a1a1a; border-radius:40px; overflow:hidden; position:relative; }
+  .preview-phone::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:100px; height:24px; background:#1a1a1a; border-radius:0 0 16px 16px; z-index:10; }
+  .pricing-card { border:1.5px solid var(--border); border-radius:20px; padding:32px; transition:all .3s; }
+  .pricing-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,.08); }
+  .pricing-card.featured { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 12px 40px rgba(59,130,246,.12); }
+  .pricing-card.featured:hover { box-shadow:0 0 0 1px var(--accent), 0 20px 50px rgba(59,130,246,.18); }
+  .badge { display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(4px); z-index:9000; display:flex; align-items:center; justify-content:center; padding:20px; animation:fadeUp .2s ease; }
+  .modal { background:#fff; border-radius:20px; padding:32px; max-width:480px; width:100%; box-shadow:0 25px 60px rgba(0,0,0,.15); max-height:90vh; overflow-y:auto; }
+  .hero-gradient { background:radial-gradient(ellipse at 50% 0%, rgba(59,130,246,.08) 0%, transparent 60%); }
+  .compare-row { display:grid; grid-template-columns:200px 1fr 1fr; gap:0; align-items:center; padding:14px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .compare-row:last-child { border-bottom:none; }
+  .compare-header { font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); padding-bottom:10px; border-bottom:2px solid var(--text); }
+  .spinner { width:20px; height:20px; border:2.5px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; display:inline-block; }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--text-muted); }
+  @media(max-width:768px) {
+    .preview-phone { width:280px; min-height:500px; border-width:6px; border-radius:32px; }
+    .preview-phone::before { width:80px; height:20px; }
+    .stat-number { font-size:24px; }
+    .card { padding:18px; }
+    .btn-lg { padding:12px 24px; font-size:15px; }
+    .compare-row { grid-template-columns:140px 1fr 1fr; font-size:13px; padding:10px 0; }
+    .modal { padding:24px; margin:12px; }
+  }
+  @media print { .no-print { display:none!important; } }
+  .verify-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; }
+  .verify-dot.green { background:var(--success); }
+  .verify-dot.yellow { background:var(--warning); }
+  .verify-dot.red { background:var(--danger); }
+  .template-card { border:2px solid var(--border); border-radius:14px; padding:16px; cursor:pointer; transition:all .2s; text-align:center; }
+  .template-card:hover { border-color:var(--accent-subtle); background:var(--accent-light); }
+  .template-card.selected { border-color:var(--accent); background:var(--accent-light); box-shadow:0 0 0 1px var(--accent); }
+  .wa-template-card { border:1.5px solid var(--border); border-radius:14px; padding:16px; cursor:pointer; transition:all .2s; }
+  .wa-template-card:hover { border-color:var(--accent-subtle); }
+  .wa-template-card.selected { border-color:#25D366; background:#F0FDF4; }
+  .wa-preview-box { background:#ECE5DD; border-radius:12px; padding:16px; max-width:340px; }
+  .wa-bubble { background:#DCF8C6; border-radius:0 10px 10px 10px; padding:10px 14px; font-size:14px; line-height:1.5; position:relative; max-width:90%; word-wrap:break-word; }
+  .wa-bubble-time { font-size:11px; color:#8B9DA5; text-align:right; margin-top:4px; }
+  .wa-avatar { width:36px; height:36px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px; flex-shrink:0; }
+</style>
+</head>
+<body>
+<div id="toast-container" class="toast-container"></div>
+<div id="app"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, updateProfile, sendEmailVerification, applyActionCode, checkActionCode } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, query, collection, where, getDocs, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDSp-HX00hZaJwTFaZ4X06pU7pARGjhl1M",
+  authDomain: "appluviio.firebaseapp.com",
+  projectId: "appluviio",
+  storageBucket: "appluviio.firebasestorage.app",
+  messagingSenderId: "598571208819",
+  appId: "1:598571208819:web:1a91c501b49b3e604d5a06",
+  measurementId: "G-MZ96FCCJ1K"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let analytics = null;
+try { analytics = getAnalytics(app); } catch(e) {}
+const track = (name, data={}) => { try { logEvent(analytics, name, data); } catch(e) {} };
+
+const provider = new GoogleAuthProvider();
+const $ = id => document.getElementById(id);
+const appEl = $('app');
+
+const LOGO_URL = 'https://images.luviio.com/craiyon_151643_image.png';
+const BIO_DOMAIN = 'app.luviio.com';
+const CURRENCIES = [
+  {code:'MYR',symbol:'RM',name:'Malaysian Ringgit'},
+  {code:'USD',symbol:'$',name:'US Dollar'},
+  {code:'SGD',symbol:'S$',name:'Singapore Dollar'},
+  {code:'EUR',symbol:'€',name:'Euro'},
+  {code:'GBP',symbol:'£',name:'British Pound'},
+  {code:'IDR',symbol:'Rp',name:'Indonesian Rupiah'},
+  {code:'THB',symbol:'฿',name:'Thai Baht'},
+  {code:'PHP',symbol:'₱',name:'Philippine Peso'},
+];
+
+let currentUser = null;
+let userData = null;
+let currentPage = 'landing';
+let emailVerifiedChecked = false;
+
+const bioState = { name:'', bio:'', avatar:'', links:[
+  {id:1,title:'WhatsApp',url:'https://wa.me/',icon:'fa-brands fa-whatsapp',color:'#25D366'},
+  {id:2,title:'TikTok',url:'https://tiktok.com/@',icon:'fa-brands fa-tiktok',color:'#000000'},
+  {id:3,title:'Shopee',url:'https://shopee.com/',icon:'fa-solid fa-bag-shopping',color:'#EE4D2D'}
+]};
+
+const resumeState = {
+  fullName:'', email:'', phone:'', address:'', photo:'',
+  summary:'', experiences:[{company:'',role:'',period:'',desc:''}],
+  skills:[], education:[{school:'',degree:'',year:''}],
+  template:'standard'
+};
+
+const invoiceState = {
+  from:{name:'',email:'',phone:'',address:''},
+  to:{name:'',email:'',phone:'',address:''},
+  items:[{desc:'',qty:1,price:0}],
+  date:new Date().toISOString().split('T')[0],
+  invoiceNo:'INV-001', notes:'', currency:'MYR'
+};
+
+const waState = {
+  phone:'', message:'', prefill:'', templateId:0
+};
+
+const linkPresets = [
+  {title:'WhatsApp',url:'https://wa.me/',icon:'fa-brands fa-whatsapp',color:'#25D366'},
+  {title:'TikTok',url:'https://tiktok.com/@',icon:'fa-brands fa-tiktok',color:'#000000'},
+  {title:'Instagram',url:'https://instagram.com/',icon:'fa-brands fa-instagram',color:'#E4405F'},
+  {title:'Shopee',url:'https://shopee.com/',icon:'fa-solid fa-bag-shopping',color:'#EE4D2D'},
+  {title:'YouTube',url:'https://youtube.com/@',icon:'fa-brands fa-youtube',color:'#FF0000'},
+  {title:'Twitter / X',url:'https://x.com/',icon:'fa-brands fa-x-twitter',color:'#000000'},
+  {title:'LinkedIn',url:'https://linkedin.com/in/',icon:'fa-brands fa-linkedin',color:'#0A66C2'},
+  {title:'Website',url:'https://',icon:'fa-solid fa-globe',color:'#3B82F6'},
+  {title:'Email',url:'mailto:',icon:'fa-solid fa-envelope',color:'#64748B'},
+  {title:'Custom',url:'',icon:'fa-solid fa-link',color:'#6366F1'},
+];
+
+const waTemplates = [
+  {id:0,name:'Simple Link',desc:'Just the link, nothing else',free:true,generate:(phone,msg)=>`https://wa.me/${phone}`},
+  {id:1,name:'Custom Message',desc:'Pre-filled chat message',free:false,generate:(phone,msg)=>`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`},
+  {id:2,name:'Business Greeting',desc:'Professional opening message',free:false,generate:(phone,msg)=>`https://wa.me/${phone}?text=${encodeURIComponent(`Hi! 👋\n\nThank you for reaching out to us.\n\n${msg||'How can we help you today?'}`)}`},
+  {id:3,name:'Order Inquiry',desc:'Pre-filled order template',free:false,generate:(phone,msg)=>`https://wa.me/${phone}?text=${encodeURIComponent(`Hi! I'm interested in your product/service.\n\nDetails: ${msg||'Please share more information.'}\n\nThank you!`)}`},
+  {id:4,name:'Support Request',desc:'Support ticket template',free:false,generate:(phone,msg)=>`https://wa.me/${phone}?text=${encodeURIComponent(`Hello, I need help with the following:\n\n${msg||'Please describe your issue.'}\n\nThank you for your assistance.`)}`},
+];
+
+function getCurSymbol() {
+  const c = CURRENCIES.find(x=>x.code===invoiceState.currency);
+  return c ? c.symbol : 'RM';
+}
+function formatMoney(amount) {
+  const sym = getCurSymbol();
+  if(invoiceState.currency==='IDR') return sym + Math.round(amount).toLocaleString('id-ID');
+  return sym + amount.toFixed(2);
+}
+
+function toast(msg, type='info') {
+  const c = $('toast-container');
+  const icons = {success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info'};
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<i class="fa-solid ${icons[type]}"></i><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.animation='slideOut .3s ease forwards'; setTimeout(()=>t.remove(),300); },3500);
+}
+
+function showModal(title, body, actions='') {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `<div class="modal"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">${title}</h3><div style="color:var(--text-secondary);font-size:14px;line-height:1.6">${body}</div><div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">${actions}</div></div>`;
+    overlay.addEventListener('click', e => { if(e.target===overlay){ overlay.remove(); resolve(false); } });
+    document.body.appendChild(overlay);
+  });
+}
+
+async function registerEmail(name, email, password) {
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: name });
+    await sendEmailVerification(cred.user);
+    const username = email.split('@')[0].replace(/[^a-z0-9]/gi,'').toLowerCase() + Math.floor(Math.random()*1000);
+    await setDoc(doc(db,'users',cred.user.uid), {
+      uid:cred.user.uid, name, email, emailVerified:false,
+      username, stats:{bioViews:0,qrScans:0,linkClicks:0},
+      plan:'free', createdAt:serverTimestamp()
+    });
+    track('sign_up',{method:'email'});
+    emailVerifiedChecked = false;
+    navigate('verify-email');
+  } catch(e) {
+    const msgs = {'auth/email-already-in-use':'This email is already registered','auth/weak-password':'Password must be at least 6 characters','auth/invalid-email':'Invalid email address'};
+    toast(msgs[e.code] || e.message,'error');
+  }
+}
+
+async function loginEmail(email, password) {
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    track('login',{method:'email'});
+  } catch(e) {
+    const msgs = {'auth/user-not-found':'No account found with this email','auth/wrong-password':'Incorrect password','auth/invalid-credential':'Invalid email or password','auth/invalid-email':'Invalid email address'};
+    toast(msgs[e.code] || e.message,'error');
+  }
+}
+
+async function loginGoogle() {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const userRef = doc(db,'users',result.user.uid);
+    const userSnap = await getDoc(userRef);
+    if(!userSnap.exists()) {
+      const username = result.user.email.split('@')[0].replace(/[^a-z0-9]/gi,'').toLowerCase() + Math.floor(Math.random()*1000);
+      await setDoc(userRef, {
+        uid:result.user.uid, name:result.user.displayName||'', email:result.user.email,
+        emailVerified:result.user.emailVerified||false, username,
+        stats:{bioViews:0,qrScans:0,linkClicks:0}, plan:'free', createdAt:serverTimestamp()
+      });
+      track('sign_up',{method:'google'});
+      toast('Account created with Google!','success');
+    } else {
+      track('login',{method:'google'});
+      toast('Welcome back!','success');
+    }
+  } catch(e) {
+    if(e.code!=='auth/popup-closed-by-user') toast(e.message,'error');
+  }
+}
+
+async function logoutUser() { await signOut(auth); toast('Signed out','info'); }
+
+async function loadUser(uid) {
+  const snap = await getDoc(doc(db,'users',uid));
+  return snap.exists() ? snap.data() : null;
+}
+async function saveBioData(uid) { try { await setDoc(doc(db,'users',uid,'data','bio'), bioState); } catch(e) {} }
+async function loadBioData(uid) { try { const s = await getDoc(doc(db,'users',uid,'data','bio')); if(s.exists()) Object.assign(bioState, s.data()); } catch(e) {} }
+async function saveResumeData(uid) { try { await setDoc(doc(db,'users',uid,'data','resume'), resumeState); } catch(e) {} }
+async function loadResumeData(uid) { try { const s = await getDoc(doc(db,'users',uid,'data','resume')); if(s.exists()) Object.assign(resumeState, s.data()); } catch(e) {} }
+async function saveInvoiceData(uid) { try { await setDoc(doc(db,'users',uid,'data','invoice'), invoiceState); } catch(e) {} }
+async function loadInvoiceData(uid) { try { const s = await getDoc(doc(db,'users',uid,'data','invoice')); if(s.exists()) Object.assign(invoiceState, s.data()); } catch(e) {} }
+async function saveWaData(uid) { try { await setDoc(doc(db,'users',uid,'data','walink'), waState); } catch(e) {} }
+async function loadWaData(uid) { try { const s = await getDoc(doc(db,'users',uid,'data','walink')); if(s.exists()) Object.assign(waState, s.data()); } catch(e) {} }
+
+async function updateUsername(uid, newUsername) {
+  const clean = newUsername.toLowerCase().replace(/[^a-z0-9._-]/g,'');
+  if(!clean || clean.length<3) { toast('Username must be at least 3 characters','error'); return false; }
+  if(clean.length>20) { toast('Username too long (max 20)','error'); return false; }
+  const q = query(collection(db,'users'), where('username','==',clean));
+  const snap = await getDocs(q);
+  for(const d of snap.docs) { if(d.id!==uid) { toast('Username already taken','error'); return false; } }
+  await updateDoc(doc(db,'users',uid), { username:clean });
+  userData.username = clean;
+  toast('Username updated!','success');
+  track('update_username');
+  return true;
+}
+
+async function loadPublicProfile(username) {
+  const q = query(collection(db,'users'), where('username','==',username));
+  const snap = await getDocs(q);
+  if(!snap.empty) {
+    const user = snap.docs[0].data();
+    const bioSnap = await getDoc(doc(db,'users',snap.docs[0].id,'data','bio'));
+    const bio = bioSnap.exists() ? bioSnap.data() : null;
+    await updateDoc(doc(db,'users',snap.docs[0].id), { 'stats.bioViews': increment(1) }).catch(()=>{});
+    return { ...user, bio };
+  }
+  return null;
+}
+
+function navigate(page, params={}) {
+  currentPage = page;
+  window.scrollTo({top:0,behavior:'smooth'});
+  const routes = {landing:'/',login:'/login',register:'/register',dashboard:'/dashboard',bio:'/bio',qr:'/qr',resume:'/resume',invoice:'/invoice',pricing:'/pricing',walink:'/walink',profile:'/profile','verify-email':'/verify-email'};
+  if(page==='profile') window.history.pushState({},'',`/${params.username}`);
+  else if(page==='public-bio') window.history.pushState({},'',`/${params.username}/bio`);
+  else window.history.pushState({},'', routes[page]||'/');
+  render();
+}
+
+window.addEventListener('popstate', () => {
+  const path = window.location.pathname.replace(/\/$/,'');
+  if(path==='') currentPage='landing';
+  else if(path==='/login') currentPage='login';
+  else if(path==='/register') currentPage='register';
+  else if(path==='/dashboard') currentPage='dashboard';
+  else if(path==='/bio') currentPage='bio';
+  else if(path==='/qr') currentPage='qr';
+  else if(path==='/resume') currentPage='resume';
+  else if(path==='/invoice') currentPage='invoice';
+  else if(path==='/pricing') currentPage='pricing';
+  else if(path==='/walink') currentPage='walink';
+  else if(path==='/verify-email') currentPage='verify-email';
+  else if(path.startsWith('/')) { currentPage='public-bio'; renderPublicBio(path.slice(1)); return; }
+  render();
+});
+
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  if(user) {
+    await user.reload();
+    if(!user.emailVerified && !emailVerifiedChecked) {
+      userData = await loadUser(user.uid);
+      emailVerifiedChecked = true;
+      if(currentPage!=='verify-email') { navigate('verify-email'); return; }
+    }
+    userData = await loadUser(user.uid);
+    if(!userData) userData = { uid:user.uid, name:user.displayName||'', email:user.email, username:user.email.split('@')[0], stats:{bioViews:0,qrScans:0,linkClicks:0}, plan:'free', emailVerified:user.emailVerified };
+    if(['landing','login','register','verify-email','pricing'].includes(currentPage)) {
+      if(['bio','qr','resume','invoice','walink'].includes(currentPage)) render();
+      else navigate('dashboard');
+    } else render();
+  } else {
+    userData = null;
+    emailVerifiedChecked = false;
+    if(['dashboard','bio','qr','resume','invoice','walink','verify-email'].includes(currentPage)) navigate('landing');
+    else render();
+  }
+});
+
+function render() {
+  if(['landing','login','register','verify-email','pricing'].includes(currentPage)) renderPublic();
+  else if(currentUser) renderApp();
+  else renderPublic();
+}
+
+function esc(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function logoHTML(size=32) {
+  return `<img src="${LOGO_URL}" style="width:${size}px;height:${size}px;border-radius:8px;object-fit:cover" alt="Appluviio" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="width:${size}px;height:${size}px;background:var(--accent);border-radius:8px;display:none;align-items:center;justify-content:center"><i class="fa-solid fa-bolt" style="color:#fff;font-size:${Math.round(size*0.44)}px"></i></div>`;
+}
+
+function publicNav() {
+  return `<nav style="position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
+    <div style="max-width:1200px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between">
+      <a onclick="window._nav('landing')" style="cursor:pointer;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)">
+        ${logoHTML(32)}
+        <div><span style="font-size:18px;font-weight:800;letter-spacing:-.5px">Appluviio</span><span style="font-size:11px;color:var(--text-muted);margin-left:4px">by Luviio</span></div>
+      </a>
+      <div style="display:flex;align-items:center;gap:6px">
+        ${currentPage==='landing'||currentPage==='pricing'?`<a class="nav-link" onclick="window._nav('pricing')">Pricing</a>`:''}
+        ${currentUser
+          ?`<a class="nav-link" onclick="window._nav('dashboard')">Dashboard</a>
+            <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+            <a class="nav-link" onclick="window._openProfile()" style="display:flex;align-items:center;gap:6px">
+              <div style="width:28px;height:28px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:12px">${(userData?.name||'U')[0].toUpperCase()}</div>
+              <span class="hidden sm:inline" style="font-size:13px">${userData?.name?.split(' ')[0]||''}</span>
+            </a>
+            <button class="btn btn-ghost btn-sm" onclick="window._logout()">Sign Out</button>`
+          :`<a class="nav-link" onclick="window._nav('login')">Sign In</a><button class="btn btn-primary btn-sm" onclick="window._nav('register')">Get Started</button>`
+        }
+      </div>
+    </div>
+  </nav>`;
+}
+
+function appNav() {
+  const tabs = [
+    {id:'dashboard',icon:'fa-solid fa-grid-2',label:'Dashboard'},
+    {id:'bio',icon:'fa-solid fa-link',label:'Bio'},
+    {id:'qr',icon:'fa-solid fa-qrcode',label:'QR'},
+    {id:'resume',icon:'fa-solid fa-file-lines',label:'Resume'},
+    {id:'invoice',icon:'fa-solid fa-file-invoice',label:'Invoice'},
+    {id:'walink',icon:'fa-brands fa-whatsapp',label:'WA Link'},
+  ];
+  const active = currentPage;
+  return `<nav style="position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
+    <div style="max-width:1200px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between">
+      <a onclick="window._nav('landing')" style="cursor:pointer;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)">
+        ${logoHTML(28)}
+        <span class="hidden sm:inline" style="font-size:16px;font-weight:800;letter-spacing:-.5px">Appluviio</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:4px;overflow-x:auto" class="no-print">
+        ${tabs.map(t=>`<a class="nav-link ${active===t.id?'active':''}" onclick="window._nav('${t.id}')"><i class="${t.icon}" style="margin-right:4px;font-size:12px"></i><span class="hidden sm:inline">${t.label}</span></a>`).join('')}
+      </div>
+      <a onclick="window._openProfile()" style="cursor:pointer;display:flex;align-items:center;gap:8px;text-decoration:none" title="View Profile">
+        <span style="font-size:13px;color:var(--text-muted)" class="hidden md:inline">${userData?.name||''}</span>
+        <div style="width:32px;height:32px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:13px">${(userData?.name||'U')[0].toUpperCase()}</div>
+      </a>
+    </div>
+  </nav>
+  <nav style="position:fixed;bottom:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:6px 0 env(safe-area-inset-bottom,6px)" class="sm:hidden no-print">
+    <div style="display:flex;justify-content:space-around;align-items:center">
+      ${tabs.map(t=>`<a onclick="window._nav('${t.id}')" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 8px;border-radius:10px;cursor:pointer;color:${active===t.id?'var(--accent)':'var(--text-muted)'};font-size:10px;font-weight:600;text-decoration:none"><i class="${t.icon}" style="font-size:18px"></i>${t.label}</a>`).join('')}
+    </div>
+  </nav>`;
+}
+
+function renderPublic() {
+  if(currentPage==='landing') renderLanding();
+  else if(currentPage==='login') renderLogin();
+  else if(currentPage==='register') renderRegister();
+  else if(currentPage==='pricing') renderPricing();
+  else if(currentPage==='verify-email') renderVerifyEmail();
+}
+
+function renderLanding() {
+  appEl.innerHTML = `${publicNav()}
+  <main class="hero-gradient" style="padding-top:100px">
+    <section style="max-width:900px;margin:0 auto;padding:60px 24px 40px;text-align:center">
+      <div class="badge fade-up" style="background:var(--accent-light);color:var(--accent);margin-bottom:20px">Now in Public Beta</div>
+      <h1 class="fade-up fade-up-1" style="font-size:clamp(36px,6vw,64px);font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:20px">
+        Simple tools for your<br><span style="background:linear-gradient(135deg,var(--accent),#818CF8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">digital identity</span> & business
+      </h1>
+      <p class="fade-up fade-up-2" style="font-size:18px;color:var(--text-secondary);max-width:560px;margin:0 auto 36px;line-height:1.7">Build your bio link, generate QR codes, create resumes, send invoices, and WhatsApp links — all in one beautiful platform.</p>
+      <div class="fade-up fade-up-3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary btn-lg" onclick="window._nav('register')"><i class="fa-solid fa-rocket"></i> Get Started Free</button>
+        <button class="btn btn-secondary btn-lg" onclick="window._nav('login')"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In</button>
+      </div>
+    </section>
+    <section style="max-width:1100px;margin:0 auto;padding:40px 24px 80px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+        ${[
+          {icon:'fa-solid fa-link',color:'#3B82F6',bg:'#EFF6FF',title:'Bio Link Builder',desc:'One link for everything. Beautiful, customizable, mobile-optimized.',demo:'bio'},
+          {icon:'fa-solid fa-qrcode',color:'#8B5CF6',bg:'#F5F3FF',title:'Smart QR Generator',desc:'Create QR codes instantly. Download, share, and track scans.',demo:'qr'},
+          {icon:'fa-solid fa-file-lines',color:'#10B981',bg:'#ECFDF5',title:'Resume Builder',desc:'Build professional resumes with template choices and PDF export.',demo:'resume'},
+          {icon:'fa-solid fa-file-invoice-dollar',color:'#F59E0B',bg:'#FFFBEB',title:'Invoice Generator',desc:'Create invoices in seconds. Multiple currencies, export, send via WhatsApp.',demo:'invoice'},
+          {icon:'fa-brands fa-whatsapp',color:'#25D366',bg:'#F0FDF4',title:'WhatsApp Link Generator',desc:'Generate WhatsApp links with custom messages and templates.',demo:'walink'}
+        ].map((s,i)=>`
+          <div class="card card-hover fade-up fade-up-${Math.min(i+1,5)}" style="padding:28px;cursor:pointer" onclick="window._tryDemo('${s.demo}')">
+            <div class="tool-icon" style="background:${s.bg};color:${s.color};margin-bottom:16px"><i class="${s.icon}"></i></div>
+            <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">${s.title}</h3>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">${s.desc}</p>
+            <span style="display:inline-flex;align-items:center;gap:4px;margin-top:14px;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer">Try Demo <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+    <section style="max-width:700px;margin:0 auto;padding:40px 24px 100px;text-align:center">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+        ${[1,2,3,4,5].map(()=>`<i class="fa-solid fa-star" style="color:#F59E0B;font-size:16px"></i>`).join('')}
+      </div>
+      <p style="font-size:15px;color:var(--text-secondary);line-height:1.7">"Appluviio replaced 4 different tools for me. My bio link, QR codes, invoices, and WhatsApp links — all in one place. Incredibly simple."</p>
+      <p style="font-size:13px;font-weight:600;color:var(--text);margin-top:12px">Sarah Chen — Freelance Designer</p>
+    </section>
+    <section style="background:var(--text);padding:80px 24px;text-align:center;border-radius:24px 24px 0 0">
+      <h2 style="font-size:clamp(28px,4vw,42px);font-weight:800;color:#fff;letter-spacing:-1px;margin-bottom:16px">Ready to build your digital presence?</h2>
+      <p style="font-size:16px;color:rgba(255,255,255,.6);margin-bottom:32px">Join thousands using Appluviio to simplify their online identity.</p>
+      <button class="btn btn-primary btn-lg" onclick="window._nav('register')" style="font-size:17px;padding:16px 40px">Start Free Today</button>
+    </section>
+  </main>
+  <footer style="background:var(--text);padding:24px;text-align:center;border-top:1px solid rgba(255,255,255,.1)">
+    <p style="font-size:13px;color:rgba(255,255,255,.4)">2025 Appluviio by Luviio. All rights reserved.</p>
+  </footer>`;
+}
+
+function renderLogin() {
+  appEl.innerHTML = `${publicNav()}
+  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 40px">
+    <div style="width:100%;max-width:400px">
+      <div style="text-align:center;margin-bottom:32px">
+        ${logoHTML(48)}
+        <h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-top:16px">Welcome back</h1>
+        <p style="font-size:14px;color:var(--text-secondary);margin-top:6px">Sign in to your Appluviio account</p>
+      </div>
+      <div class="card" style="padding:28px">
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:16px" onclick="window._googleLogin()"><i class="fa-brands fa-google"></i> Continue with Google</button>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:12px;color:var(--text-muted);font-weight:500">OR</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
+        <div style="margin-bottom:14px"><label class="label">Email</label><input class="input" type="email" id="login-email" placeholder="you@example.com"></div>
+        <div style="margin-bottom:20px"><label class="label">Password</label><input class="input" type="password" id="login-pass" placeholder="Enter your password"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="window._emailLogin()">Sign In</button>
+      </div>
+      <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text-secondary)">Don't have an account? <a onclick="window._nav('register')" style="color:var(--accent);font-weight:600;cursor:pointer">Get Started</a></p>
+    </div>
+  </main>`;
+}
+
+function renderRegister() {
+  appEl.innerHTML = `${publicNav()}
+  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 40px">
+    <div style="width:100%;max-width:400px">
+      <div style="text-align:center;margin-bottom:32px">
+        ${logoHTML(48)}
+        <h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-top:16px">Create your account</h1>
+        <p style="font-size:14px;color:var(--text-secondary);margin-top:6px">Start building your digital identity</p>
+      </div>
+      <div class="card" style="padding:28px">
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:16px" onclick="window._googleLogin()"><i class="fa-brands fa-google"></i> Continue with Google</button>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:12px;color:var(--text-muted);font-weight:500">OR</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
+        <div style="margin-bottom:14px"><label class="label">Full Name</label><input class="input" type="text" id="reg-name" placeholder="Your name"></div>
+        <div style="margin-bottom:14px"><label class="label">Email</label><input class="input" type="email" id="reg-email" placeholder="you@example.com"><p style="font-size:11px;color:var(--text-muted);margin-top:4px"><i class="fa-solid fa-lock" style="margin-right:3px"></i>Email cannot be changed after registration</p></div>
+        <div style="margin-bottom:20px"><label class="label">Password</label><input class="input" type="password" id="reg-pass" placeholder="Min 6 characters"></div>
+        <button class="btn btn-primary" style="width:100%" onclick="window._emailRegister()">Create Account</button>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:12px;text-align:center"><i class="fa-solid fa-envelope" style="margin-right:3px"></i>A verification email will be sent to confirm your account</p>
+      </div>
+      <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text-secondary)">Already have an account? <a onclick="window._nav('login')" style="color:var(--accent);font-weight:600;cursor:pointer">Sign In</a></p>
+    </div>
+  </main>`;
+}
+
+function renderVerifyEmail() {
+  const email = currentUser?.email || userData?.email || '';
+  appEl.innerHTML = `${publicNav()}
+  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 40px">
+    <div style="width:100%;max-width:440px;text-align:center">
+      <div style="width:80px;height:80px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px">
+        <i class="fa-solid fa-envelope-circle-check" style="font-size:32px;color:var(--accent)"></i>
+      </div>
+      <h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px">Verify your email</h1>
+      <p style="font-size:14px;color:var(--text-secondary);line-height:1.7;margin-bottom:8px">We've sent a verification link to</p>
+      <p style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:24px">${esc(email)}</p>
+      <div id="verify-status" style="padding:16px;background:var(--bg-secondary);border-radius:12px;margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center">
+          <span class="verify-dot yellow"></span>
+          <span style="font-size:14px;color:var(--text-secondary)">Waiting for verification...</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-primary" style="width:100%" onclick="window._resendVerify()"><i class="fa-solid fa-rotate"></i> Resend Verification Email</button>
+        <button class="btn btn-ghost" style="width:100%" onclick="window._checkVerify()"><i class="fa-solid fa-arrows-rotate"></i> I've verified — Check again</button>
+        <button class="btn btn-ghost" style="width:100%;color:var(--danger)" onclick="window._logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
+      </div>
+    </div>
+  </main>`;
+  startVerifyCheck();
+}
+
+let verifyInterval = null;
+function startVerifyCheck() {
+  if(verifyInterval) clearInterval(verifyInterval);
+  verifyInterval = setInterval(async()=>{
+    if(!currentUser) { clearInterval(verifyInterval); return; }
+    try {
+      await currentUser.reload();
+      if(currentUser.emailVerified) {
+        clearInterval(verifyInterval);
+        await updateDoc(doc(db,'users',currentUser.uid), { emailVerified:true });
+        if(userData) userData.emailVerified = true;
+        const st = $('verify-status');
+        if(st) st.innerHTML = `<div style="display:flex;align-items:center;gap:8px;justify-content:center"><span class="verify-dot green"></span><span style="font-size:14px;color:var(--success);font-weight:600">Email verified!</span></div>`;
+        toast('Email verified successfully!','success');
+        setTimeout(()=>navigate('dashboard'), 1000);
+      }
+    } catch(e) {}
+  }, 5000);
+}
+
+function renderPricing() {
+  appEl.innerHTML = `${publicNav()}
+  <main style="padding-top:100px;max-width:1000px;margin:0 auto;padding-left:24px;padding-right:24px;padding-bottom:100px">
+    <div style="text-align:center;padding:60px 0 48px">
+      <h1 style="font-size:clamp(32px,5vw,48px);font-weight:800;letter-spacing:-1px;margin-bottom:12px">Simple, transparent pricing</h1>
+      <p style="font-size:16px;color:var(--text-secondary)">Start free. Upgrade when you need more.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-bottom:60px">
+      <div class="pricing-card">
+        <div style="margin-bottom:24px"><span style="font-size:14px;font-weight:700;color:var(--text-secondary)">Free</span><div style="font-size:40px;font-weight:800;margin-top:4px">RM0<span style="font-size:16px;font-weight:500;color:var(--text-muted)">/forever</span></div></div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:28px">
+          ${['Up to 5 bio links','Basic QR codes','Standard resume template','Basic invoices (MYR only)','Simple WA link only','Appluviio watermark','Email support'].map(f=>`<li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-secondary)"><i class="fa-solid fa-check" style="color:var(--success);font-size:12px"></i>${f}</li>`).join('')}
+        </ul>
+        <button class="btn btn-secondary" style="width:100%" onclick="window._nav('register')">Get Started</button>
+      </div>
+      <div class="pricing-card featured">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:var(--accent)">Pro</span><span class="badge" style="background:var(--accent);color:#fff;font-size:10px">POPULAR</span></div>
+        <div style="font-size:40px;font-weight:800;margin-top:4px;margin-bottom:24px">RM9<span style="font-size:16px;font-weight:500;color:var(--text-muted)">/month</span></div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:28px">
+          ${['Unlimited bio links','Dynamic QR + analytics','All resume templates','Invoices with 8 currencies','All WA templates + custom chat','No watermark','Priority support','Early access to new tools'].map(f=>`<li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-secondary)"><i class="fa-solid fa-check" style="color:var(--accent);font-size:12px"></i>${f}</li>`).join('')}
+        </ul>
+        <button class="btn btn-primary" style="width:100%" onclick="toast('Pro plan coming soon! Stay tuned.','info')">Upgrade to Pro</button>
+      </div>
+    </div>
+    <!-- Compare Table -->
+    <div style="margin-bottom:40px"><h2 style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:24px;text-align:center">Compare Plans</h2></div>
+    <div class="card" style="padding:24px 28px;overflow-x:auto">
+      <div class="compare-row compare-header"><span></span><span>Free</span><span style="color:var(--accent)">Pro</span></div>
+      ${[
+        ['Bio Links','Up to 5','Unlimited'],
+        ['Bio Customization','Basic','Advanced'],
+        ['QR Code Types','Basic','Dynamic + Analytics'],
+        ['Resume Templates','1 template','All templates'],
+        ['Resume PDF Export','With watermark','Clean, no watermark'],
+        ['Invoice Currencies','MYR only','8 currencies'],
+        ['Invoice Items','Up to 10','Unlimited'],
+        ['WhatsApp Links','Simple link only','All templates + custom'],
+        ['WA Custom Chat','','Included'],
+        ['Branding','Appluviio watermark','No watermark'],
+        ['Support','Email','Priority'],
+      ].map(([feature,free,pro])=>`
+        <div class="compare-row">
+          <span style="font-weight:500">${feature}</span>
+          <span style="color:var(--text-secondary)">${free}</span>
+          <span style="color:var(--accent);font-weight:600">${pro}</span>
+        </div>
+      `).join('')}
+    </div>
+  </main>`;
+}
+
+function renderApp() {
+  if(currentPage==='dashboard') renderDashboard();
+  else if(currentPage==='bio') { loadBioData(currentUser.uid).then(()=>renderBio()); }
+  else if(currentPage==='qr') renderQR();
+  else if(currentPage==='resume') { loadResumeData(currentUser.uid).then(()=>renderResume()); }
+  else if(currentPage==='invoice') { loadInvoiceData(currentUser.uid).then(()=>renderInvoice()); }
+  else if(currentPage==='walink') { loadWaData(currentUser.uid).then(()=>renderWaLink()); }
+  else renderDashboard();
+}
+
+function renderDashboard() {
+  const s = userData?.stats || {bioViews:0,qrScans:0,linkClicks:0};
+  const verified = currentUser?.emailVerified || userData?.emailVerified;
+  appEl.innerHTML = `${appNav()}
+  <main style="padding-top:80px;padding-bottom:80px;max-width:1100px;margin:0 auto;padding-left:24px;padding-right:24px">
+    <div style="padding:32px 0 8px">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <h1 style="font-size:28px;font-weight:800;letter-spacing:-.5px">Welcome back, ${userData?.name||'User'}</h1>
+        ${!verified?`<span class="badge" style="background:#FEF3C7;color:#92400E;cursor:pointer" onclick="window._nav('verify-email')"><i class="fa-solid fa-exclamation-triangle" style="margin-right:4px"></i>Unverified</span>`:`<span class="badge" style="background:#ECFDF5;color:#166534"><i class="fa-solid fa-check" style="margin-right:4px"></i>Verified</span>`}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <span style="font-size:14px;color:var(--text-secondary)">Your bio link:</span>
+        <a href="https://${BIO_DOMAIN}/${userData?.username||'...'}/bio" target="_blank" style="font-size:14px;font-weight:600;color:var(--accent);text-decoration:none">https://${BIO_DOMAIN}/${userData?.username||'...'}/bio <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px"></i></a>
+        <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:12px" onclick="window._editUsername()"><i class="fa-solid fa-pen" style="font-size:10px"></i></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap">
+        <span style="font-size:13px;color:var(--text-muted)">Email:</span>
+        <span style="font-size:13px;color:var(--text-secondary)">${esc(userData?.email||'')}</span>
+        <span style="font-size:11px;color:var(--text-muted);background:var(--bg-secondary);padding:2px 8px;border-radius:6px"><i class="fa-solid fa-lock" style="font-size:9px;margin-right:2px"></i>Cannot be changed</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:24px 0 32px">
+      ${[
+        {label:'Bio Views',value:s.bioViews,icon:'fa-solid fa-eye',color:'#3B82F6',bg:'#EFF6FF'},
+        {label:'QR Scans',value:s.qrScans,icon:'fa-solid fa-qrcode',color:'#8B5CF6',bg:'#F5F3FF'},
+        {label:'Link Clicks',value:s.linkClicks,icon:'fa-solid fa-mouse-pointer',color:'#10B981',bg:'#ECFDF5'},
+        {label:'Plan',value:userData?.plan==='pro'?'Pro':'Free',icon:'fa-solid fa-crown',color:'#F59E0B',bg:'#FFFBEB'}
+      ].map(c=>`
+        <div class="card stat-card card-hover" style="padding:20px">
+          <div style="width:36px;height:36px;background:${c.bg};border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:${c.color};font-size:14px"><i class="${c.icon}"></i></div>
+          <div class="stat-number">${c.value}</div>
+          <div class="stat-label">${c.label}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:14px">Quick Tools</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:32px">
+      ${[
+        {id:'bio',icon:'fa-solid fa-link',color:'#3B82F6',bg:'#EFF6FF',title:'Bio Link',desc:'Build your link-in-bio page'},
+        {id:'qr',icon:'fa-solid fa-qrcode',color:'#8B5CF6',bg:'#F5F3FF',title:'QR Code',desc:'Generate smart QR codes'},
+        {id:'resume',icon:'fa-solid fa-file-lines',color:'#10B981',bg:'#ECFDF5',title:'Resume',desc:'Create professional resumes'},
+        {id:'invoice',icon:'fa-solid fa-file-invoice-dollar',color:'#F59E0B',bg:'#FFFBEB',title:'Invoice',desc:'Create & send invoices'},
+        {id:'walink',icon:'fa-brands fa-whatsapp',color:'#25D366',bg:'#F0FDF4',title:'WhatsApp Link',desc:'Generate WA chat links'}
+      ].map(t=>`
+        <div class="card card-hover" style="padding:20px;cursor:pointer;display:flex;align-items:center;gap:14px" onclick="window._nav('${t.id}')">
+          <div class="tool-icon" style="background:${t.bg};color:${t.color};flex-shrink:0;width:44px;height:44px;border-radius:12px;font-size:16px"><i class="${t.icon}"></i></div>
+          <div style="flex:1"><div style="font-size:15px;font-weight:700">${t.title}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${t.desc}</div></div>
+          <i class="fa-solid fa-chevron-right" style="color:var(--text-muted);font-size:12px"></i>
+        </div>
+      `).join('')}
+    </div>
+
+    ${userData?.plan!=='pro'?`<div class="card" style="background:linear-gradient(135deg,#EFF6FF,#F5F3FF);border-color:var(--accent-subtle);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div><div style="font-size:16px;font-weight:700">Upgrade to Pro — RM9/month</div><div style="font-size:13px;color:var(--text-secondary);margin-top:4px">Unlimited links, all templates, multi-currency invoices, no branding.</div></div>
+      <button class="btn btn-primary btn-sm" onclick="window._nav('pricing')">View Plans</button>
+    </div>`:''}
+  </main>`;
+}
+
+/* ─── Bio Builder ─── */
+function renderBio() {
+  const bioUrl = `https://${BIO_DOMAIN}/${userData?.username||'...'}/bio`;
+  appEl.innerHTML = `${appNav()}
+  <main style="padding-top:80px;padding-bottom:100px;max-width:1200px;margin:0 auto;padding-left:24px;padding-right:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">Bio Link Builder</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create your all-in-one link page</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="window._copyText('${bioUrl}')"><i class="fa-solid fa-copy"></i> Copy Link</button>
+        <button class="btn btn-primary btn-sm" onclick="window._saveBio()"><i class="fa-solid fa-floppy-disk"></i> Save & Publish</button>
+      </div>
+    </div>
+    <div class="card" style="padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;background:var(--bg-secondary)">
+      <i class="fa-solid fa-link" style="color:var(--accent);font-size:13px"></i>
+      <span style="font-size:13px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${bioUrl}</span>
+      <button class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:12px" onclick="window._copyText('${bioUrl}')"><i class="fa-solid fa-copy"></i></button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:24px;align-items:start" class="lg-grid">
+      <div class="card" style="padding:24px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+          <div><label class="label">Display Name</label><input class="input" id="bio-name" value="${esc(bioState.name)}" oninput="window._updateBio('name',this.value)"></div>
+          <div><label class="label">Avatar URL</label><input class="input" id="bio-avatar" value="${esc(bioState.avatar)}" placeholder="https://..." oninput="window._updateBio('avatar',this.value)"></div>
+        </div>
+        <div style="margin-bottom:20px"><label class="label">Bio Text</label><textarea class="input" id="bio-text" rows="2" oninput="window._updateBio('bio',this.value)" style="resize:vertical">${esc(bioState.bio)}</textarea></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><label class="label" style="margin-bottom:0">Links (${bioState.links.length})</label><button class="btn btn-secondary btn-sm" onclick="window._addBioLink()"><i class="fa-solid fa-plus"></i> Add Link</button></div>
+        <div id="bio-links-list" style="display:flex;flex-direction:column;gap:8px">
+          ${bioState.links.map((l,i)=>bioLinkItem(l,i)).join('')}
+        </div>
+        ${userData?.plan!=='pro'&&bioState.links.length>=5?`<p style="font-size:12px;color:var(--warning);margin-top:12px"><i class="fa-solid fa-lock" style="margin-right:4px"></i>Upgrade to Pro for unlimited links</p>`:''}
+      </div>
+      <div style="position:sticky;top:90px">
+        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Live Preview</p>
+        <div style="display:flex;justify-content:center">
+          <div class="preview-phone" id="bio-preview">${bioPreviewContent()}</div>
+        </div>
+      </div>
+    </div>
+  </main>`;
+  setupBioDragDrop();
+}
+
+function bioLinkItem(link, idx) {
+  return `<div class="link-item" data-idx="${idx}" draggable="true">
+    <i class="fa-solid fa-grip-vertical drag-handle"></i>
+    <div style="width:32px;height:32px;border-radius:8px;background:${link.color}15;color:${link.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px"><i class="${link.icon}"></i></div>
+    <div style="flex:1;min-width:0">
+      <input class="input" style="padding:6px 10px;font-size:13px;margin-bottom:4px" value="${esc(link.title)}" placeholder="Title" oninput="window._updateBioLink(${idx},'title',this.value)">
+      <input class="input" style="padding:6px 10px;font-size:12px" value="${esc(link.url)}" placeholder="URL" oninput="window._updateBioLink(${idx},'url',this.value)">
+    </div>
+    <button class="btn btn-danger btn-sm" style="padding:6px;min-width:32px" onclick="window._removeBioLink(${idx})"><i class="fa-solid fa-trash" style="font-size:12px"></i></button>
+  </div>`;
+}
+
+function bioPreviewContent() {
+  const name = bioState.name || 'Your Name';
+  const avatar = bioState.avatar;
+  const initial = (name||'U')[0].toUpperCase();
+  const isFree = userData?.plan !== 'pro';
+  const links = bioState.links;
+  return `<div style="padding:60px 24px 32px;text-align:center;min-height:520px;display:flex;flex-direction:column;align-items:center;background:linear-gradient(180deg,#f8fafc 0%,#fff 100%)">
+    ${avatar?`<img src="${esc(avatar)}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;margin-bottom:14px;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.1)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#818CF8);display:none;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:800;margin-bottom:14px;box-shadow:0 4px 16px rgba(59,130,246,.3)">${initial}</div>`
+    :`<div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#818CF8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:800;margin-bottom:14px;box-shadow:0 4px 16px rgba(59,130,246,.3)">${initial}</div>`}
+    <h3 style="font-size:20px;font-weight:800;letter-spacing:-.3px;color:var(--text)">${esc(name)}</h3>
+    ${bioState.bio?`<p style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5;max-width:260px">${esc(bioState.bio)}</p>`:''}
+    <div style="width:40px;height:3px;background:var(--accent);border-radius:2px;margin:16px 0;opacity:.4"></div>
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%;flex:1">
+      ${links.map(l=>`<a href="${esc(l.url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:#fff;border:1px solid ${l.color}18;border-radius:14px;text-decoration:none;color:var(--text);font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:all .15s" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px ${l.color}15'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,0,0,.04)'"><div style="width:36px;height:36px;border-radius:10px;background:${l.color}12;color:${l.color};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0"><i class="${l.icon}"></i></div><span style="flex:1;text-align:left">${esc(l.title)}</span><i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--text-muted)"></i></a>`).join('')}
+    </div>
+    ${isFree?`<p style="font-size:10px;color:var(--text-muted);margin-top:20px;opacity:.6">Powered by Appluviio</p>`:''}
+  </div>`;
+}
+
+function refreshBioPreview() { const p=$('bio-preview'); if(p) p.innerHTML=bioPreviewContent(); }
+
+function setupBioDragDrop() {
+  const list=$('bio-links-list'); if(!list)return;
+  let dragIdx=null;
+  list.querySelectorAll('.link-item').forEach(item=>{
+    item.addEventListener('dragstart',e=>{dragIdx=+item.dataset.idx;item.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    item.addEventListener('dragend',()=>{item.classList.remove('dragging');dragIdx=null;});
+    item.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';});
+    item.addEventListener('drop',e=>{e.preventDefault();const dropIdx=+item.dataset.idx;if(dragIdx!==null&&dragIdx!==dropIdx){const[moved]=bioState.links.splice(dragIdx,1);bioState.links.splice(dropIdx,0,moved);renderBio();}});
+  });
+}
+
+/* ─── QR Code Generator ─── */
+function renderQR() {
+  appEl.innerHTML = `${appNav()}
+  <main style="padding-top:80px;padding-bottom:100px;max-width:700px;margin:0 auto;padding-left:24px;padding-right:24px">
+    <div style="margin-bottom:24px"><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">QR Code Generator</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create and download beautiful QR codes</p></div>
+    <div class="card" style="padding:28px">
+      <div style="margin-bottom:20px"><label class="label">Content (URL or Text)</label><input class="input" id="qr-input" placeholder="Enter URL or text" value="${userData?'https://'+BIO_DOMAIN+'/'+userData.username+'/bio':''}"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+        <div><label class="label">Size</label><select class="input" id="qr-size"><option value="200">200px</option><option value="300" selected>300px</option><option value="400">400px</option><option value="500">500px</option></select></div>
+        <div><label class="label">FG Color</label><input type="color" id="qr-color" value="#0F172A" style="width:100%;height:42px;border:1.5px solid var(--border);border-radius:12px;padding:4px;cursor:pointer"></div>
+        <div><label class="label">BG Color</label><input type="color" id="qr-bg" value="#FFFFFF" style="width:100%;height:42px;border:1.5px solid var(--border);border-radius:12px;padding:4px;cursor:pointer"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+        <div><label class="label">Corner Radius</label><select class="input" id="qr-radius"><option value="0">Sharp</option><option value="8" selected>Rounded</option><option value="50">Circle</option></select></div>
+        <div><label class="label">Error Correction</label><select class="input" id="qr-ec"><option value="L">Low (7%)</option><option value="M" selected>Medium (15%)</option><option value="Q">Quartile (25%)</option><option value="H">High (30%)</option></select></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:24px" onclick="window._generateQR()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate QR Code</button>
+      <div id="qr-output" style="display:flex;flex-direction:column;align-items:center;gap:16px">
+        <div style="color:var(--text-muted);font-size:14px;padding:40px 0;text-align:center">
+          <i class="fa-solid fa-qrcode" style="font-size:48px;opacity:.2;display:block;margin-bottom:12px"></i>
+          Your QR code will appear here
+        </div>
+      </div>
+    </div>
+  </main>`;
+}
+
+window._generateQR = () => {
+  const input=$('qr-input')?.value?.trim(); if(!input){toast('Enter a URL or text','error');return;}
+  const size=+($('qr-size')?.value||300);
+  const fg=$('qr-color')?.value||'#0F172A';
+  const bg=$('qr-bg')?.value||'#FFFFFF';
+  const radius=+($('qr-radius')?.value||8);
+  const ecMap={L:QRCode.CorrectLevel.L,M:QRCode.CorrectLevel.M,Q:QRCode.CorrectLevel.Q,H:QRCode.CorrectLevel.H};
+  const ec=ecMap[$('qr-ec')?.value||'M']||QRCode.CorrectLevel.M;
+  const output=$('qr-output');
+  output.innerHTML=`<div id="qr-code" style="padding:24px;background:${bg};border-radius:20px;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,.08)"></div><div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="window._downloadQR('png')"><i class="fa-solid fa-download"></i> PNG</button><button class="btn btn-secondary btn-sm" onclick="window._downloadQR('svg')"><i class="fa-solid fa-download"></i> SVG</button></div>`;
+  try {
+    new QRCode($('qr-code'),{text:input,width:size,height:size,colorDark:fg,colorLight:bg,correctLevel:ec});
+    const canvas=$('qr-code')?.querySelector('canvas');
+    if(canvas&&radius>0) {
+      const ctx=canvas.getContext('2d');
+      const moduleCount=canvas.width/size*21;
+      const moduleSize=canvas.width/moduleCount;
+      const r=Math.min(radius,moduleSize*0.45);
+      const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle=bg; ctx.fillRect(0,0,canvas.width,canvas.height);
+      for(let row=0;row<moduleCount;row++){for(let col=0;col<moduleCount;col++){
+        const x=col*moduleSize; const y=row*moduleSize;
+        const idx=(Math.floor(y)*canvas.width+Math.floor(x))*4;
+        if(imgData.data[idx+3]>128){ctx.fillStyle=fg;ctx.beginPath();ctx.roundRect(x+0.5,y+0.5,moduleSize-1,moduleSize-1,r);ctx.fill();}
+      }}
+    }
+    track('generate_qr'); toast('QR code generated!','success');
+  } catch(e){toast('Failed to generate QR','error');}
+};
+
+window._downloadQR = (fmt) => {
+  const canvas=$('qr-code')?.querySelector('canvas');
+  if(!canvas){toast('Generate a QR code first','error');return;}
+  if(fmt==='svg') {
+    const size=canvas.width;
+    const fg=$('qr-color')?.value||'#0F172A';
+    const bg=$('qr-bg')?.value||'#FFFFFF';
+    const ctx=canvas.getContext('2d');
+    const imgData=ctx.getImageData(0,0,size,size);
+    const moduleCount=21;
+    const moduleSize=size/moduleCount;
+    let rects='';
+    for(let row=0;row<moduleCount;row++){for(let col=0;col<moduleCount;col++){
+      const x=Math.floor(col*moduleSize); const y=Math.floor(row*moduleSize);
+      const idx=(y*size+x)*4;
+      if(imgData.data[idx+3]>128) rects+=`<rect x="${(col*moduleSize).toFixed(1)}" y="${(row*moduleSize).toFixed(1)}" width="${moduleSize.toFixed(1)}" height="${moduleSize.toFixed(1)}" fill="${fg}"/>`;
+    }}
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="${bg}"/>${rects}</svg>`;
+    const blob=new Blob([svg],{type:'image/svg+xml'});
+    const a=document.createElement('a');a.download='luviio-qr.svg';a.href=URL.createObjectURL(blob);a.click();
+    toast('SVG downloaded!','success');
+  } else {
+    const a=document.createElement('a');a.download='luviio-qr.png';a.href=canvas.toDataURL('image/png');a.click();
+    toast('PNG downloaded!','success');
+  }
+  track('download_qr');
+};
+
+/* ─── Resume Builder ─── */
+function renderResume() {
+  const templates = [{id:'standard',name:'Standard',desc:'Classic professional layout'}];
+  if(userData?.plan==='pro') templates.push({id:'modern',name:'Modern',desc:'Clean modern design'});
+  appEl.innerHTML = `${appNav()}
+  <main style="padding-top:80px;padding-bottom:100px;max-width:1200px;margin:0 auto;padding-left:24px;padding-right:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">Resume Builder</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create a professional resume</p></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="window._saveResume()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <button class="btn btn-primary btn-sm" onclick="window._exportResumePDF()"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      ${templates.map(t=>`<div class="template-card ${resumeState.template===t.id?'selected':''}" onclick="window._selectResumeTemplate('${t.id}')" style="min-width:140px">
+        <div style="font-size:14px;font-weight:700">${t.name}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${t.desc}</div>
+      </div>`).join('')}
+      ${userData?.plan!=='pro'?`<div class="template-card" style="min-width:140px;opacity:.5;cursor:not-allowed;position:relative">
+        <div style="font-size:14px;font-weight:700">Modern</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Clean modern design</div>
+        <span class="badge" style="position:absolute;top:8px;right:8px;background:#FEF3C7;color:#92400E;font-size:9px">PRO</span>
+      </div>`:''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:24px;align-items:start" class="lg-grid-equal">
+      <div class="card" style="padding:24px;max-height:calc(100vh - 180px);overflow-y:auto">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div><label class="label">Full Name</label><input class="input" value="${esc(resumeState.fullName)}" oninput="window._updateResume('fullName',this.value)"></div>
+          <div><label class="label">Email</label><input class="input" value="${esc(resumeState.email)}" oninput="window._updateResume('email',this.value)"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div><label class="label">Phone</label><input class="input" value="${esc(resumeState.phone)}" oninput="window._updateResume('phone',this.value)"></div>
+          <div><label class="label">Address / Location</label><input class="input" value="${esc(resumeState.address)}" oninput="window._updateResume('address',this.value)"></div>
+        </div>
+        <div style="margin-bottom:14px"><label class="label">Photo URL (optional)</label><input class="input" value="${esc(resumeState.photo)}" placeholder="https://..." oninput="window._updateResume('photo',this.value)"></div>
+        <div style="margin-bottom:20px"><label class="label">Skills (comma-separated)</label><input class="input" value="${esc(resumeState.skills.join(', '))}" oninput="window._updateResumeSkills(this.value)"></div>
+        <div style="margin-bottom:20px"><label class="label">Professional Summary</label><textarea class="input" rows="3" oninput="window._updateResume('summary',this.value)" style="resize:vertical">${esc(resumeState.summary)}</textarea></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><label class="label" style="margin-bottom:0">Work Experience</label><button class="btn btn-secondary btn-sm" onclick="window._addExp()"><i class="fa-solid fa-plus"></i></button></div>
+        <div id="resume-exp-list" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+          ${resumeState.experiences.map((e,i)=>`
+            <div style="padding:14px;border:1px solid var(--border);border-radius:12px;position:relative">
+              ${resumeState.experiences.length>1?`<button style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px" onclick="window._removeExp(${i})"><i class="fa-solid fa-xmark"></i></button>`:''}
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+                <input class="input" style="padding:6px 10px;font-size:13px" placeholder="Company" value="${esc(e.company)}" oninput="window._updateExp(${i},'company',this.value)">
+                <input class="input" style="padding:6px 10px;font-size:13px" placeholder="Role / Position" value="${esc(e.role)}" oninput="window._updateExp(${i},'role',this.value)">
+              </div>
+              <input class="input" style="padding:6px 10px;font-size:13px;margin-bottom:8px" placeholder="Period (e.g. July 2023 – Present)" value="${esc(e.period)}" oninput="window._updateExp(${i},'period',this.value)">
+              <textarea class="input" style="padding:6px 10px;font-size:13px;resize:vertical" rows="3" placeholder="Responsibilities (one per line)" oninput="window._updateExp(${i},'desc',this.value)">${esc(e.desc)}</textarea>
+            </div>
+          `).join('')}
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><label class="label" style="margin-bottom:0">Education</label><button class="btn btn-secondary btn-sm" onclick="window._addEdu()"><i class="fa-solid fa-plus"></i></button></div>
+        <div id="resume-edu-list" style="display:flex;flex-direction:column;gap:12px">
+          ${resumeState.education.map((e,i)=>`
+            <div style="padding:14px;border:1px solid var(--border);border-radius:12px;position:relative">
+              ${resumeState.education.length>1?`<button style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px" onclick="window._removeEdu(${i})"><i class="fa-solid fa-xmark"></i></button>`:''}
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+                <input class="input" style="padding:6px 10px;font-size:13px" placeholder="School / Institution" value="${esc(e.school)}" oninput="window._updateEdu(${i},'school',this.value)">
+                <input class="input" style="padding:6px 10px;font-size:13px" placeholder="Degree / Certificate" value="${esc(e.degree)}" oninput="window._updateEdu(${i},'degree',this.value)">
+              </div>
+              <input class="input" style="padding:6px 10px;font-size:13px" placeholder="Year (e.g. 2018 – 2021)" value="${esc(e.year)}" oninput="window._updateEdu(${i},'year',this.value)">
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div style="position:sticky;top:90px">
+        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Live Preview</p>
+        <div id="resume-preview" style="background:#f9fafb;border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.06);overflow:hidden">${resumePreviewContent()}</div>
+      </div>
+    </div>
+  </main>`;
+}
+
+function resumePreviewContent() {
+  if(resumeState.template==='modern') return resumeModernTemplate();
+  return resumeStandardTemplate();
+}
+
+function resumeStandardTemplate() {
+  const r=resumeState;
+  const isFree=userData?.plan!=='pro';
+  const exps=r.experiences.filter(e=>e.company||e.role);
+  const edus=r.education.filter(e=>e.school||e.degree);
+  return `<div style="background:#fff;padding:40px 36px;font-family:Arial,sans-serif;color:#222;font-size:12px;line-height:1.6;min-height:600px">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #eee;padding-bottom:18px;margin-bottom:20px">
+      <div style="flex:1">
+        <div style="font-size:22px;font-weight:bold;letter-spacing:-.3px;color:#111">${esc(r.fullName)||'Your Name'}</div>
+        <div style="font-size:12px;color:#555;margin-top:6px">${[r.address,r.phone,r.email].filter(Boolean).join(' | ')}</div>
+      </div>
+      ${r.photo?`<img src="${esc(r.photo)}" style="width:100px;height:100px;border-radius:8px;object-fit:cover;border:1px solid #ccc;margin-left:20px" onerror="this.style.display='none'">`:''}
+    </div>
+    ${r.summary?`<div style="margin-bottom:22px"><div style="font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px">PROFESSIONAL SUMMARY</div><p style="font-size:12px;line-height:1.6">${esc(r.summary)}</p></div>`:''}
+    ${exps.length?`<div style="margin-bottom:22px"><div style="font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px">WORK EXPERIENCE</div>${exps.map(e=>`<div style="margin-bottom:16px"><div style="font-weight:bold;font-size:13px">${esc(e.role)}<span style="float:right;font-size:12px;color:#777;font-weight:normal">${esc(e.period)}</span></div><div style="color:#555;font-size:12px">${esc(e.company)}</div>${e.desc?`<ul style="margin:5px 0 0 18px;padding:0">${e.desc.split('\n').filter(l=>l.trim()).map(l=>`<li style="font-size:12px;margin-bottom:4px;line-height:1.4">${esc(l.trim())}</li>`).join('')}</ul>`:''}</div>`).join('')}</div>`:''}
+    ${edus.length?`<div style="margin-bottom:22px"><div style="font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px">EDUCATION</div>${edus.map(e=>`<div style="margin-bottom:12px"><p style="margin:0"><b style="font-size:13px">${esc(e.degree)}</b><span style="float:right;font-size:12px;color:#777">${esc(e.year)}</span></p><div style="color:#555;font-size:12px">${esc(e.school)}</div></div>`).join('')}</div>`:''}
+    ${r.skills.length?`<div style="margin-bottom:22px"><div style="font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px">KEY SKILLS</div><div style="columns:2;column-gap:20px;font-size:12px">${r.skills.map(s=>`${esc(s)}<br>`).join('')}</div></div>`:''}
+    ${isFree?`<div style="text-align:center;margin-top:20px;padding-top:12px;border-top:1px solid #eee"><span style="font-size:10px;color:#aaa">Made with Appluviio</span></div>`:''}
+  </div>`;
+}
+
+function resumeModernTemplate() {
+  const r=resumeState;
+  const isFree=userData?.plan!=='pro';
+  const exps=r.experiences.filter(e=>e.company||e.role);
+  const edus=r.education.filter(e=>e.school||e.degree);
+  return `<div style="background:#fff;min-height:600px;display:flex;font-family:Arial,sans-serif">
+    <div style="width:200px;background:linear-gradient(180deg,#0F172A 0%,#1E293B 100%);color:#fff;padding:36px 24px;flex-shrink:0">
+      ${r.photo?`<img src="${esc(r.photo)}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.2);margin:0 auto 16px;display:block" onerror="this.style.display='none'">`:`<div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;font-weight:bold">${(r.fullName||'U')[0]}</div>`}
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:8px;margin-top:20px">Contact</div>
+      <div style="font-size:11px;line-height:2;color:rgba(255,255,255,.8)">
+        ${r.phone?`<div><i class="fa-solid fa-phone" style="width:14px;margin-right:6px;font-size:10px;color:#3B82F6"></i>${esc(r.phone)}</div>`:''}
+        ${r.email?`<div><i class="fa-solid fa-envelope" style="width:14px;margin-right:6px;font-size:10px;color:#3B82F6"></i>${esc(r.email)}</div>`:''}
+        ${r.address?`<div><i class="fa-solid fa-location-dot" style="width:14px;margin-right:6px;font-size:10px;color:#3B82F6"></i>${esc(r.address)}</div>`:''}
+      </div>
+      ${r.skills.length?`<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:8px;margin-top:24px">Skills</div><div style="display:flex;flex-wrap:wrap;gap:4px">${r.skills.map(s=>`<span style="padding:3px 10px;background:rgba(59,130,246,.2);color:#93C5FD;border-radius:20px;font-size:10px;font-weight:600">${esc(s)}</span>`).join('')}</div>`:''}
+    </div>
+    <div style="flex:1;padding:36px 32px;color:#222;font-size:12px;line-height:1.6">
+      <div style="font-size:26px;font-weight:800;color:#0F172A;letter-spacing:-.5px;margin-bottom:4px">${esc(r.fullName)||'Your Name'}</div>
+      ${r.summary?`<div style="margin-bottom:24px;margin-top:20px"><div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">About Me</div><p>${esc(r.summary)}</p></div>`:''}
+      ${exps.length?`<div style="margin-bottom:24px"><div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Experience</div>${exps.map((e,i)=>`<div style="margin-bottom:16px;${i<exps.length-1?'padding-bottom:12px;border-left:2px solid #E2E8F0;padding-left:14px;':''}"><div style="font-weight:bold;font-size:13px;color:#0F172A">${esc(e.role)}</div><div style="font-size:11px;color:#3B82F6;font-weight:600">${esc(e.company)} <span style="color:#94A3B8;font-weight:normal;margin-left:6px">${esc(e.period)}</span></div>${e.desc?`<ul style="margin:6px 0 0 16px;padding:0">${e.desc.split('\n').filter(l=>l.trim()).map(l=>`<li style="font-size:11px;margin-bottom:3px;color:#555">${esc(l.trim())}</li>`).join('')}</ul>`:''}</div>`).join('')}</div>`:''}
+      ${edus.length?`<div><div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Education</div>${edus.map(e=>`<div style="margin-bottom:10px"><div style="font-weight:bold;font-size:13px">${esc(e.degree)} <span style="font-size:11px;color:#94A3B8;font-weight:normal">${esc(e.year)}</span></div><div style="font-size:11px;color:#555">${esc(e.school)}</div></div>`).join('')}</div>`:''}
+      ${isFree?`<div style="text-align:center;margin-top:30px;padding-top:12px;border-top:1px solid #eee"><span style="font-size:10px;color:#aaa">Made with Appluviio</span></div>`:''}
+    </div>
+  </div>`;
+}
+
+function refreshResumePreview() { const p=$('resume-preview'); if(p) p.innerHTML=resumePreviewContent(); }
+
+/* ─── Invoice Generator ─── */
+function renderInvoice() {
+  const isPro = userData?.plan==='pro';
+  appEl.innerHTML = `${appNav()}
+  <main style="padding-top:80px;padding-bottom:100px;max-width:1100px;margin:0 auto;padding-left:24px;padding-right:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">Invoice Generator</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create professional invoices in seconds</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" onclick="window._saveInvoice()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <button class="btn btn-primary btn-sm" onclick="window._exportInvoicePDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        <button class="btn btn-sm" style="background:#25D366;color:#fff" onclick="window._sendInvoiceWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Send</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:24px;align-items:start" class="lg-grid-equal">
+      <div class="card" style="padding:24px;max-height:calc(100vh - 140px);overflow-y:auto">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+          <div><label class="label">Invoice No</label><input class="input" value="${esc(invoiceState.invoiceNo)}" oninput="window._updateInv('invoiceNo',this.value)"></div>
+          <div>
+            <label class="label">Currency ${!isPro?'<span style=\"color:var(--warning);font-size:10px\">(Pro)</span>':''}</label>
+            <select class="input" onchange="window._updateInv('currency',this.value)" ${!isPro?'disabled':''}>
+              ${CURRENCIES.map(c=>`<option value="${c.code}" ${invoiceState.currency===c.code?'selected':''}>${c.code} — ${c.symbol} ${c.name}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div><label class="label">Date</label><input class="input" type="date" value="${invoiceState.date}" oninput="window._updateInv('date',this.value)" style="margin-bottom:20px"></div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent)">From</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px">
+          <div><label class="label">Name</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.from.name)}" oninput="window._updateInvFrom('name',this.value)"></div>
+          <div><label class="label">Email</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.from.email)}" oninput="window._updateInvFrom('email',this.value)"></div>
+        </div>
+        <div style="margin-bottom:20px"><label class="label">Phone / Address</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.from.phone)}" oninput="window._updateInvFrom('phone',this.value)"></div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent)">To</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px">
+          <div><label class="label">Name</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.to.name)}" oninput="window._updateInvTo('name',this.value)"></div>
+          <div><label class="label">Email</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.to.email)}" oninput="window._updateInvTo('email',this.value)"></div>
+        </div>
+        <div style="margin-bottom:20px"><label class="label">Phone / Address</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.to.phone)}" oninput="window._updateInvTo('phone',this.value)"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h3 style="font-size:14px;font-weight:700;color:var(--accent);margin:0">Items</h3><button class="btn btn-secondary btn-sm" onclick="window._addInvItem()"><i class="fa-solid fa-plus"></i> Add</button></div>
+        <div id="inv-items-list" style="margin-bottom:20px">
+          ${invoiceState.items.map((item,i)=>`
+            <div style="display:grid;grid-template-columns:1fr 65px 90px 32px;gap:8px;margin-bottom:8px;align-items:end">
+              <div><label class="label" style="font-size:11px">${i===0?'Description':''}</label><input class="input" style="padding:8px 10px;font-size:13px" placeholder="Item" value="${esc(item.desc)}" oninput="window._updateInvItem(${i},'desc',this.value)"></div>
+              <div><label class="label" style="font-size:11px">${i===0?'Qty':''}</label><input class="input" type="number" min="1" style="padding:8px 10px;font-size:13px" value="${item.qty}" oninput="window._updateInvItem(${i},'qty',+this.value)"></div>
+              <div><label class="label" style="font-size:11px">${i===0?'Price':''}</label><input class="input" type="number" min="0" step="0.01" style="padding:8px 10px;font-size:13px" value="${item.price}" oninput="window._updateInvItem(${i},'price',+this.value)"></div>
+              <button style="width:32px;height:36px;border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:13px;border-radius:8px" onclick="window._removeInvItem(${i})"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          `).join('')}
+        </div>
+        <div><label class="label">Notes</label><textarea class="input" rows="2" oninput="window._updateInv('notes',this.value)" style="resize:vertical">${esc(invoiceState.notes)}</textarea></div>
+      </div>
+      <div style="position:sticky;top:90px">
+        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Live Preview</p>
+        <div id="invoice-preview" style="background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.06);overflow:hidden">${invoicePreviewContent()}</div>
+      </div>
+    </div>
+  </main>`;
+}
+
+function invoicePreviewContent() {
+  const inv=invoiceState; const sym=getCurSymbol();
+  const subtotal=inv.items.reduce((s,i)=>s+(i.qty*i.price||0),0);
+  return `<div style="padding:36px;font-size:13px;line-height:1.6;font-family:Arial,sans-serif">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px">
+      <div><div style="font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--accent)">Invoice</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">${esc(inv.invoiceNo)}</div></div>
+      <div style="text-align:right"><div style="font-weight:600">${inv.date}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${inv.currency}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+      <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px">From</div><div style="font-weight:600">${esc(inv.from.name)||'-'}</div><div style="color:var(--text-secondary);font-size:12px">${esc(inv.from.email)||''}</div><div style="color:var(--text-secondary);font-size:12px">${esc(inv.from.phone)||''}</div></div>
+      <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px">To</div><div style="font-weight:600">${esc(inv.to.name)||'-'}</div><div style="color:var(--text-secondary);font-size:12px">${esc(inv.to.email)||''}</div><div style="color:var(--text-secondary);font-size:12px">${esc(inv.to.phone)||''}</div></div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+      <thead><tr style="border-bottom:2px solid var(--accent)"><th style="text-align:left;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)">Description</th><th style="text-align:right;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:55px">Qty</th><th style="text-align:right;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:85px">Price</th><th style="text-align:right;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:85px">Total</th></tr></thead>
+      <tbody>${inv.items.map(i=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 0">${esc(i.desc)||'-'}</td><td style="text-align:right;padding:10px 0">${i.qty}</td><td style="text-align:right;padding:10px 0">${sym}${(i.price||0).toFixed(2)}</td><td style="text-align:right;padding:10px 0;font-weight:600">${sym}${(i.qty*i.price||0).toFixed(2)}</td></tr>`).join('')}</tbody>
+    </table>
+    <div style="display:flex;justify-content:flex-end"><div style="width:220px">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px"><span style="color:var(--text-secondary)">Subtotal</span><span>${sym}${subtotal.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:12px 0;border-top:2px solid var(--text);font-size:18px;font-weight:800"><span>Total</span><span>${sym}${subtotal.toFixed(2)}</span></div>
+    </div></div>
+    ${inv.notes?`<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:4px">Notes</div><p style="color:var(--text-secondary)">${esc(inv.notes)}</p></div>`:''}
+    ${userData?.plan!=='pro'?`<div style="text-align:center;margin-top:20px;padding-top:12px;border-top:1px solid var(--border)"><span style="font-size:10px;color:var(--text-muted)">Made with Appluviio</span></div>`:''}
+  </div>`;
+}
+
+function refreshInvoicePreview() { const p=$('invoice-preview'); if(p) p.innerHTML=invoicePreviewContent(); }
+
+/* ─── WhatsApp Link Generator ─── */
+function renderWaLink() {
+  const isPro = userData?.plan==='pro';
+  const selTemplate = waTemplates.find(t=>t.id===waState.templateId) || waTemplates[0];
+  const generatedLink = selTemplate.generate(waState.phone, waState.message);
+  const isLocked = !isPro && !selTemplate.free;
+  appEl.innerHTML = `${appNav()}
+  <main style="padding-top:80px;padding-bottom:100px;max-width:900px;margin:0 auto;padding-left:24px;padding-right:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">WhatsApp Link Generator</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create clickable WhatsApp chat links</p></div>
+      <button class="btn btn-secondary btn-sm" onclick="window._saveWaLink()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:24px;align-items:start" class="lg-grid-equal">
+      <div class="card" style="padding:24px">
+        <div style="margin-bottom:20px"><label class="label">Phone Number (with country code)</label><input class="input" id="wa-phone" value="${esc(waState.phone)}" placeholder="e.g. 60123456789" oninput="window._updateWa('phone',this.value)"><p style="font-size:11px;color:var(--text-muted);margin-top:4px">Include country code without + (e.g. 60 for Malaysia)</p></div>
+        <div style="margin-bottom:20px">
+          <label class="label">Choose Template</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            ${waTemplates.map(t=>{
+              const locked = !isPro && !t.free;
+              return `<div class="wa-template-card ${waState.templateId===t.id?'selected':''}" onclick="${locked?'':'window._selectWaTemplate('+t.id+')'}" style="${locked?'opacity:.5;cursor:not-allowed;':''}position:relative">
+                ${locked?`<span class="badge" style="position:absolute;top:8px;right:8px;background:#FEF3C7;color:#92400E;font-size:9px">PRO</span>`:''}
+                <div style="font-size:14px;font-weight:700">${t.name}</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${t.desc}</div>
+                ${t.free?`<span style="font-size:10px;color:var(--success);font-weight:600">Free</span>`:''}
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+        ${!selTemplate.free?`<div style="margin-bottom:20px"><label class="label">Custom Message</label><textarea class="input" id="wa-message" rows="4" placeholder="Type your message..." oninput="window._updateWa('message',this.value)" style="resize:vertical" ${isLocked?'disabled':''}>${esc(waState.message)}</textarea>${isLocked?`<p style="font-size:11px;color:var(--warning);margin-top:4px"><i class="fa-solid fa-lock" style="margin-right:3px"></i>Upgrade to Pro to customize messages</p>`:''}</div>`:''}
+        <div style="padding:14px;background:var(--bg-secondary);border-radius:12px;margin-bottom:16px">
+          <label class="label" style="margin-bottom:8px">Generated Link</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="input" id="wa-link-output" value="${esc(generatedLink)}" readonly style="font-size:12px;font-family:monospace">
+            <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="window._copyText(document.getElementById('wa-link-output').value)"><i class="fa-solid fa-copy"></i></button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <a href="${esc(generatedLink)}" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;flex:1;text-decoration:none"><i class="fa-brands fa-whatsapp"></i> Test Link</a>
+          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="window._shareWaLink()"><i class="fa-solid fa-share-nodes"></i> Share</button>
+        </div>
+      </div>
+      <div style="position:sticky;top:90px">
+        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Chat Preview</p>
+        <div class="wa-preview-box">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #D4CCD3">
+            <div class="wa-avatar">${(waState.phone||'W')[0].toUpperCase()}</div>
+            <div><div style="font-weight:700;font-size:15px;color:#111">${waState.phone?'+('+waState.phone.slice(0,2)+') '+waState.phone.slice(2):'Phone number'}</div><div style="font-size:11px;color:#8B9DA5">online</div></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end">
+            <div style="max-width:90%">
+              <div class="wa-bubble">${waState.phone?selTemplate.generate(waState.phone,waState.message).split('?text=')[1]?decodeURIComponent(selTemplate.generate(waState.phone,waState.message).split('?text=')[1]):'Tap to start chat':'Enter a phone number'}</div>
+              <div class="wa-bubble-time">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+            </div>
+          </div>
+        </div>
+        ${!isPro?`<div class="card" style="margin-top:16px;background:linear-gradient(135deg,#F0FDF4,#ECFDF5);border-color:#BBF7D0;display:flex;align-items:center;gap:12px">
+          <i class="fa-solid fa-crown" style="color:#F59E0B;font-size:18px"></i>
+          <div style="flex:1"><div style="font-size:14px;font-weight:700">Unlock all templates</div><div style="font-size:12px;color:var(--text-secondary)">Custom messages, business greetings & more</div></div>
+          <button class="btn btn-primary btn-sm" onclick="window._nav('pricing')">Upgrade</button>
+        </div>`:''}
+      </div>
+    </div>
+  </main>`;
+}
+
+function refreshWaPreview() { /* Re-render WA link section */ renderWaLink(); }
+
+/* ─── Public Bio Page ─── */
+async function renderPublicBio(slug) {
+  const parts = slug.split('/');
+  const username = parts[0];
+  if(!username) { navigate('landing'); return; }
+  const profile = await loadPublicProfile(username);
+  if(!profile) {
+    appEl.innerHTML = `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;text-align:center">
+      <div style="width:100%;max-width:420px">
+        <div style="text-align:center;margin-bottom:24px"><a onclick="window._nav('landing')" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--accent);text-decoration:none"><img src="${LOGO_URL}" style="width:20px;height:20px;border-radius:4px" onerror="this.style.display='none'">Appluviio</a></div>
+        <div style="background:#fff;border-radius:20px;padding:48px 28px;box-shadow:0 4px 30px rgba(0,0,0,.06);text-align:center">
+          <div style="width:72px;height:72px;background:var(--bg-secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><i class="fa-solid fa-user-slash" style="font-size:28px;color:var(--text-muted)"></i></div>
+          <h1 style="font-size:20px;font-weight:800;margin-bottom:8px">User not found</h1>
+          <p style="color:var(--text-secondary);font-size:14px;margin-bottom:24px">This profile doesn't exist or has been removed.</p>
+          <a class="btn btn-primary" onclick="window._nav('landing')" style="cursor:pointer">Go to Appluviio</a>
+        </div>
+      </div>
+    </main>`;
+    return;
+  }
+  const bio = profile.bio || {};
+  const name = bio.name || profile.name || 'User';
+  const avatar = bio.avatar;
+  const initial = name[0].toUpperCase();
+  const links = bio.links || [];
+  const isFree = profile.plan !== 'pro';
+  appEl.innerHTML = `<main style="min-height:100vh;background:linear-gradient(180deg,#f1f5f9 0%,#e2e8f0 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px">
+    <div style="width:100%;max-width:440px">
+      <div style="text-align:center;margin-bottom:24px"><a onclick="window._nav('landing')" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--accent);text-decoration:none"><img src="${LOGO_URL}" style="width:22px;height:22px;border-radius:5px" onerror="this.style.display='none'"><span>Appluviio</span></a></div>
+      <div style="background:#fff;border-radius:24px;padding:44px 32px 36px;box-shadow:0 8px 40px rgba(0,0,0,.08);text-align:center">
+        ${avatar?`<img src="${esc(avatar)}" style="width:88px;height:88px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:4px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,.12)" onerror="this.outerHTML='<div style=\\'width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#818CF8);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#fff;font-size:36px;font-weight:800;box-shadow:0 4px 20px rgba(59,130,246,.3)\\'>${initial}</div>'">`
+        :`<div style="width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#818CF8);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#fff;font-size:36px;font-weight:800;box-shadow:0 4px 20px rgba(59,130,246,.3)">${initial}</div>`}
+        <h1 style="font-size:24px;font-weight:800;letter-spacing:-.3px">${esc(name)}</h1>
+        ${bio.bio?`<p style="font-size:14px;color:var(--text-secondary);margin-top:10px;line-height:1.7;max-width:320px;margin-left:auto;margin-right:auto">${esc(bio.bio)}</p>`:''}
+        <div style="width:48px;height:3px;background:linear-gradient(90deg,var(--accent),#818CF8);border-radius:2px;margin:20px auto"></div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+          ${links.map(l=>`<a href="${esc(l.url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;padding:15px 18px;background:${l.color}08;border:1px solid ${l.color}15;border-radius:16px;text-decoration:none;color:var(--text);font-size:15px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.03);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px ${l.color}15';this.style.borderColor='${l.color}30'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,0,0,.03)';this.style.borderColor='${l.color}15'"><div style="width:40px;height:40px;border-radius:12px;background:${l.color}12;color:${l.color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"><i class="${l.icon}"></i></div><span style="flex:1;text-align:left">${esc(l.title)}</span><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:11px;color:var(--text-muted)"></i></a>`).join('')}
+        </div>
+        ${!links.length?`<p style="color:var(--text-muted);font-size:14px;padding:24px 0">No links added yet</p>`:''}
+        <p style="font-size:11px;color:var(--text-muted);margin-top:28px;opacity:.7">Powered by <a onclick="window._nav('landing')" style="color:var(--accent);cursor:pointer;font-weight:600;text-decoration:none">Appluviio</a>${isFree?' by Luviio':''}</p>
+      </div>
+    </div>
+  </main>`;
+}
+
+/* ─── Global Handlers ─── */
+window._nav = page => navigate(page);
+window._logout = () => { if(verifyInterval) clearInterval(verifyInterval); logoutUser(); };
+window._googleLogin = () => loginGoogle();
+window._emailLogin = () => {
+  const email=$('login-email')?.value?.trim(); const pass=$('login-pass')?.value;
+  if(!email||!pass){toast('Please fill in all fields','error');return;}
+  loginEmail(email,pass);
+};
+window._emailRegister = () => {
+  const name=$('reg-name')?.value?.trim(); const email=$('reg-email')?.value?.trim(); const pass=$('reg-pass')?.value;
+  if(!name||!email||!pass){toast('Please fill in all fields','error');return;}
+  if(pass.length<6){toast('Password must be at least 6 characters','error');return;}
+  registerEmail(name,email,pass);
+};
+window._tryDemo = tool => {
+  if(!currentUser) { navigate(tool); return; }
+  navigate(tool);
+};
+window._openProfile = () => {
+  if(userData?.username) {
+    window.open(`https://${BIO_DOMAIN}/${userData.username}/bio`,'_blank');
+  } else toast('Set up your username first','error');
+};
+window._copyText = text => {
+  navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard!','success')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Copied!','success');
+  });
+};
+window._resendVerify = async () => {
+  if(currentUser) { try { await sendEmailVerification(currentUser); toast('Verification email sent!','success'); } catch(e) { toast(e.message,'error'); } }
+};
+window._checkVerify = async () => {
+  if(!currentUser) return;
+  try { await currentUser.reload(); if(currentUser.emailVerified) { await updateDoc(doc(db,'users',currentUser.uid),{emailVerified:true}); userData.emailVerified=true; toast('Verified!','success'); navigate('dashboard'); } else toast('Email not verified yet. Check your inbox.','info'); } catch(e) { toast(e.message,'error'); }
+};
+window._editUsername = async () => {
+  const overlay=document.createElement('div');overlay.className='modal-overlay';
+  overlay.innerHTML=`<div class="modal"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Edit Username</h3><p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">Your public bio link:<br><strong style="color:var(--accent)">https://${BIO_DOMAIN}/<span id="un-preview">${userData?.username||''}</span>/bio</strong></p><input class="input" id="un-input" value="${userData?.username||''}" placeholder="username" style="margin-bottom:20px"><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary btn-sm" id="un-cancel">Cancel</button><button class="btn btn-primary btn-sm" id="un-save">Save</button></div></div>`;
+  document.body.appendChild(overlay);
+  const inp=$('un-input');const preview=$('un-preview');
+  inp.addEventListener('input',()=>{preview.textContent=inp.value.toLowerCase().replace(/[^a-z0-9._-]/g,'');});
+  $('un-cancel').onclick=()=>overlay.remove();
+  $('un-save').onclick=async()=>{const ok=await updateUsername(currentUser.uid,inp.value);if(ok){overlay.remove();renderDashboard();}};
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+  inp.focus();
+};
+
+// Bio handlers
+window._updateBio = (k,v) => { bioState[k]=v; refreshBioPreview(); };
+window._updateBioLink = (i,k,v) => { bioState.links[i][k]=v; refreshBioPreview(); };
+window._removeBioLink = i => { bioState.links.splice(i,1); renderBio(); };
+window._addBioLink = () => {
+  if(userData?.plan!=='pro'&&bioState.links.length>=5){toast('Upgrade to Pro for unlimited links','error');return;}
+  const overlay=document.createElement('div');overlay.className='modal-overlay';
+  overlay.innerHTML=`<div class="modal" style="max-width:420px"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Add Link</h3><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:300px;overflow-y:auto">${linkPresets.map((p,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent-subtle)';this.style.background='var(--accent-light)'" onmouseout="this.style.borderColor='var(--border)';this.style.background=''" onclick="window._selectLinkPreset(${i})"><i class="${p.icon}" style="color:${p.color};font-size:16px;width:20px;text-align:center"></i><span style="font-size:14px;font-weight:600;flex:1">${p.title}</span><i class="fa-solid fa-plus" style="color:var(--text-muted);font-size:12px"></i></div>`).join('')}</div><button class="btn btn-secondary btn-sm" style="width:100%" onclick="this.closest('.modal-overlay').remove()">Cancel</button></div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+};
+window._selectLinkPreset = i => { bioState.links.push({...linkPresets[i],id:Date.now()}); document.querySelector('.modal-overlay')?.remove(); renderBio(); };
+window._saveBio = async () => { if(!currentUser){toast('Sign in to save','error');return;} await saveBioData(currentUser.uid); toast('Bio saved & published!','success'); track('save_bio'); };
+
+// Resume handlers
+window._updateResume = (k,v) => { resumeState[k]=v; refreshResumePreview(); };
+window._updateResumeSkills = v => { resumeState.skills=v.split(',').map(s=>s.trim()).filter(Boolean); refreshResumePreview(); };
+window._updateExp = (i,k,v) => { resumeState.experiences[i][k]=v; refreshResumePreview(); };
+window._addExp = () => { resumeState.experiences.push({company:'',role:'',period:'',desc:''}); renderResume(); };
+window._removeExp = i => { resumeState.experiences.splice(i,1); renderResume(); };
+window._updateEdu = (i,k,v) => { resumeState.education[i][k]=v; refreshResumePreview(); };
+window._addEdu = () => { resumeState.education.push({school:'',degree:'',year:''}); renderResume(); };
+window._removeEdu = i => { resumeState.education.splice(i,1); renderResume(); };
+window._selectResumeTemplate = id => {
+  if(id!=='standard'&&userData?.plan!=='pro'){toast('Upgrade to Pro for more templates','error');return;}
+  resumeState.template=id; renderResume();
+};
+window._saveResume = async () => { if(!currentUser){toast('Sign in to save','error');return;} await saveResumeData(currentUser.uid); toast('Resume saved!','success'); track('save_resume'); };
+window._exportResumePDF = () => {
+  const el=$('resume-preview'); if(!el)return;
+  toast('Generating PDF...','info');
+  const opt={margin:0,filename:'resume.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+  html2pdf().set(opt).from(el).save().then(()=>{toast('Resume PDF exported!','success');track('export_resume_pdf');});
+};
+
+// Invoice handlers
+window._updateInv = (k,v) => { invoiceState[k]=v; refreshInvoicePreview(); };
+window._updateInvFrom = (k,v) => { invoiceState.from[k]=v; refreshInvoicePreview(); };
+window._updateInvTo = (k,v) => { invoiceState.to[k]=v; refreshInvoicePreview(); };
+window._updateInvItem = (i,k,v) => { invoiceState.items[i][k]=v; refreshInvoicePreview(); };
+window._addInvItem = () => { invoiceState.items.push({desc:'',qty:1,price:0}); renderInvoice(); };
+window._removeInvItem = i => { if(invoiceState.items.length>1){invoiceState.items.splice(i,1);renderInvoice();} };
+window._saveInvoice = async () => { if(!currentUser){toast('Sign in to save','error');return;} await saveInvoiceData(currentUser.uid); toast('Invoice saved!','success'); track('save_invoice'); };
+window._exportInvoicePDF = () => {
+  const el=$('invoice-preview'); if(!el)return;
+  toast('Generating PDF...','info');
+  const opt={margin:10,filename:`${invoiceState.invoiceNo||'invoice'}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+  html2pdf().set(opt).from(el).save().then(()=>{toast('Invoice PDF exported!','success');track('export_invoice_pdf');});
+};
+window._sendInvoiceWhatsApp = () => {
+  const sym=getCurSymbol();
+  const total=invoiceState.items.reduce((s,i)=>s+(i.qty*i.price||0),0);
+  const text=`Invoice ${invoiceState.invoiceNo}\nDate: ${invoiceState.date}\nTo: ${invoiceState.to.name}\nTotal: ${sym}${total.toFixed(2)}\n\nPlease find the full invoice in the attached PDF.`;
+  const phone=(invoiceState.to.phone||'').replace(/[^0-9]/g,'');
+  if(!phone){toast('Add client phone number to send via WhatsApp','error');return;}
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`,'_blank');
+  track('send_invoice_whatsapp');
+};
+
+// WhatsApp Link handlers
+window._updateWa = (k,v) => { waState[k]=v; renderWaLink(); };
+window._selectWaTemplate = id => {
+  if(!waTemplates.find(t=>t.id===id)?.free && userData?.plan!=='pro'){toast('Upgrade to Pro for this template','error');return;}
+  waState.templateId=id; renderWaLink();
+};
+window._saveWaLink = async () => { if(!currentUser){toast('Sign in to save','error');return;} await saveWaData(currentUser.uid); toast('WhatsApp link saved!','success'); track('save_wa_link'); };
+window._shareWaLink = () => {
+  const selTemplate=waTemplates.find(t=>t.id===waState.templateId)||waTemplates[0];
+  const link=selTemplate.generate(waState.phone,waState.message);
+  if(navigator.share){navigator.share({title:'WhatsApp Link',url:link}).catch(()=>{});}
+  else window._copyText(link);
+};
+
+/* ─── Responsive Grid ─── */
+const style=document.createElement('style');
+style.textContent=`@media(min-width:1024px){.lg-grid{grid-template-columns:1fr 340px !important}.lg-grid-equal{grid-template-columns:1fr 1fr !important}}`;
+document.head.appendChild(style);
+
+/* ─── Handle /username/bio routes ─── */
+const path=window.location.pathname.replace(/\/$/,'');
+if(path.startsWith('/')&&path.length>1){
+  const slug=path.slice(1);
+  if(slug.includes('/bio')){
+    currentPage='public-bio';
+    renderPublicBio(slug);
+  } else {
+    currentPage='public-bio';
+    renderPublicBio(slug);
+  }
+} else {
+  render();
+}
+
+</script>
+</body>
+</html>
