@@ -2,176 +2,661 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Appluviio by Luviio — Simple tools for your digital identity & business</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LuvTools | Free QR Generator, WhatsApp Link, PDF Convert - No Login</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+        accent: { 400: '#f472b6', 500: '#ec4899' },
+        surface: '#f2f0f5',
+      },
+      fontFamily: {
+        sans: ['"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- qrcodejs library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.1/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.1/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.1/firebase-firestore-compat.js"></script>
 <style>
   :root {
-    --accent: #3B82F6;
-    --accent-hover: #2563EB;
-    --accent-light: #EFF6FF;
-    --accent-subtle: #DBEAFE;
-    --bg: #FFFFFF;
-    --bg-secondary: #F8FAFC;
-    --text: #0F172A;
-    --text-secondary: #64748B;
-    --text-muted: #94A3B8;
-    --border: #E2E8F0;
-    --card: #FFFFFF;
-    --success: #22C55E;
-    --danger: #EF4444;
-    --warning: #F59E0B;
+    --glass-bg: rgba(255,255,255,0.45);
+    --glass-border: rgba(255,255,255,0.65);
+    --glass-shadow: rgba(100,100,150,0.08);
+    --glass-blur: 24px;
+    --surface: #f2f0f5;
+    --blob1: rgba(99,102,241,0.15);
+    --blob2: rgba(236,72,153,0.12);
+    --blob3: rgba(59,130,246,0.1);
   }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:var(--text); background:var(--bg); -webkit-font-smoothing:antialiased; }
-  .page { display:none; opacity:0; transition:opacity .3s ease; }
-  .page.active { display:block; opacity:1; }
-  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 24px; border-radius:12px; font-weight:600; font-size:14px; border:none; cursor:pointer; transition:all .2s ease; text-decoration:none; font-family:inherit; }
-  .btn-primary { background:var(--accent); color:#fff; }
-  .btn-primary:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 12px rgba(59,130,246,.3); }
-  .btn-secondary { background:var(--bg-secondary); color:var(--text); border:1px solid var(--border); }
-  .btn-secondary:hover { background:var(--border); }
-  .btn-ghost { background:transparent; color:var(--text-secondary); }
-  .btn-ghost:hover { background:var(--bg-secondary); color:var(--text); }
-  .btn-danger { background:#FEF2F2; color:var(--danger); }
-  .btn-danger:hover { background:#FEE2E2; }
-  .btn-sm { padding:6px 14px; font-size:13px; border-radius:8px; }
-  .btn-lg { padding:14px 32px; font-size:16px; border-radius:14px; }
-  .btn:disabled { opacity:.5; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
-  .input { width:100%; padding:10px 16px; border:1.5px solid var(--border); border-radius:12px; font-size:14px; font-family:inherit; transition:all .2s; background:var(--bg); color:var(--text); outline:none; }
-  .input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,.1); }
-  .input::placeholder { color:var(--text-muted); }
-  .input:disabled { background:var(--bg-secondary); color:var(--text-muted); cursor:not-allowed; }
-  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; }
-  .card-hover { transition:all .25s ease; }
-  .card-hover:hover { border-color:var(--accent-subtle); box-shadow:0 8px 30px rgba(0,0,0,.06); transform:translateY(-2px); }
-  .label { display:block; font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
-  .toast-container { position:fixed; top:20px; right:20px; z-index:10000; display:flex; flex-direction:column; gap:8px; }
-  .toast { padding:14px 20px; border-radius:12px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px; animation:slideIn .3s ease; min-width:280px; max-width:400px; box-shadow:0 8px 30px rgba(0,0,0,.12); }
-  .toast-success { background:#F0FDF4; color:#166534; border:1px solid #BBF7D0; }
-  .toast-error { background:#FEF2F2; color:#991B1B; border:1px solid #FECACA; }
-  .toast-info { background:var(--accent-light); color:#1E40AF; border:1px solid var(--accent-subtle); }
-  @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
-  @keyframes slideOut { from { transform:translateX(0); opacity:1; } to { transform:translateX(100%); opacity:0; } }
-  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
-  .fade-up { animation:fadeUp .6s ease both; }
-  .fade-up-1 { animation-delay:.1s; }
-  .fade-up-2 { animation-delay:.2s; }
-  .fade-up-3 { animation-delay:.3s; }
-  .fade-up-4 { animation-delay:.4s; }
-  .fade-up-5 { animation-delay:.5s; }
-  .nav-link { padding:8px 16px; border-radius:10px; font-size:14px; font-weight:500; color:var(--text-secondary); transition:all .2s; cursor:pointer; text-decoration:none; white-space:nowrap; }
-  .nav-link:hover { color:var(--text); background:var(--bg-secondary); }
-  .nav-link.active { color:var(--accent); background:var(--accent-light); }
-  .tool-icon { width:56px; height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; }
-  .stat-card { text-align:center; padding:20px; }
-  .stat-number { font-size:32px; font-weight:800; color:var(--text); line-height:1; }
-  .stat-label { font-size:13px; color:var(--text-muted); margin-top:6px; }
-  .link-item { display:flex; align-items:center; gap:12px; padding:12px; border:1px solid var(--border); border-radius:12px; cursor:grab; transition:all .2s; }
-  .link-item:hover { border-color:var(--accent-subtle); background:var(--accent-light); }
-  .link-item.dragging { opacity:.5; transform:scale(.98); }
-  .link-item .drag-handle { color:var(--text-muted); cursor:grab; }
-  .preview-phone { width:320px; min-height:580px; background:#fff; border:8px solid #1a1a1a; border-radius:40px; overflow:hidden; position:relative; }
-  .preview-phone::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:100px; height:24px; background:#1a1a1a; border-radius:0 0 16px 16px; z-index:10; }
-  .pricing-card { border:1.5px solid var(--border); border-radius:20px; padding:32px; transition:all .3s; }
-  .pricing-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,.08); }
-  .pricing-card.featured { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 12px 40px rgba(59,130,246,.12); }
-  .pricing-card.featured:hover { box-shadow:0 0 0 1px var(--accent), 0 20px 50px rgba(59,130,246,.18); }
-  .badge { display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; }
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(4px); z-index:9000; display:flex; align-items:center; justify-content:center; padding:20px; animation:fadeUp .2s ease; }
-  .modal { background:#fff; border-radius:20px; padding:32px; max-width:480px; width:100%; box-shadow:0 25px 60px rgba(0,0,0,.15); max-height:90vh; overflow-y:auto; }
-  .hero-gradient { background:radial-gradient(ellipse at 50% 0%, rgba(59,130,246,.08) 0%, transparent 60%); }
-  .compare-row { display:grid; grid-template-columns:200px 1fr 1fr; gap:0; align-items:center; padding:14px 0; border-bottom:1px solid var(--border); font-size:14px; }
-  .compare-row:last-child { border-bottom:none; }
-  .compare-header { font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); padding-bottom:10px; border-bottom:2px solid var(--text); }
-  .spinner { width:20px; height:20px; border:2.5px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; display:inline-block; }
-  ::-webkit-scrollbar { width:6px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-  ::-webkit-scrollbar-thumb:hover { background:var(--text-muted); }
-  @media(max-width:768px) {
-    .preview-phone { width:280px; min-height:500px; border-width:6px; border-radius:32px; }
-    .preview-phone::before { width:80px; height:20px; }
-    .stat-number { font-size:24px; }
-    .card { padding:18px; }
-    .btn-lg { padding:12px 24px; font-size:15px; }
-    .compare-row { grid-template-columns:140px 1fr 1fr; font-size:13px; padding:10px 0; }
-    .modal { padding:24px; margin:12px; }
+  *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { overflow-x: hidden; scroll-behavior: smooth; }
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background: var(--surface);
+    min-height: 100dvh;
+    overflow-x: hidden;
+    position: relative;
   }
-  @media print { .no-print { display:none!important; } }
-  .verify-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; }
-  .verify-dot.green { background:var(--success); }
-  .verify-dot.yellow { background:var(--warning); }
-  .verify-dot.red { background:var(--danger); }
-  .template-card { border:2px solid var(--border); border-radius:14px; padding:16px; cursor:pointer; transition:all .2s; text-align:center; }
-  .template-card:hover { border-color:var(--accent-subtle); background:var(--accent-light); }
-  .template-card.selected { border-color:var(--accent); background:var(--accent-light); box-shadow:0 0 0 1px var(--accent); }
-  .wa-template-card { border:1.5px solid var(--border); border-radius:14px; padding:16px; cursor:pointer; transition:all .2s; }
-  .wa-template-card:hover { border-color:var(--accent-subtle); }
-  .wa-template-card.selected { border-color:#25D366; background:#F0FDF4; }
-  .wa-preview-box { background:#ECE5DD; border-radius:12px; padding:16px; max-width:340px; }
-  .wa-bubble { background:#DCF8C6; border-radius:0 10px 10px 10px; padding:10px 14px; font-size:14px; line-height:1.5; position:relative; max-width:90%; word-wrap:break-word; white-space:pre-line; }
-  .wa-bubble-time { font-size:11px; color:#8B9DA5; text-align:right; margin-top:4px; }
-  .wa-avatar { width:36px; height:36px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px; flex-shrink:0; }
-  .phone-input-wrapper { display:flex; gap:0; border:1.5px solid var(--border); border-radius:12px; overflow:hidden; transition:all .2s; background:var(--bg); }
-  .phone-input-wrapper:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,.1); }
-  .country-select { padding:10px 12px; border:none; border-right:1px solid var(--border); background:var(--bg-secondary); font-size:14px; font-family:inherit; color:var(--text); cursor:pointer; min-width:90px; outline:none; appearance:none; background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position:right 6px center; background-repeat:no-repeat; background-size:16px; padding-right:28px; }
-  .phone-input { flex:1; border:none; padding:10px 16px; font-size:14px; font-family:inherit; color:var(--text); outline:none; background:transparent; }
-  .phone-input::placeholder { color:var(--text-muted); }
-  /* Public bio page - inspired by the export template */
-  .pub-bio-page {
-    min-height:100vh;
-    background:linear-gradient(180deg,#f2f2f7 0%,#e9e9ee 100%);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:40px 24px;
+  .bg-blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .blob {
+    position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.7;
+    animation: blobFloat 20s ease-in-out infinite alternate;
   }
-  .pub-bio-container { width:100%;max-width:420px;text-align:center; }
-  .pub-avatar {
-    width:90px;height:90px;border-radius:50%;
-    background:linear-gradient(135deg,#6a8dff,#8ea6ff);
-    display:flex;align-items:center;justify-content:center;
-    color:#fff;font-size:34px;font-weight:700;
-    margin:0 auto 14px;
-    box-shadow:0 10px 25px rgba(0,0,0,.12);
-    overflow:hidden;
+  .blob-1 { width: 400px; height: 400px; background: var(--blob1); top: -100px; left: -80px; animation-delay: 0s; }
+  .blob-2 { width: 350px; height: 350px; background: var(--blob2); bottom: -80px; right: -60px; animation-delay: -7s; }
+  .blob-3 { width: 300px; height: 300px; background: var(--blob3); top: 40%; left: 50%; animation-delay: -14s; }
+  @keyframes blobFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -30px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+    100% { transform: translate(10px, -10px) scale(1.02); }
   }
-  .pub-avatar img { width:100%;height:100%;border-radius:50%;object-fit:cover; }
-  .pub-name { font-size:22px;font-weight:600;letter-spacing:-0.3px;color:#1d1d1f; }
-  .pub-bio-text { font-size:14px;color:#8e8e93;margin-top:6px;line-height:1.4; }
-  .pub-divider { width:48px;height:4px;margin:18px auto 26px;border-radius:2px;background:linear-gradient(90deg,#6a8dff,#8ea6ff);opacity:.7; }
-  .pub-card {
-    display:flex;align-items:center;justify-content:space-between;gap:14px;
-    padding:14px 16px;margin-bottom:12px;border-radius:18px;
-    text-decoration:none;color:#1d1d1f;font-size:15px;font-weight:500;
-    background:rgba(255,255,255,0.7);backdrop-filter:blur(14px);
-    box-shadow:0 8px 20px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.6);
-    transition:all .2s ease;
+  @media (prefers-reduced-motion: reduce) {
+    .blob { animation: none !important; }
+    .glass-card { transition: none !important; }
   }
-  .pub-card:hover { transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,0.1),inset 0 1px 0 rgba(255,255,255,0.6); }
-  .pub-card:active { transform:scale(0.97); }
-  .pub-left { display:flex;align-items:center;gap:12px; }
-  .pub-icon { width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
-  .pub-arrow { color:#c7c7cc;font-size:18px; }
-  .pub-footer { margin-top:24px;font-size:11px;color:#8e8e93;opacity:.6; }
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.5);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .glass-card:hover { box-shadow: 0 12px 40px rgba(100,100,150,0.12), inset 0 1px 0 rgba(255,255,255,0.6); }
+  .glass-input {
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(200,195,220,0.4);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #1e1b3a;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  .glass-input::placeholder { color: #a09aad; }
+  .glass-input:focus {
+    border-color: rgba(99,102,241,0.5);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+  }
+  .glass-input:disabled { opacity: 0.5; cursor: not-allowed; }
+  textarea.glass-input { resize: vertical; min-height: 100px; }
+  .glass-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 48px; padding: 12px 24px;
+    border-radius: 14px; font-weight: 600; font-size: 15px;
+    border: 1.5px solid transparent;
+    cursor: pointer; transition: all 0.2s ease;
+    position: relative; overflow: hidden;
+  }
+  .glass-btn:active { transform: scale(0.97); }
+  .glass-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; border-color: rgba(99,102,241,0.3);
+    box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+  }
+  .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(99,102,241,0.4); transform: translateY(-1px); }
+  .btn-secondary {
+    background: rgba(255,255,255,0.5);
+    color: #4338ca; border-color: rgba(99,102,241,0.2);
+    backdrop-filter: blur(8px);
+  }
+  .btn-secondary:hover:not(:disabled) { background: rgba(255,255,255,0.7); }
+  .btn-whatsapp {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: #fff; border-color: rgba(37,211,102,0.3);
+    box-shadow: 0 4px 16px rgba(37,211,102,0.25);
+  }
+  .btn-whatsapp:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(37,211,102,0.35); }
+  .btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff; border-color: rgba(239,68,68,0.3);
+    box-shadow: 0 4px 16px rgba(239,68,68,0.25);
+  }
+  .btn-danger:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(239,68,68,0.35); }
+  .tab-bar {
+    display: flex; gap: 4px;
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 16px; padding: 4px;
+  }
+  .tab-btn {
+    flex: 1; padding: 12px 8px; border-radius: 12px;
+    font-weight: 600; font-size: 13px; color: #6b6580;
+    background: transparent; border: none; cursor: pointer;
+    transition: all 0.3s ease; display: flex; align-items: center;
+    justify-content: center; gap: 6px; white-space: nowrap;
+  }
+  .tab-btn.active {
+    background: rgba(255,255,255,0.75);
+    color: #4338ca;
+    box-shadow: 0 2px 12px rgba(99,102,241,0.12);
+  }
+  .tab-btn:not(.active):hover { color: #4338ca; }
+  .size-selector { display: flex; gap: 6px; }
+  .size-btn {
+    padding: 8px 20px; border-radius: 10px;
+    font-weight: 600; font-size: 13px;
+    border: 1.5px solid rgba(200,195,220,0.4);
+    background: rgba(255,255,255,0.4); color: #6b6580;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .size-btn.active {
+    background: rgba(99,102,241,0.1);
+    border-color: rgba(99,102,241,0.4);
+    color: #4338ca;
+  }
+  .sticky-bottom {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom));
+    background: linear-gradient(to top, rgba(242,240,245,0.95) 60%, rgba(242,240,245,0));
+    backdrop-filter: blur(12px); z-index: 30;
+  }
+  .toast-container { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 400px; }
+  .toast {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 14px; padding: 14px 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 500; color: #1e1b3a;
+    animation: toastIn 0.35s ease;
+    margin-bottom: 8px;
+  }
+  .toast.out { animation: toastOut 0.3s ease forwards; }
+  .toast .toast-icon { font-size: 18px; }
+  .toast.success .toast-icon { color: #22c55e; }
+  .toast.error .toast-icon { color: #ef4444; }
+  .toast.info .toast-icon { color: #6366f1; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+  .view { display: none; animation: fadeSlideIn 0.4s ease; }
+  .view.active { display: block; }
+  @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(30,27,58,0.3);
+    backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-content {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 24px; padding: 28px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.12);
+    max-width: 420px; width: 100%;
+    animation: fadeSlideIn 0.3s ease;
+  }
+  /* QR code output styling */
+  .qr-preview-wrap {
+    background: #fff; border-radius: 16px; padding: 20px;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  /* qrcodejs creates a canvas + img inside the container */
+  #qrcodeContainer { display: inline-block; line-height: 0; }
+  #qrcodeContainer img { display: block !important; border-radius: 4px; }
+  #qrcodeContainer canvas { display: none !important; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 8px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-free { background: rgba(200,195,220,0.3); color: #6b6580; }
+  .badge-pro { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15)); color: #4338ca; }
+  .badge-active { background: rgba(34,197,94,0.12); color: #16a34a; }
+  .badge-inactive { background: rgba(200,195,220,0.3); color: #6b6580; }
+  .badge-suspended { background: rgba(239,68,68,0.1); color: #dc2626; }
+  .badge-admin { background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(99,102,241,0.15)); color: #a855f7; }
+  .drop-zone {
+    border: 2px dashed rgba(200,195,220,0.5);
+    border-radius: 16px; padding: 32px; text-align: center;
+    background: rgba(255,255,255,0.3);
+    transition: all 0.2s; cursor: pointer;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: rgba(99,102,241,0.4);
+    background: rgba(99,102,241,0.05);
+  }
+  .watermark {
+    position: absolute; bottom: 8px; right: 8px;
+    font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.12);
+    pointer-events: none; user-select: none;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(150,145,170,0.3); border-radius: 3px; }
+  .admin-table { width: 100%; font-size: 13px; }
+  .admin-table th { text-align: left; padding: 10px 8px; font-weight: 700; color: #6b6580; border-bottom: 1.5px solid rgba(200,195,220,0.4); white-space: nowrap; }
+  .admin-table td { padding: 12px 8px; border-bottom: 1px solid rgba(200,195,220,0.2); vertical-align: middle; }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .glass-divider { height: 1px; background: rgba(200,195,220,0.3); margin: 16px 0; }
+  .pro-banner {
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08), rgba(236,72,153,0.06));
+    border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 14px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px; color: #4338ca; font-weight: 500;
+  }
+  .plan-highlight { position: relative; overflow: hidden; }
+  .plan-highlight::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #6366f1, #ec4899);
+  }
+  .spinner {
+    width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pdf-preview-area {
+    background: #fff; border-radius: 12px; padding: 20px; min-height: 200px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    max-height: 400px; overflow: auto;
+  }
+  @media (max-width: 480px) {
+    .tab-btn { font-size: 12px; padding: 10px 4px; gap: 4px; }
+    .glass-card { border-radius: 16px; }
+    .modal-content { padding: 22px; border-radius: 20px; }
+  }
+  @media (min-width: 768px) {
+    .glass-card { border-radius: 24px; }
+  }
 </style>
 </head>
 <body>
-<div id="toast-container" class="toast-container"></div>
-<div id="app"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, updateProfile, sendEmailVerification, updatePassword } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, query, collection, where, getDocs, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+<div class="bg-blobs" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
 
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== AUTH VIEW ===== -->
+<div class="view active" id="authView">
+  <div class="min-h-[100dvh] flex flex-col items-center justify-center px-5 py-10 relative z-10">
+    <div class="glass-card w-full max-w-md p-8">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-lg shadow-primary-500/20 mb-4">
+          <i class="fa-solid fa-wand-magic-sparkles text-white text-2xl"></i>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">Appluvii</h1>
+        <p class="text-sm text-gray-500 mt-1">QR Codes, WhatsApp Links & PDF Tools</p>
+      </div>
+      <div id="loginForm">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Email</label>
+            <input type="email" id="loginEmail" class="glass-input" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Password</label>
+            <div class="relative">
+              <input type="password" id="loginPassword" class="glass-input pr-12" placeholder="Enter password" autocomplete="current-password">
+              <button type="button" onclick="togglePwdVis('loginPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1" aria-label="Toggle password visibility">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <button onclick="handleLogin()" class="glass-btn btn-primary w-full" id="loginBtn">
+            <span>Sign In</span>
+          </button>
+        </div>
+        <div class="glass-divider"></div>
+        <button onclick="handleGoogleSignIn()" class="glass-btn btn-secondary w-full">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          <span>Continue with Google</span>
+        </button>
+        <p class="text-center text-sm text-gray-500 mt-5">
+          New here? <button onclick="showRegister()" class="text-primary-600 font-semibold hover:underline">Create account</button>
+        </p>
+      </div>
+      <div id="registerForm" style="display:none;">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Email</label>
+            <input type="email" id="regEmail" class="glass-input" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Password</label>
+            <div class="relative">
+              <input type="password" id="regPassword" class="glass-input pr-12" placeholder="Min 6 characters" autocomplete="new-password">
+              <button type="button" onclick="togglePwdVis('regPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1" aria-label="Toggle password visibility">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Confirm Password</label>
+            <div class="relative">
+              <input type="password" id="regConfirm" class="glass-input pr-12" placeholder="Re-enter password" autocomplete="new-password">
+              <button type="button" onclick="togglePwdVis('regConfirm', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1" aria-label="Toggle password visibility">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <button onclick="handleRegister()" class="glass-btn btn-primary w-full" id="regBtn">
+            <span>Create Account</span>
+          </button>
+        </div>
+        <p class="text-center text-sm text-gray-500 mt-5">
+          Already have an account? <button onclick="showLogin()" class="text-primary-600 font-semibold hover:underline">Sign in</button>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP VIEW ===== -->
+<div class="view" id="appView">
+  <div class="relative z-10 max-w-2xl mx-auto px-4 pt-4 pb-40">
+    <header class="flex items-center justify-between mb-5">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-md shadow-primary-500/20">
+          <i class="fa-solid fa-wand-magic-sparkles text-white text-sm"></i>
+        </div>
+        <span class="font-bold text-lg text-gray-900 tracking-tight">Appluvii</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="planBadge" class="badge badge-free">Free</span>
+        <button onclick="openPlanModal()" class="glass-btn btn-secondary !py-2 !px-3 !text-xs !min-h-0 !rounded-xl">
+          <i class="fa-solid fa-crown text-amber-500"></i>
+          <span class="hidden sm:inline">Upgrade</span>
+        </button>
+        <div class="relative">
+          <button onclick="toggleUserMenu()" id="userMenuBtn" class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-accent-500 flex items-center justify-center text-white font-bold text-sm shadow-md" aria-label="User menu">U</button>
+          <div id="userMenu" class="absolute right-0 top-12 glass-card p-2 min-w-[180px] z-50" style="display:none; border-radius:16px;">
+            <div class="px-3 py-2 text-xs text-gray-500 font-semibold truncate" id="userMenuEmail">user@email.com</div>
+            <div class="glass-divider !my-1"></div>
+            <button onclick="showAdminPanel()" id="adminMenuBtn" class="w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:bg-white/40 rounded-lg transition-colors" style="display:none;">
+              <i class="fa-solid fa-shield-halved text-purple-500 mr-2"></i>SuperAdmin
+            </button>
+            <button onclick="handleSignOut()" class="w-full text-left px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50/40 rounded-lg transition-colors">
+              <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i>Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div id="proBanner" class="pro-banner mb-5">
+      <i class="fa-solid fa-crown text-amber-500 text-lg"></i>
+      <span>Upgrade to <strong>Pro</strong> for watermark-free exports & advanced features</span>
+      <button onclick="openPlanModal()" class="ml-auto text-xs font-bold text-primary-600 hover:underline whitespace-nowrap">RM 9.90/mo</button>
+    </div>
+
+    <nav class="tab-bar mb-5" role="tablist">
+      <button class="tab-btn active" onclick="switchTab('qr')" role="tab" aria-selected="true" id="tabQr">
+        <i class="fa-solid fa-qrcode"></i>QR Code
+      </button>
+      <button class="tab-btn" onclick="switchTab('whatsapp')" role="tab" aria-selected="false" id="tabWhatsapp">
+        <i class="fa-brands fa-whatsapp"></i>WhatsApp
+      </button>
+      <button class="tab-btn" onclick="switchTab('pdf')" role="tab" aria-selected="false" id="tabPdf">
+        <i class="fa-solid fa-file-pdf"></i>PDF
+      </button>
+    </nav>
+
+    <!-- ===== QR CODE TAB ===== -->
+    <section id="qrPanel" class="tab-panel" role="tabpanel">
+      <div class="glass-card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">QR Code Generator</h2>
+        <p class="text-sm text-gray-500 mb-5">Enter a URL or any text to generate a QR code instantly</p>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">URL or Text</label>
+            <textarea id="qrInput" class="glass-input" rows="3" placeholder="https://example.com or any text..."></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-2 ml-1">Size</label>
+            <div class="size-selector">
+              <button class="size-btn" data-size="150" onclick="selectSize(this)">S</button>
+              <button class="size-btn active" data-size="250" onclick="selectSize(this)">M</button>
+              <button class="size-btn" data-size="400" onclick="selectSize(this)">L</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- QR Preview — container for qrcodejs, hidden until generated -->
+      <div id="qrPreviewSection" class="mt-4 glass-card p-6" style="display:none;">
+        <div class="flex flex-col items-center">
+          <div class="qr-preview-wrap">
+            <div id="qrcodeContainer"></div>
+            <div class="watermark" id="qrWatermark">Appluvii Free</div>
+          </div>
+          <div class="flex gap-3 mt-5 justify-center">
+            <button onclick="downloadQR()" class="glass-btn btn-primary !text-sm">
+              <i class="fa-solid fa-download"></i> Download PNG
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WHATSAPP TAB ===== -->
+    <section id="whatsappPanel" class="tab-panel" role="tabpanel" style="display:none;">
+      <div class="glass-card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">WhatsApp Link Generator</h2>
+        <p class="text-sm text-gray-500 mb-5">Create direct WhatsApp message links in seconds</p>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Phone Number (with country code)</label>
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">+</span>
+              <input type="tel" id="waPhone" class="glass-input !pl-9" placeholder="60123456789" inputmode="numeric">
+            </div>
+            <p class="text-xs text-gray-400 mt-1 ml-1">Example: 60123456789 for Malaysia</p>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Message (optional)</label>
+            <textarea id="waMessage" class="glass-input" rows="3" placeholder="Hello! I'd like to inquire about..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div id="waResultSection" class="mt-4 glass-card p-6" style="display:none;">
+        <label class="block text-xs font-semibold text-gray-500 mb-2 ml-1">Generated Link</label>
+        <div class="flex items-center gap-2">
+          <input type="text" id="waLink" class="glass-input !text-sm" readonly>
+          <button onclick="copyWaLink()" class="glass-btn btn-secondary !min-h-0 !py-3 !px-4 !rounded-xl shrink-0" aria-label="Copy link">
+            <i class="fa-regular fa-copy"></i>
+          </button>
+        </div>
+        <div class="flex gap-3 mt-4">
+          <button onclick="copyWaLink()" class="glass-btn btn-secondary flex-1 !text-sm">
+            <i class="fa-regular fa-copy"></i> Copy Link
+          </button>
+          <button onclick="openWaLink()" class="glass-btn btn-whatsapp flex-1 !text-sm">
+            <i class="fa-brands fa-whatsapp"></i> Open WhatsApp
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PDF TAB ===== -->
+    <section id="pdfPanel" class="tab-panel" role="tabpanel" style="display:none;">
+      <div class="glass-card p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Convert to PDF</h2>
+        <p class="text-sm text-gray-500 mb-5">Upload images or enter text to create a PDF document</p>
+        <div class="flex gap-2 mb-5">
+          <button class="size-btn active" id="pdfModeImage" onclick="switchPdfMode('image')">
+            <i class="fa-regular fa-image mr-1"></i>Image
+          </button>
+          <button class="size-btn" id="pdfModeText" onclick="switchPdfMode('text')">
+            <i class="fa-regular fa-file-lines mr-1"></i>Text
+          </button>
+        </div>
+        <div id="pdfImageMode">
+          <div class="drop-zone" id="dropZone" onclick="document.getElementById('pdfFileInput').click()">
+            <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3"></i>
+            <p class="text-sm font-semibold text-gray-600">Tap to upload or drag & drop</p>
+            <p class="text-xs text-gray-400 mt-1">JPG, PNG — Max 10MB</p>
+            <input type="file" id="pdfFileInput" accept=".jpg,.jpeg,.png" multiple style="display:none" onchange="handleFileSelect(event)">
+          </div>
+          <div id="pdfFileList" class="mt-3 space-y-2"></div>
+        </div>
+        <div id="pdfTextMode" style="display:none;">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Document Title</label>
+            <input type="text" id="pdfTitle" class="glass-input" placeholder="My Document">
+          </div>
+          <div class="mt-3">
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Content</label>
+            <textarea id="pdfText" class="glass-input" rows="8" placeholder="Enter or paste your text content here..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div id="pdfPreviewSection" class="mt-4 glass-card p-6" style="display:none;">
+        <label class="block text-xs font-semibold text-gray-500 mb-3 ml-1">Preview</label>
+        <div class="pdf-preview-area" id="pdfPreviewArea"></div>
+        <div class="flex gap-3 mt-4 justify-center">
+          <button onclick="downloadPDF()" class="glass-btn btn-primary !text-sm">
+            <i class="fa-solid fa-download"></i> Download PDF
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="sticky-bottom">
+    <div class="max-w-2xl mx-auto">
+      <button id="mainActionBtn" onclick="handleMainAction()" class="glass-btn btn-primary w-full text-base">
+        <i class="fa-solid fa-bolt"></i>
+        <span id="mainActionText">Generate QR Code</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN PANEL VIEW ===== -->
+<div class="view" id="adminView">
+  <div class="relative z-10 max-w-5xl mx-auto px-4 pt-4 pb-6">
+    <header class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <button onclick="closeAdminPanel()" class="glass-btn btn-secondary !min-h-0 !py-2 !px-3 !rounded-xl">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div>
+          <h1 class="text-xl font-extrabold text-gray-900">SuperAdmin Panel</h1>
+          <p class="text-xs text-gray-500">Manage user accounts and plans</p>
+        </div>
+      </div>
+      <span class="badge badge-admin"><i class="fa-solid fa-shield-halved mr-1"></i>Admin</span>
+    </header>
+    <div class="flex gap-2 mb-4 overflow-x-auto pb-1">
+      <button class="size-btn active" data-filter="all" onclick="filterUsers(this,'all')">All</button>
+      <button class="size-btn" data-filter="active" onclick="filterUsers(this,'active')">Active</button>
+      <button class="size-btn" data-filter="inactive" onclick="filterUsers(this,'inactive')">Inactive</button>
+      <button class="size-btn" data-filter="suspended" onclick="filterUsers(this,'suspended')">Suspended</button>
+    </div>
+    <div class="glass-card p-4 overflow-x-auto">
+      <table class="admin-table" id="adminTable">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Plan</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody">
+          <tr><td colspan="5" class="text-center py-8 text-gray-400">Loading users...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PLAN MODAL ===== -->
+<div class="modal-overlay" id="planModal">
+  <div class="modal-content plan-highlight">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-extrabold text-gray-900">Choose Your Plan</h3>
+      <button onclick="closePlanModal()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="space-y-3">
+      <div class="p-4 rounded-2xl border border-gray-200/60 bg-white/40">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-gray-900">Free</span>
+          <span class="badge badge-free">Current</span>
+        </div>
+        <div class="text-2xl font-extrabold text-gray-900">RM 0<span class="text-sm font-normal text-gray-500">/month</span></div>
+        <ul class="mt-3 space-y-1.5 text-sm text-gray-600">
+          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Unlimited QR, WhatsApp, PDF</li>
+          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Basic features</li>
+          <li><i class="fa-solid fa-xmark text-gray-300 mr-2"></i>Watermark on exports</li>
+          <li><i class="fa-solid fa-xmark text-gray-300 mr-2"></i>No priority support</li>
+        </ul>
+      </div>
+      <div class="p-4 rounded-2xl border-2 border-primary-500/30 bg-gradient-to-br from-primary-500/5 to-accent-500/5 relative">
+        <div class="absolute -top-3 right-4 bg-gradient-to-r from-primary-500 to-accent-500 text-white text-[10px] font-bold px-3 py-1 rounded-full">RECOMMENDED</div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-gray-900">Pro</span>
+          <span class="badge badge-pro"><i class="fa-solid fa-crown mr-1"></i>Pro</span>
+        </div>
+        <div class="text-2xl font-extrabold text-gray-900">RM 9.90<span class="text-sm font-normal text-gray-500">/month</span></div>
+        <ul class="mt-3 space-y-1.5 text-sm text-gray-600">
+          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Everything in Free</li>
+          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>No watermark</li>
+          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>HD quality exports</li>
+          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Advanced PDF formatting</li>
+          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Priority support</li>
+        </ul>
+        <button onclick="handleProUpgrade()" class="glass-btn btn-primary w-full mt-4" id="proUpgradeBtn">
+          Upgrade to Pro
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 text-center mt-4">Cancel anytime. Payment handled securely.</p>
+  </div>
+</div>
+
+<!-- ===== ADMIN USER MODAL ===== -->
+<div class="modal-overlay" id="adminUserModal">
+  <div class="modal-content">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-extrabold text-gray-900">Manage User</h3>
+      <button onclick="closeAdminUserModal()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div id="adminUserDetails" class="space-y-4"></div>
+  </div>
+</div>
+
+<script>
+/* ========================================
+   Firebase Configuration & Init
+   ======================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyDSp-HX00hZaJwTFaZ4X06pU7pARGjhl1M",
   authDomain: "appluviio.firebaseapp.com",
@@ -181,1212 +666,818 @@ const firebaseConfig = {
   appId: "1:598571208819:web:1a91c501b49b3e604d5a06",
   measurementId: "G-MZ96FCCJ1K"
 };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-let analytics = null;
-try { analytics = getAnalytics(app); } catch(e) {}
-const track = (name, data={}) => { try { logEvent(analytics, name, data); } catch(e) {} };
 
-const provider = new GoogleAuthProvider();
-const $ = id => document.getElementById(id);
-const appEl = $('app');
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-// SuperAdmin UIDs — replace with your actual Firebase UIDs
-const SUPER_ADMIN_UIDS = ['super-admin-uid-here', 'admin2-uid'];
+db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
 
-const LOGO_URL = 'https://images.luviio.com/craiyon_151643_image.png';
-const BIO_DOMAIN = 'app.luviio.com';
-const CURRENCIES = [
-  {code:'MYR',symbol:'RM',name:'Malaysian Ringgit'},
-  {code:'USD',symbol:'$',name:'US Dollar'},
-  {code:'SGD',symbol:'S$',name:'Singapore Dollar'},
-  {code:'EUR',symbol:'€',name:'Euro'},
-  {code:'GBP',symbol:'£',name:'British Pound'},
-  {code:'IDR',symbol:'Rp',name:'Indonesian Rupiah'},
-  {code:'THB',symbol:'฿',name:'Thai Baht'},
-  {code:'PHP',symbol:'₱',name:'Philippine Peso'},
-];
-
-const COUNTRY_CODES = [
-  {code:'+60',country:'Malaysia',flag:'🇲🇾'},
-  {code:'+62',country:'Indonesia',flag:'🇮🇩'},
-  {code:'+65',country:'Singapore',flag:'🇸🇬'},
-  {code:'+66',country:'Thailand',flag:'🇹🇭'},
-  {code:'+63',country:'Philippines',flag:'🇵🇭'},
-  {code:'+1',country:'USA/Canada',flag:'🇺🇸'},
-  {code:'+44',country:'UK',flag:'🇬🇧'},
-  {code:'+86',country:'China',flag:'🇨🇳'},
-  {code:'+81',country:'Japan',flag:'🇯🇵'},
-  {code:'+91',country:'India',flag:'🇮🇳'},
-  {code:'+61',country:'Australia',flag:'🇦🇺'},
-  {code:'+49',country:'Germany',flag:'🇩🇪'},
-  {code:'+33',country:'France',flag:'🇫🇷'},
-  {code:'+39',country:'Italy',flag:'🇮🇹'},
-  {code:'+971',country:'UAE',flag:'🇦🇪'},
-  {code:'+974',country:'Qatar',flag:'🇶🇦'},
-  {code:'+966',country:'Saudi Arabia',flag:'🇸🇦'},
-  {code:'+20',country:'Egypt',flag:'🇪🇬'},
-  {code:'+27',country:'South Africa',flag:'🇿🇦'},
-  {code:'+55',country:'Brazil',flag:'🇧🇷'},
-];
-
+/* ========================================
+   State
+   ======================================== */
 let currentUser = null;
 let userData = null;
-let currentPage = 'landing';
-let emailVerifiedChecked = false;
+let currentTab = 'qr';
+let selectedQrSize = 250;
+let pdfMode = 'image';
+let pdfFiles = [];
+let generatedPdfBlob = null;
+let currentFilter = 'all';
+let allUsers = [];
 
-// Bio state — published flag is key
-const bioState = { name:'', bio:'', avatar:'', published:false, links:[
-  {id:1,title:'WhatsApp',url:'https://wa.me/',icon:'fa-brands fa-whatsapp',color:'#25D366'},
-  {id:2,title:'TikTok',url:'https://tiktok.com/@',icon:'fa-brands fa-tiktok',color:'#000000'},
-  {id:3,title:'Shopee',url:'https://shopee.com/',icon:'fa-solid fa-bag-shopping',color:'#EE4D2D'}
-]};
-
-const resumeState = {
-  fullName:'', email:'', phone:'', address:'', photo:'',
-  summary:'', experiences:[{company:'',role:'',period:'',desc:''}],
-  skills:[], education:[{school:'',degree:'',year:''}],
-  template:'standard'
-};
-
-const invoiceState = {
-  from:{name:'',email:'',phone:'',address:''},
-  to:{name:'',email:'',phone:'',address:''},
-  items:[{desc:'',qty:1,price:0}],
-  date:new Date().toISOString().split('T')[0],
-  invoiceNo:'INV-001', notes:'', currency:'MYR'
-};
-
-const waState = { phone:'', message:'', prefill:'', templateId:0, countryCode:'+60' };
-
-const linkPresets = [
-  {title:'WhatsApp',url:'https://wa.me/',icon:'fa-brands fa-whatsapp',color:'#25D366'},
-  {title:'TikTok',url:'https://tiktok.com/@',icon:'fa-brands fa-tiktok',color:'#000000'},
-  {title:'Instagram',url:'https://instagram.com/',icon:'fa-brands fa-instagram',color:'#E4405F'},
-  {title:'Shopee',url:'https://shopee.com/',icon:'fa-solid fa-bag-shopping',color:'#EE4D2D'},
-  {title:'YouTube',url:'https://youtube.com/@',icon:'fa-brands fa-youtube',color:'#FF0000'},
-  {title:'Twitter / X',url:'https://x.com/',icon:'fa-brands fa-x-twitter',color:'#000000'},
-  {title:'LinkedIn',url:'https://linkedin.com/in/',icon:'fa-brands fa-linkedin',color:'#0A66C2'},
-  {title:'Website',url:'https://',icon:'fa-solid fa-globe',color:'#3B82F6'},
-  {title:'Email',url:'mailto:',icon:'fa-solid fa-envelope',color:'#64748B'},
-  {title:'Custom',url:'',icon:'fa-solid fa-link',color:'#6366F1'},
-];
-
-const waTemplates = [
-  {id:0,name:'Simple Link',desc:'Just the link, nothing else',free:true,generate:(phone,msg)=>`https://wa.me/${phone}`},
-  {id:1,name:'Custom Message',desc:'Pre-filled chat message',free:false,generate:(phone,msg)=>`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`},
-  {id:2,name:'Business Greeting',desc:'Professional opening message',free:false,generate:(phone,msg)=>`https://wa.me/${phone}?text=${encodeURIComponent(`Hi! 👋\n\nThank you for reaching out to us.\n\n${msg||'How can we help you today?'}`)}`},
-  {id:3,name:'Order Inquiry',desc:'Pre-filled order template',free:false,generate:(phone,msg)=>`https://wa.me/${phone}?text=${encodeURIComponent(`Hi! I'm interested in your product/service.\n\nDetails: ${msg||'Please share more information.'}\n\nThank you!`)}`},
-  {id:4,name:'Support Request',desc:'Support ticket template',free:false,generate:(phone,msg)=>`https://wa.me/${phone}?text=${encodeURIComponent(`Hello, I need help with the following:\n\n${msg||'Please describe your issue.'}\n\nThank you for your assistance.`)}`},
-];
-
-function isSuperAdmin() { return currentUser && SUPER_ADMIN_UIDS.includes(currentUser.uid); }
-function getCurSymbol() { const c = CURRENCIES.find(x=>x.code===invoiceState.currency); return c ? c.symbol : 'RM'; }
-function formatMoney(amount) { const sym = getCurSymbol(); if(invoiceState.currency==='IDR') return sym + Math.round(amount).toLocaleString('id-ID'); return sym + amount.toFixed(2); }
-
-function toast(msg, type='info') {
-  const c = $('toast-container');
-  const icons = {success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info'};
-  const t = document.createElement('div');
-  t.className = `toast toast-${type}`;
-  t.innerHTML = `<i class="fa-solid ${icons[type]}"></i><span>${msg}</span>`;
-  c.appendChild(t);
-  setTimeout(()=>{ t.style.animation='slideOut .3s ease forwards'; setTimeout(()=>t.remove(),300); },3500);
+/* ========================================
+   Utilities
+   ======================================== */
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-circle-info' };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<i class="fa-solid ${icons[type]} toast-icon"></i><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.add('out'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-function esc(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function logoHTML(size=32) {
-  return `<img src="${LOGO_URL}" style="width:${size}px;height:${size}px;border-radius:8px;object-fit:cover" alt="Appluviio" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="width:${size}px;height:${size}px;background:var(--accent);border-radius:8px;display:none;align-items:center;justify-content:center"><i class="fa-solid fa-bolt" style="color:#fff;font-size:${Math.round(size*0.44)}px"></i></div>`;
+function togglePwdVis(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') { input.type = 'text'; icon.className = 'fa-regular fa-eye-slash'; }
+  else { input.type = 'password'; icon.className = 'fa-regular fa-eye'; }
 }
 
-/* ═══════════════ AUTH ═══════════════ */
-async function registerEmail(name, email, password) {
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: name });
-    await sendEmailVerification(cred.user);
-    const username = email.split('@')[0].replace(/[^a-z0-9]/gi,'').toLowerCase() + Math.floor(Math.random()*1000);
-    await setDoc(doc(db,'users',cred.user.uid), {
-      uid:cred.user.uid, name, email, emailVerified:false,
-      username, stats:{bioViews:0,qrScans:0,linkClicks:0},
-      plan:'free', createdAt:serverTimestamp()
-    });
-    track('sign_up',{method:'email'});
-    emailVerifiedChecked = false;
-    navigate('verify-email');
-  } catch(e) {
-    const msgs = {'auth/email-already-in-use':'This email is already registered','auth/weak-password':'Password must be at least 6 characters','auth/invalid-email':'Invalid email address'};
-    toast(msgs[e.code] || e.message,'error');
-  }
+function showView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
 }
 
-async function loginEmail(email, password) {
-  try { await signInWithEmailAndPassword(auth, email, password); track('login',{method:'email'}); }
-  catch(e) { const msgs = {'auth/user-not-found':'No account found','auth/wrong-password':'Incorrect password','auth/invalid-credential':'Invalid email or password','auth/invalid-email':'Invalid email'}; toast(msgs[e.code] || e.message,'error'); }
+function formatDate(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-async function loginGoogle() {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const userRef = doc(db,'users',result.user.uid);
-    const userSnap = await getDoc(userRef);
-    if(!userSnap.exists()) {
-      const username = result.user.email.split('@')[0].replace(/[^a-z0-9]/gi,'').toLowerCase() + Math.floor(Math.random()*1000);
-      await setDoc(userRef, { uid:result.user.uid, name:result.user.displayName||'', email:result.user.email, emailVerified:result.user.emailVerified||false, username, stats:{bioViews:0,qrScans:0,linkClicks:0}, plan:'free', createdAt:serverTimestamp() });
-      track('sign_up',{method:'google'}); toast('Account created with Google!','success');
-    } else { track('login',{method:'google'}); toast('Welcome back!','success'); }
-  } catch(e) { if(e.code!=='auth/popup-closed-by-user') toast(e.message,'error'); }
-}
-
-async function logoutUser() { if(verifyInterval) clearInterval(verifyInterval); await signOut(auth); toast('Signed out','info'); }
-
-/* ═══════════════ DATA ═══════════════ */
-async function loadUser(uid) { const s = await getDoc(doc(db,'users',uid)); return s.exists() ? s.data() : null; }
-async function saveBioData(uid) { try { await setDoc(doc(db,'users',uid,'data','bio'), {...bioState}); } catch(e) { console.error(e); } }
-async function loadBioData(uid) { try { const s = await getDoc(doc(db,'users',uid,'data','bio')); if(s.exists()) { const d = s.data(); Object.assign(bioState, d); } } catch(e) { console.error(e); } }
-async function saveResumeData(uid) { try { await setDoc(doc(db,'users',uid,'data','resume'), {...resumeState}); } catch(e) {} }
-async function loadResumeData(uid) { try { const s = await getDoc(doc(db,'users',uid,'data','resume')); if(s.exists()) Object.assign(resumeState, s.data()); } catch(e) {} }
-async function saveInvoiceData(uid) { try { await setDoc(doc(db,'users',uid,'data','invoice'), {...invoiceState}); } catch(e) {} }
-async function loadInvoiceData(uid) { try { const s = await getDoc(doc(db,'users',uid,'data','invoice')); if(s.exists()) Object.assign(invoiceState, s.data()); } catch(e) {} }
-async function saveWaData(uid) { try { await setDoc(doc(db,'users',uid,'data','walink'), {...waState}); } catch(e) {} }
-async function loadWaData(uid) { try { const s = await getDoc(doc(db,'users',uid,'data','walink')); if(s.exists()) Object.assign(waState, s.data()); } catch(e) {} }
-
-async function updateUsername(uid, newUsername) {
-  const clean = newUsername.toLowerCase().replace(/[^a-z0-9._-]/g,'');
-  if(!clean || clean.length<3) { toast('Username must be at least 3 characters','error'); return false; }
-  if(clean.length>20) { toast('Username too long (max 20)','error'); return false; }
-  const q = query(collection(db,'users'), where('username','==',clean));
-  const snap = await getDocs(q);
-  for(const d of snap.docs) { if(d.id!==uid) { toast('Username already taken','error'); return false; } }
-  await updateDoc(doc(db,'users',uid), { username:clean });
-  userData.username = clean;
-  toast('Username updated!','success');
-  track('update_username');
-  return true;
-}
-
-/* ═══════════════ PUBLIC BIO LOADER ═══════════════ */
-async function loadPublicProfile(username) {
-  const q = query(collection(db,'users'), where('username','==',username));
-  const snap = await getDocs(q);
-  if(!snap.empty) {
-    const user = snap.docs[0].data();
-    const uid = snap.docs[0].id;
-    const bioSnap = await getDoc(doc(db,'users',uid,'data','bio'));
-    const bio = bioSnap.exists() ? bioSnap.data() : null;
-    // FIXED: only require published=true for OTHER users viewing
-    // The owner can always see their own
-    const isOwner = currentUser && currentUser.uid === uid;
-    if (!bio) return null;
-    if (!isOwner && !bio.published) return null;
-    // Increment views only for non-owner visitors
-    if (!isOwner) {
-      await updateDoc(doc(db,'users',uid), { 'stats.bioViews': increment(1) }).catch(()=>{});
-    }
-    return { ...user, bio, uid };
-  }
-  return null;
-}
-
-async function loadAllUsers() {
-  const snap = await getDocs(query(collection(db,'users')));
-  return snap.docs.map(d => ({ uid: d.id, ...d.data() }));
-}
-
-/* ═══════════════ NAVIGATION ═══════════════ */
-function navigate(page, params={}) {
-  currentPage = page;
-  window.scrollTo({top:0,behavior:'smooth'});
-  const routes = {landing:'/',login:'/login',register:'/register',dashboard:'/dashboard',bio:'/bio',qr:'/qr',resume:'/resume',invoice:'/invoice',pricing:'/pricing',walink:'/walink',profile:'/profile','verify-email':'/verify-email','admin':'/admin'};
-  if(page==='profile') window.history.pushState({},'',`/${params.username || userData?.username || ''}`);
-  else if(page==='public-bio') window.history.pushState({},'',`/${params.username}/bio`);
-  else window.history.pushState({},'', routes[page]||'/');
-  render();
-}
-
-window.addEventListener('popstate', () => {
-  const path = window.location.pathname.replace(/\/$/,'');
-  if(path==='' || path==='/') { currentPage='landing'; render(); return; }
-  const map = {'/login':'login','/register':'register','/dashboard':'dashboard','/bio':'bio','/qr':'qr','/resume':'resume','/invoice':'invoice','/pricing':'pricing','/walink':'walink','/verify-email':'verify-email','/profile':'profile','/admin':'admin'};
-  if(map[path]) { currentPage=map[path]; render(); return; }
-  // Everything else is treated as a public bio slug
-  const slug = path.startsWith('/') ? path.slice(1) : path;
-  currentPage='public-bio';
-  renderPublicBio(slug);
-});
-
-onAuthStateChanged(auth, async user => {
-  currentUser = user;
-  if(user) {
-    await user.reload();
-    if(!user.emailVerified && !emailVerifiedChecked) {
-      userData = await loadUser(user.uid);
-      emailVerifiedChecked = true;
-      if(currentPage!=='verify-email') { navigate('verify-email'); return; }
-    }
-    userData = await loadUser(user.uid);
-    if(!userData) userData = { uid:user.uid, name:user.displayName||'', email:user.email, username:user.email.split('@')[0], stats:{bioViews:0,qrScans:0,linkClicks:0}, plan:'free', emailVerified:user.emailVerified };
-    if(isSuperAdmin() && userData.plan !== 'pro') { await updateDoc(doc(db,'users',user.uid), { plan: 'pro' }); userData.plan = 'pro'; }
-    render();
-  } else {
-    userData = null;
-    emailVerifiedChecked = false;
-    if(['dashboard','bio','qr','resume','invoice','walink','verify-email','admin'].includes(currentPage)) { navigate('landing'); return; }
-    render();
-  }
-});
-
-function render() {
-  if(currentPage==='public-bio') return; // handled separately
-  if(['landing','login','register','verify-email','pricing'].includes(currentPage)) renderPublic();
-  else if(currentUser) renderApp();
-  else renderPublic();
-}
-
-/* ═══════════════ NAVBARS ═══════════════ */
-function publicNav() {
-  return `<nav style="position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
-    <div style="max-width:1200px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between">
-      <a onclick="window._nav('landing')" style="cursor:pointer;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)">
-        ${logoHTML(32)}
-        <div><span style="font-size:18px;font-weight:800;letter-spacing:-.5px">Appluviio</span><span style="font-size:11px;color:var(--text-muted);margin-left:4px">by Luviio</span></div>
-      </a>
-      <div style="display:flex;align-items:center;gap:6px">
-        ${currentPage==='landing'||currentPage==='pricing'?`<a class="nav-link" onclick="window._nav('pricing')">Pricing</a>`:''}
-        ${currentUser
-          ?`<a class="nav-link" onclick="window._nav('dashboard')">Dashboard</a>
-            <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
-            <a class="nav-link" onclick="window._nav('profile')" style="display:flex;align-items:center;gap:6px">
-              <div style="width:28px;height:28px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:12px">${(userData?.name||'U')[0].toUpperCase()}</div>
-              <span class="hidden sm:inline" style="font-size:13px">${userData?.name?.split(' ')[0]||''}</span>
-            </a>
-            ${isSuperAdmin()?`<a class="nav-link" onclick="window._nav('admin')" style="background:#FEF3C7;color:#92400E"><i class="fa-solid fa-shield-halved" style="margin-right:4px"></i>Admin</a>`:''}
-            <button class="btn btn-ghost btn-sm" onclick="window._logout()">Sign Out</button>`
-          :`<a class="nav-link" onclick="window._nav('login')">Sign In</a><button class="btn btn-primary btn-sm" onclick="window._nav('register')">Get Started</button>`
-        }
-      </div>
-    </div>
-  </nav>`;
-}
-
-function appNav() {
-  const tabs = [
-    {id:'dashboard',icon:'fa-solid fa-grid-2',label:'Dashboard'},
-    {id:'bio',icon:'fa-solid fa-link',label:'Bio'},
-    {id:'qr',icon:'fa-solid fa-qrcode',label:'QR'},
-    {id:'resume',icon:'fa-solid fa-file-lines',label:'Resume'},
-    {id:'invoice',icon:'fa-solid fa-file-invoice',label:'Invoice'},
-    {id:'walink',icon:'fa-brands fa-whatsapp',label:'WA Link'},
-  ];
-  const active = currentPage;
-  return `<nav style="position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)">
-    <div style="max-width:1200px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between">
-      <a onclick="window._nav('landing')" style="cursor:pointer;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)">
-        ${logoHTML(28)}
-        <span class="hidden sm:inline" style="font-size:16px;font-weight:800;letter-spacing:-.5px">Appluviio</span>
-      </a>
-      <div style="display:flex;align-items:center;gap:4px;overflow-x:auto" class="no-print">
-        ${tabs.map(t=>`<a class="nav-link ${active===t.id?'active':''}" onclick="window._nav('${t.id}')"><i class="${t.icon}" style="margin-right:4px;font-size:12px"></i><span class="hidden sm:inline">${t.label}</span></a>`).join('')}
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        ${isSuperAdmin()?`<a onclick="window._nav('admin')" style="cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;padding:6px 12px;border-radius:8px;background:#FEF3C7;color:#92400E;font-size:13px;font-weight:600" title="Admin Panel"><i class="fa-solid fa-shield-halved"></i><span class="hidden md:inline">Admin</span></a>`:''}
-        <a onclick="window._nav('profile')" style="cursor:pointer;display:flex;align-items:center;gap:8px;text-decoration:none" title="Profile">
-          <span style="font-size:13px;color:var(--text-muted)" class="hidden md:inline">${userData?.name||''}</span>
-          <div style="width:32px;height:32px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:13px">${(userData?.name||'U')[0].toUpperCase()}</div>
-        </a>
-      </div>
-    </div>
-  </nav>
-  <nav style="position:fixed;bottom:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:6px 0 env(safe-area-inset-bottom,6px)" class="sm:hidden no-print">
-    <div style="display:flex;justify-content:space-around;align-items:center">
-      ${tabs.map(t=>`<a onclick="window._nav('${t.id}')" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 8px;border-radius:10px;cursor:pointer;color:${active===t.id?'var(--accent)':'var(--text-muted)'};font-size:10px;font-weight:600;text-decoration:none"><i class="${t.icon}" style="font-size:18px"></i>${t.label}</a>`).join('')}
-    </div>
-  </nav>`;
-}
-
-/* ═══════════════ PUBLIC PAGES ═══════════════ */
-function renderPublic() {
-  if(currentPage==='landing') renderLanding();
-  else if(currentPage==='login') renderLogin();
-  else if(currentPage==='register') renderRegister();
-  else if(currentPage==='pricing') renderPricing();
-  else if(currentPage==='verify-email') renderVerifyEmail();
-}
-
-function renderLanding() {
-  appEl.innerHTML = `${publicNav()}
-  <main class="hero-gradient" style="padding-top:100px">
-    <section style="max-width:900px;margin:0 auto;padding:60px 24px 40px;text-align:center">
-      <div class="badge fade-up" style="background:var(--accent-light);color:var(--accent);margin-bottom:20px">Now in Public Beta</div>
-      <h1 class="fade-up fade-up-1" style="font-size:clamp(36px,6vw,64px);font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:20px">
-        Simple tools for your<br><span style="background:linear-gradient(135deg,var(--accent),#818CF8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">digital identity</span> & business
-      </h1>
-      <p class="fade-up fade-up-2" style="font-size:18px;color:var(--text-secondary);max-width:560px;margin:0 auto 36px;line-height:1.7">Build your bio link, generate QR codes, create resumes, send invoices, and WhatsApp links — all in one beautiful platform.</p>
-      <div class="fade-up fade-up-3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-primary btn-lg" onclick="window._nav('register')"><i class="fa-solid fa-rocket"></i> Get Started Free</button>
-        <button class="btn btn-secondary btn-lg" onclick="window._nav('login')"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In</button>
-      </div>
-    </section>
-    <section style="max-width:1100px;margin:0 auto;padding:40px 24px 80px">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
-        ${[
-          {icon:'fa-solid fa-link',color:'#3B82F6',bg:'#EFF6FF',title:'Bio Link Builder',desc:'One link for everything. Beautiful, customizable, mobile-optimized.',demo:'bio'},
-          {icon:'fa-solid fa-qrcode',color:'#8B5CF6',bg:'#F5F3FF',title:'Smart QR Generator',desc:'Create QR codes instantly. Download, share, and track scans.',demo:'qr'},
-          {icon:'fa-solid fa-file-lines',color:'#10B981',bg:'#ECFDF5',title:'Resume Builder',desc:'Build professional resumes with template choices and PDF export.',demo:'resume'},
-          {icon:'fa-solid fa-file-invoice-dollar',color:'#F59E0B',bg:'#FFFBEB',title:'Invoice Generator',desc:'Create invoices in seconds. Multiple currencies, export, send via WhatsApp.',demo:'invoice'},
-          {icon:'fa-brands fa-whatsapp',color:'#25D366',bg:'#F0FDF4',title:'WhatsApp Link Generator',desc:'Generate WhatsApp links with custom messages and templates.',demo:'walink'}
-        ].map((s,i)=>`
-          <div class="card card-hover fade-up fade-up-${Math.min(i+1,5)}" style="padding:28px;cursor:pointer" onclick="window._tryDemo('${s.demo}')">
-            <div class="tool-icon" style="background:${s.bg};color:${s.color};margin-bottom:16px"><i class="${s.icon}"></i></div>
-            <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">${s.title}</h3>
-            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">${s.desc}</p>
-            <span style="display:inline-flex;align-items:center;gap:4px;margin-top:14px;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer">Try Demo <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></span>
-          </div>
-        `).join('')}
-      </div>
-    </section>
-    <section style="max-width:700px;margin:0 auto;padding:40px 24px 100px;text-align:center">
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">${[1,2,3,4,5].map(()=>`<i class="fa-solid fa-star" style="color:#F59E0B;font-size:16px"></i>`).join('')}</div>
-      <p style="font-size:15px;color:var(--text-secondary);line-height:1.7">"Appluviio replaced 4 different tools for me. My bio link, QR codes, invoices, and WhatsApp links — all in one place. Incredibly simple."</p>
-      <p style="font-size:13px;font-weight:600;color:var(--text);margin-top:12px">Sarah Chen — Freelance Designer</p>
-    </section>
-    <section style="background:var(--text);padding:80px 24px;text-align:center;border-radius:24px 24px 0 0">
-      <h2 style="font-size:clamp(28px,4vw,42px);font-weight:800;color:#fff;letter-spacing:-1px;margin-bottom:16px">Ready to build your digital presence?</h2>
-      <p style="font-size:16px;color:rgba(255,255,255,.6);margin-bottom:32px">Join thousands using Appluviio to simplify their online identity.</p>
-      <button class="btn btn-primary btn-lg" onclick="window._nav('register')" style="font-size:17px;padding:16px 40px">Start Free Today</button>
-    </section>
-  </main>
-  <footer style="background:var(--text);padding:24px;text-align:center;border-top:1px solid rgba(255,255,255,.1)">
-    <p style="font-size:13px;color:rgba(255,255,255,.4)">2025 Appluviio by Luviio. All rights reserved.</p>
-  </footer>`;
-}
-
-function renderLogin() {
-  appEl.innerHTML = `${publicNav()}
-  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 40px">
-    <div style="width:100%;max-width:400px">
-      <div style="text-align:center;margin-bottom:32px">${logoHTML(48)}<h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-top:16px">Welcome back</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:6px">Sign in to your Appluviio account</p></div>
-      <div class="card" style="padding:28px">
-        <button class="btn btn-secondary" style="width:100%;margin-bottom:16px" onclick="window._googleLogin()"><i class="fa-brands fa-google"></i> Continue with Google</button>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:12px;color:var(--text-muted);font-weight:500">OR</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
-        <div style="margin-bottom:14px"><label class="label">Email</label><input class="input" type="email" id="login-email" placeholder="you@example.com"></div>
-        <div style="margin-bottom:20px"><label class="label">Password</label><input class="input" type="password" id="login-pass" placeholder="Enter your password"></div>
-        <button class="btn btn-primary" style="width:100%" onclick="window._emailLogin()">Sign In</button>
-      </div>
-      <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text-secondary)">Don't have an account? <a onclick="window._nav('register')" style="color:var(--accent);font-weight:600;cursor:pointer">Get Started</a></p>
-    </div>
-  </main>`;
-}
-
-function renderRegister() {
-  appEl.innerHTML = `${publicNav()}
-  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 40px">
-    <div style="width:100%;max-width:400px">
-      <div style="text-align:center;margin-bottom:32px">${logoHTML(48)}<h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-top:16px">Create your account</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:6px">Start building your digital identity</p></div>
-      <div class="card" style="padding:28px">
-        <button class="btn btn-secondary" style="width:100%;margin-bottom:16px" onclick="window._googleLogin()"><i class="fa-brands fa-google"></i> Continue with Google</button>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:12px;color:var(--text-muted);font-weight:500">OR</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
-        <div style="margin-bottom:14px"><label class="label">Full Name</label><input class="input" type="text" id="reg-name" placeholder="Your name"></div>
-        <div style="margin-bottom:14px"><label class="label">Email</label><input class="input" type="email" id="reg-email" placeholder="you@example.com"><p style="font-size:11px;color:var(--text-muted);margin-top:4px"><i class="fa-solid fa-lock" style="margin-right:3px"></i>Email cannot be changed after registration</p></div>
-        <div style="margin-bottom:20px"><label class="label">Password</label><input class="input" type="password" id="reg-pass" placeholder="Min 6 characters"></div>
-        <button class="btn btn-primary" style="width:100%" onclick="window._emailRegister()">Create Account</button>
-        <p style="font-size:11px;color:var(--text-muted);margin-top:12px;text-align:center"><i class="fa-solid fa-envelope" style="margin-right:3px"></i>A verification email will be sent</p>
-      </div>
-      <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text-secondary)">Already have an account? <a onclick="window._nav('login')" style="color:var(--accent);font-weight:600;cursor:pointer">Sign In</a></p>
-    </div>
-  </main>`;
-}
-
-function renderVerifyEmail() {
-  const email = currentUser?.email || userData?.email || '';
-  appEl.innerHTML = `${publicNav()}
-  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 40px">
-    <div style="width:100%;max-width:440px;text-align:center">
-      <div style="width:80px;height:80px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px"><i class="fa-solid fa-envelope-circle-check" style="font-size:32px;color:var(--accent)"></i></div>
-      <h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px">Verify your email</h1>
-      <p style="font-size:14px;color:var(--text-secondary);line-height:1.7;margin-bottom:8px">We've sent a verification link to</p>
-      <p style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:24px">${esc(email)}</p>
-      <div id="verify-status" style="padding:16px;background:var(--bg-secondary);border-radius:12px;margin-bottom:24px">
-        <div style="display:flex;align-items:center;gap:8px;justify-content:center"><span class="verify-dot yellow"></span><span style="font-size:14px;color:var(--text-secondary)">Waiting for verification...</span></div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn btn-primary" style="width:100%" onclick="window._resendVerify()"><i class="fa-solid fa-rotate"></i> Resend Verification Email</button>
-        <button class="btn btn-ghost" style="width:100%" onclick="window._checkVerify()"><i class="fa-solid fa-arrows-rotate"></i> I've verified — Check again</button>
-        <button class="btn btn-ghost" style="width:100%;color:var(--danger)" onclick="window._logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
-      </div>
-    </div>
-  </main>`;
-  startVerifyCheck();
-}
-
-let verifyInterval = null;
-function startVerifyCheck() {
-  if(verifyInterval) clearInterval(verifyInterval);
-  verifyInterval = setInterval(async()=>{
-    if(!currentUser) { clearInterval(verifyInterval); return; }
+/* ========================================
+   Authentication
+   ======================================== */
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
     try {
-      await currentUser.reload();
-      if(currentUser.emailVerified) {
-        clearInterval(verifyInterval);
-        await updateDoc(doc(db,'users',currentUser.uid), { emailVerified:true });
-        if(userData) userData.emailVerified = true;
-        const st = $('verify-status');
-        if(st) st.innerHTML = `<div style="display:flex;align-items:center;gap:8px;justify-content:center"><span class="verify-dot green"></span><span style="font-size:14px;color:var(--success);font-weight:600">Email verified!</span></div>`;
-        toast('Email verified successfully!','success');
-        setTimeout(()=>navigate('dashboard'), 1000);
+      const doc = await db.collection('users').doc(user.uid).get();
+      if (doc.exists) {
+        userData = doc.data();
+        if (userData.status === 'suspended') {
+          showToast('Your account has been suspended. Contact support.', 'error');
+          auth.signOut();
+          return;
+        }
+      } else {
+        userData = {
+          email: user.email,
+          displayName: user.displayName || user.email.split('@')[0],
+          photoURL: user.photoURL || null,
+          plan: 'free',
+          role: 'user',
+          status: 'active',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        await db.collection('users').doc(user.uid).set(userData);
       }
-    } catch(e) {}
-  }, 5000);
-}
+      await db.collection('users').doc(user.uid).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
+    } catch (err) {
+      console.error('Firestore error:', err);
+      userData = { email: user.email, plan: 'free', role: 'user', status: 'active' };
+    }
+    setupAppUI();
+    showView('appView');
+  } else {
+    currentUser = null;
+    userData = null;
+    showView('authView');
+  }
+});
 
-function renderPricing() {
-  appEl.innerHTML = `${publicNav()}
-  <main style="padding-top:100px;max-width:1000px;margin:0 auto;padding-left:24px;padding-right:24px;padding-bottom:100px">
-    <div style="text-align:center;padding:60px 0 48px"><h1 style="font-size:clamp(32px,5vw,48px);font-weight:800;letter-spacing:-1px;margin-bottom:12px">Simple, transparent pricing</h1><p style="font-size:16px;color:var(--text-secondary)">Start free. Upgrade when you need more.</p></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-bottom:60px">
-      <div class="pricing-card">
-        <div style="margin-bottom:24px"><span style="font-size:14px;font-weight:700;color:var(--text-secondary)">Free</span><div style="font-size:40px;font-weight:800;margin-top:4px">RM0<span style="font-size:16px;font-weight:500;color:var(--text-muted)">/forever</span></div></div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:28px">${['Up to 5 bio links','Basic QR codes','Standard resume template','Basic invoices (MYR only)','Simple WA link only','Appluviio watermark','Email support'].map(f=>`<li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-secondary)"><i class="fa-solid fa-check" style="color:var(--success);font-size:12px"></i>${f}</li>`).join('')}</ul>
-        <button class="btn btn-secondary" style="width:100%" onclick="window._nav('register')">Get Started</button>
-      </div>
-      <div class="pricing-card featured">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:var(--accent)">Pro</span><span class="badge" style="background:var(--accent);color:#fff;font-size:10px">POPULAR</span></div>
-        <div style="font-size:40px;font-weight:800;margin-top:4px;margin-bottom:24px">RM9<span style="font-size:16px;font-weight:500;color:var(--text-muted)">/month</span></div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:28px">${['Unlimited bio links','Dynamic QR + analytics','All resume templates','Invoices with 8 currencies','All WA templates + custom chat','No watermark','Priority support','Early access to new tools'].map(f=>`<li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-secondary)"><i class="fa-solid fa-check" style="color:var(--accent);font-size:12px"></i>${f}</li>`).join('')}</ul>
-        <button class="btn btn-primary" style="width:100%" onclick="toast('Pro plan coming soon! Stay tuned.','info')">Upgrade to Pro</button>
-      </div>
-    </div>
-    <div style="margin-bottom:40px"><h2 style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:24px;text-align:center">Compare Plans</h2></div>
-    <div class="card" style="padding:24px 28px;overflow-x:auto">
-      <div class="compare-row compare-header"><span></span><span>Free</span><span style="color:var(--accent)">Pro</span></div>
-      ${[['Bio Links','Up to 5','Unlimited'],['Bio Customization','Basic','Advanced'],['QR Code Types','Basic','Dynamic + Analytics'],['Resume Templates','1 template','All templates'],['Resume PDF Export','With watermark','Clean, no watermark'],['Invoice Currencies','MYR only','8 currencies'],['Invoice Items','Up to 10','Unlimited'],['WhatsApp Links','Simple link only','All templates + custom'],['WA Custom Chat','','Included'],['Branding','Appluviio watermark','No watermark'],['Support','Email','Priority']].map(([feature,free,pro])=>`<div class="compare-row"><span style="font-weight:500">${feature}</span><span style="color:var(--text-secondary)">${free}</span><span style="color:var(--accent);font-weight:600">${pro}</span></div>`).join('')}
-    </div>
-  </main>`;
-}
-
-/* ═══════════════ APP PAGES ═══════════════ */
-function renderApp() {
-  if(currentPage==='dashboard') renderDashboard();
-  else if(currentPage==='bio') { loadBioData(currentUser.uid).then(()=>renderBio()); }
-  else if(currentPage==='qr') renderQR();
-  else if(currentPage==='resume') { loadResumeData(currentUser.uid).then(()=>renderResume()); }
-  else if(currentPage==='invoice') { loadInvoiceData(currentUser.uid).then(()=>renderInvoice()); }
-  else if(currentPage==='walink') { loadWaData(currentUser.uid).then(()=>renderWaLink()); }
-  else if(currentPage==='profile') renderProfile();
-  else if(currentPage==='admin') renderAdminPanel();
-  else renderDashboard();
-}
-
-function renderDashboard() {
-  const s = userData?.stats || {bioViews:0,qrScans:0,linkClicks:0};
-  const verified = currentUser?.emailVerified || userData?.emailVerified;
-  const un = userData?.username || '...';
-  const bioUrl = `https://${BIO_DOMAIN}/${un}/bio`;
-  appEl.innerHTML = `${appNav()}
-  <main style="padding-top:80px;padding-bottom:80px;max-width:1100px;margin:0 auto;padding-left:24px;padding-right:24px">
-    <div style="padding:32px 0 8px">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <h1 style="font-size:28px;font-weight:800;letter-spacing:-.5px">Welcome back, ${userData?.name||'User'}</h1>
-        ${isSuperAdmin()?`<span class="badge" style="background:#FEF3C7;color:#92400E"><i class="fa-solid fa-shield-halved" style="margin-right:4px"></i>Super Admin</span>`:''}
-        ${!verified?`<span class="badge" style="background:#FEF3C7;color:#92400E;cursor:pointer" onclick="window._nav('verify-email')"><i class="fa-solid fa-exclamation-triangle" style="margin-right:4px"></i>Unverified</span>`:`<span class="badge" style="background:#ECFDF5;color:#166534"><i class="fa-solid fa-check" style="margin-right:4px"></i>Verified</span>`}
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap">
-        <span style="font-size:14px;color:var(--text-secondary)">Your bio link:</span>
-        <a href="${bioUrl}" target="_blank" style="font-size:14px;font-weight:600;color:var(--accent);text-decoration:none">${bioUrl} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px"></i></a>
-        <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:12px" onclick="window._editUsername()"><i class="fa-solid fa-pen" style="font-size:10px"></i></button>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap">
-        <span style="font-size:13px;color:var(--text-muted)">Email:</span>
-        <span style="font-size:13px;color:var(--text-secondary)">${esc(userData?.email||'')}</span>
-        <span style="font-size:11px;color:var(--text-muted);background:var(--bg-secondary);padding:2px 8px;border-radius:6px"><i class="fa-solid fa-lock" style="font-size:9px;margin-right:2px"></i>Cannot be changed</span>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:24px 0 32px">
-      ${[{label:'Bio Views',value:s.bioViews,icon:'fa-solid fa-eye',color:'#3B82F6',bg:'#EFF6FF'},{label:'QR Scans',value:s.qrScans,icon:'fa-solid fa-qrcode',color:'#8B5CF6',bg:'#F5F3FF'},{label:'Link Clicks',value:s.linkClicks,icon:'fa-solid fa-mouse-pointer',color:'#10B981',bg:'#ECFDF5'},{label:'Plan',value:userData?.plan==='pro'?'Pro':'Free',icon:'fa-solid fa-crown',color:'#F59E0B',bg:'#FFFBEB'}].map(c=>`
-        <div class="card stat-card card-hover" style="padding:20px"><div style="width:36px;height:36px;background:${c.bg};border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:${c.color};font-size:14px"><i class="${c.icon}"></i></div><div class="stat-number">${c.value}</div><div class="stat-label">${c.label}</div></div>
-      `).join('')}
-    </div>
-    <h2 style="font-size:18px;font-weight:700;margin-bottom:14px">Quick Tools</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:32px">
-      ${[{id:'bio',icon:'fa-solid fa-link',color:'#3B82F6',bg:'#EFF6FF',title:'Bio Link',desc:'Build your link-in-bio page'},{id:'qr',icon:'fa-solid fa-qrcode',color:'#8B5CF6',bg:'#F5F3FF',title:'QR Code',desc:'Generate smart QR codes'},{id:'resume',icon:'fa-solid fa-file-lines',color:'#10B981',bg:'#ECFDF5',title:'Resume',desc:'Create professional resumes'},{id:'invoice',icon:'fa-solid fa-file-invoice-dollar',color:'#F59E0B',bg:'#FFFBEB',title:'Invoice',desc:'Create & send invoices'},{id:'walink',icon:'fa-brands fa-whatsapp',color:'#25D366',bg:'#F0FDF4',title:'WhatsApp Link',desc:'Generate WA chat links'}].map(t=>`
-        <div class="card card-hover" style="padding:20px;cursor:pointer;display:flex;align-items:center;gap:14px" onclick="window._nav('${t.id}')">
-          <div class="tool-icon" style="background:${t.bg};color:${t.color};flex-shrink:0;width:44px;height:44px;border-radius:12px;font-size:16px"><i class="${t.icon}"></i></div>
-          <div style="flex:1"><div style="font-size:15px;font-weight:700">${t.title}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${t.desc}</div></div>
-          <i class="fa-solid fa-chevron-right" style="color:var(--text-muted);font-size:12px"></i>
-        </div>
-      `).join('')}
-    </div>
-    ${userData?.plan!=='pro'?`<div class="card" style="background:linear-gradient(135deg,#EFF6FF,#F5F3FF);border-color:var(--accent-subtle);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-      <div><div style="font-size:16px;font-weight:700">Upgrade to Pro — RM9/month</div><div style="font-size:13px;color:var(--text-secondary);margin-top:4px">Unlimited links, all templates, multi-currency invoices, no branding.</div></div>
-      <button class="btn btn-primary btn-sm" onclick="window._nav('pricing')">View Plans</button>
-    </div>`:''}
-  </main>`;
-}
-
-/* ═══════════════ PROFILE (with working edit) ═══════════════ */
-function renderProfile() {
-  const verified = currentUser?.emailVerified || userData?.emailVerified;
-  const un = userData?.username || '...';
-  const bioUrl = `https://${BIO_DOMAIN}/${un}/bio`;
-  appEl.innerHTML = `${appNav()}
-  <main style="padding-top:80px;padding-bottom:100px;max-width:700px;margin:0 auto;padding-left:24px;padding-right:24px">
-    <div style="text-align:center;margin-bottom:32px">
-      <div style="width:100px;height:100px;background:linear-gradient(135deg,var(--accent),#818CF8);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#fff;font-size:40px;font-weight:800;box-shadow:0 8px 30px rgba(59,130,246,.3)">${(userData?.name||'U')[0].toUpperCase()}</div>
-      <h1 style="font-size:28px;font-weight:800;letter-spacing:-.5px">${esc(userData?.name||'User')}</h1>
-      <p style="font-size:14px;color:var(--text-secondary);margin-top:4px">@${esc(un)}</p>
-    </div>
-    <div class="card" style="margin-bottom:20px">
-      <h2 style="font-size:16px;font-weight:700;margin-bottom:20px;color:var(--accent)"><i class="fa-solid fa-user" style="margin-right:8px"></i>Profile Information</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-        <div><label class="label">Name</label><div style="padding:10px 16px;background:var(--bg-secondary);border-radius:12px;font-size:14px;font-weight:600">${esc(userData?.name||'-')}</div></div>
-        <div><label class="label">Username</label>
-          <div style="display:flex;gap:6px;align-items:center">
-            <div style="flex:1;padding:10px 16px;background:var(--bg-secondary);border-radius:12px;font-size:14px;font-weight:600">@${esc(un)}</div>
-            <button class="btn btn-ghost btn-sm" style="padding:8px 12px;flex-shrink:0" onclick="window._editUsername()"><i class="fa-solid fa-pen" style="font-size:12px"></i></button>
-          </div>
-        </div>
-      </div>
-      <div style="margin-bottom:16px"><label class="label">Email Address</label>
-        <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--bg-secondary);border-radius:12px">
-          <i class="fa-solid fa-envelope" style="color:var(--text-muted)"></i>
-          <span style="font-size:14px;flex:1">${esc(userData?.email||'-')}</span>
-          <span class="badge" style="${verified?'background:#ECFDF5;color:#166534':'background:#FEF3C7;color:#92400E'}"><span class="verify-dot ${verified?'green':'yellow'}" style="margin-right:4px"></span>${verified?'Verified':'Not Verified'}</span>
-        </div>
-      </div>
-      <div style="margin-bottom:16px"><label class="label">Bio Link</label>
-        <div style="display:flex;gap:6px;align-items:center">
-          <a href="${bioUrl}" target="_blank" style="flex:1;padding:10px 16px;background:var(--bg-secondary);border-radius:12px;font-size:14px;font-weight:600;color:var(--accent);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${bioUrl}</a>
-          <button class="btn btn-ghost btn-sm" style="padding:8px 12px;flex-shrink:0" onclick="window._copyText('${bioUrl}')"><i class="fa-solid fa-copy" style="font-size:12px"></i></button>
-        </div>
-      </div>
-      <div style="margin-bottom:16px"><label class="label">Current Plan</label>
-        <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--bg-secondary);border-radius:12px;border:1.5px solid var(--border)">
-          <i class="fa-solid fa-crown" style="color:${userData?.plan==='pro'?'#F59E0B':'var(--text-muted)'};font-size:18px"></i>
-          <span style="font-size:16px;font-weight:700;color:var(--text)">${userData?.plan==='pro'?'Pro':'Free'}</span>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
-        <button class="btn btn-secondary" onclick="window._editUsername()"><i class="fa-solid fa-pen"></i> Edit Username</button>
-        <button class="btn btn-secondary" onclick="window._editName()"><i class="fa-solid fa-user-pen"></i> Edit Name</button>
-        <button class="btn btn-ghost" style="color:var(--danger);margin-left:auto" onclick="window._logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
-      </div>
-    </div>
-    <div class="card">
-      <h2 style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--accent)"><i class="fa-solid fa-chart-simple" style="margin-right:8px"></i>Your Stats</h2>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-        ${[{label:'Bio Views',value:userData?.stats?.bioViews||0,icon:'fa-solid fa-eye',color:'#3B82F6'},{label:'QR Scans',value:userData?.stats?.qrScans||0,icon:'fa-solid fa-qrcode',color:'#8B5CF6'},{label:'Link Clicks',value:userData?.stats?.linkClicks||0,icon:'fa-solid fa-mouse-pointer',color:'#10B981'}].map(s=>`
-          <div style="text-align:center;padding:16px;background:var(--bg-secondary);border-radius:12px"><i class="${s.icon}" style="font-size:20px;color:${s.color};margin-bottom:8px;display:block"></i><div style="font-size:24px;font-weight:800">${s.value}</div><div style="font-size:12px;color:var(--text-muted)">${s.label}</div></div>
-        `).join('')}
-      </div>
-    </div>
-  </main>`;
-}
-
-/* ═══════════════ ADMIN PANEL ═══════════════ */
-async function renderAdminPanel() {
-  if(!isSuperAdmin()) { navigate('dashboard'); return; }
-  const users = await loadAllUsers();
-  appEl.innerHTML = `${appNav()}
-  <main style="padding-top:80px;padding-bottom:100px;max-width:1200px;margin:0 auto;padding-left:24px;padding-right:24px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-      <div><h1 style="font-size:28px;font-weight:800;letter-spacing:-.5px"><i class="fa-solid fa-shield-halved" style="color:#F59E0B;margin-right:8px"></i>Admin Panel</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Manage all users and accounts</p></div>
-      <span class="badge" style="background:#FEF3C7;color:#92400E;font-size:13px;padding:8px 16px"><i class="fa-solid fa-crown" style="margin-right:4px"></i>Super Admin</span>
-    </div>
-    <div class="card" style="margin-bottom:24px;overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:14px">
-        <thead><tr style="border-bottom:2px solid var(--text)">
-          <th style="text-align:left;padding:12px 8px;font-weight:700;color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px">User</th>
-          <th style="text-align:left;padding:12px 8px;font-weight:700;color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px">Email</th>
-          <th style="text-align:center;padding:12px 8px;font-weight:700;color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px">Status</th>
-          <th style="text-align:center;padding:12px 8px;font-weight:700;color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px">Plan</th>
-          <th style="text-align:right;padding:12px 8px;font-weight:700;color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px">Actions</th>
-        </tr></thead>
-        <tbody>${users.map(u=>`
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:12px 8px"><div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:13px;flex-shrink:0">${(u.name||'U')[0].toUpperCase()}</div><div><div style="font-weight:600;font-size:13px">${esc(u.name||'N/A')}</div><div style="font-size:11px;color:var(--text-muted)">@${esc(u.username||'...')}</div></div></div></td>
-            <td style="padding:12px 8px;font-size:13px;color:var(--text-secondary)">${esc(u.email||'N/A')}</td>
-            <td style="padding:12px 8px;text-align:center"><span class="badge" style="${u.emailVerified?'background:#ECFDF5;color:#166534':'background:#FEF3C7;color:#92400E'};font-size:10px">${u.emailVerified?'VERIFIED':'UNVERIFIED'}</span></td>
-            <td style="padding:12px 8px;text-align:center"><span class="badge" style="${u.plan==='pro'?'background:#FEF3C7;color:#92400E':'background:var(--bg-secondary);color:var(--text-secondary)'};font-size:10px">${u.plan==='pro'?'PRO':'FREE'}</span></td>
-            <td style="padding:12px 8px;text-align:right"><div style="display:flex;gap:4px;justify-content:flex-end">
-              <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:12px" onclick="window._togglePlan('${u.uid}','${u.plan}')" title="Toggle Plan"><i class="fa-solid fa-crown"></i></button>
-            </div></td>
-          </tr>
-        `).join('')}</tbody>
-      </table>
-    </div>
-  </main>`;
-}
-
-/* ═══════════════ BIO BUILDER ═══════════════ */
-function renderBio() {
-  const un = userData?.username || '...';
-  const bioUrl = `https://${BIO_DOMAIN}/${un}/bio`;
-  const isPublished = bioState.published;
-  appEl.innerHTML = `${appNav()}
-  <main style="padding-top:80px;padding-bottom:100px;max-width:1200px;margin:0 auto;padding-left:24px;padding-right:24px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-      <div><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">Bio Link Builder</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create your all-in-one link page</p></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        ${isPublished?`<span class="badge" style="background:#ECFDF5;color:#166534"><i class="fa-solid fa-circle-check" style="margin-right:4px"></i>Published</span>`:`<span class="badge" style="background:#FEF3C7;color:#92400E"><i class="fa-solid fa-circle-exclamation" style="margin-right:4px"></i>Draft</span>`}
-        <button class="btn btn-ghost btn-sm" onclick="window._copyText('${bioUrl}')"><i class="fa-solid fa-copy"></i> Copy Link</button>
-        <button class="btn btn-primary btn-sm" onclick="window._saveBio()"><i class="fa-solid fa-floppy-disk"></i> Save & Publish</button>
-      </div>
-    </div>
-    <div class="card" style="padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;background:var(--bg-secondary)">
-      <i class="fa-solid fa-link" style="color:var(--accent);font-size:13px"></i>
-      <span style="font-size:13px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${bioUrl}</span>
-      <button class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:12px" onclick="window._copyText('${bioUrl}')"><i class="fa-solid fa-copy"></i></button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr;gap:24px;align-items:start" class="lg-grid">
-      <div class="card" style="padding:24px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
-          <div><label class="label">Display Name</label><input class="input" id="bio-name" value="${esc(bioState.name)}" oninput="window._updateBio('name',this.value)"></div>
-          <div><label class="label">Avatar URL</label><input class="input" id="bio-avatar" value="${esc(bioState.avatar)}" placeholder="https://..." oninput="window._updateBio('avatar',this.value)"></div>
-        </div>
-        <div style="margin-bottom:20px"><label class="label">Bio Text</label><textarea class="input" id="bio-text" rows="2" oninput="window._updateBio('bio',this.value)" style="resize:vertical">${esc(bioState.bio)}</textarea></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><label class="label" style="margin-bottom:0">Links (${bioState.links.length})</label><button class="btn btn-secondary btn-sm" onclick="window._addBioLink()"><i class="fa-solid fa-plus"></i> Add Link</button></div>
-        <div id="bio-links-list" style="display:flex;flex-direction:column;gap:8px">
-          ${bioState.links.map((l,i)=>bioLinkItem(l,i)).join('')}
-        </div>
-        ${userData?.plan!=='pro'&&bioState.links.length>=5?`<p style="font-size:12px;color:var(--warning);margin-top:12px"><i class="fa-solid fa-lock" style="margin-right:4px"></i>Upgrade to Pro for unlimited links</p>`:''}
-      </div>
-      <div style="position:sticky;top:90px">
-        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Live Preview</p>
-        <div style="display:flex;justify-content:center"><div class="preview-phone" id="bio-preview">${bioPreviewContent()}</div></div>
-      </div>
-    </div>
-  </main>`;
-  setupBioDragDrop();
-}
-
-function bioLinkItem(link, idx) {
-  return `<div class="link-item" data-idx="${idx}" draggable="true">
-    <i class="fa-solid fa-grip-vertical drag-handle"></i>
-    <div style="width:32px;height:32px;border-radius:8px;background:${link.color}15;color:${link.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px"><i class="${link.icon}"></i></div>
-    <div style="flex:1;min-width:0">
-      <input class="input" style="padding:6px 10px;font-size:13px;margin-bottom:4px" value="${esc(link.title)}" placeholder="Title" oninput="window._updateBioLink(${idx},'title',this.value)">
-      <input class="input" style="padding:6px 10px;font-size:12px" value="${esc(link.url)}" placeholder="URL" oninput="window._updateBioLink(${idx},'url',this.value)">
-    </div>
-    <button class="btn btn-danger btn-sm" style="padding:6px;min-width:32px" onclick="window._removeBioLink(${idx})"><i class="fa-solid fa-trash" style="font-size:12px"></i></button>
-  </div>`;
-}
-
-function bioPreviewContent() {
-  const name = bioState.name || 'Your Name';
-  const avatar = bioState.avatar;
-  const initial = (name||'U')[0].toUpperCase();
-  const isFree = userData?.plan !== 'pro';
-  const links = bioState.links;
-  return `<div style="padding:60px 24px 32px;text-align:center;min-height:520px;display:flex;flex-direction:column;align-items:center;background:linear-gradient(180deg,#f8fafc 0%,#fff 100%)">
-    ${avatar?`<img src="${esc(avatar)}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;margin-bottom:14px;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.1)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#818CF8);display:none;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:800;margin-bottom:14px;box-shadow:0 4px 16px rgba(59,130,246,.3)">${initial}</div>`
-    :`<div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#818CF8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:800;margin-bottom:14px;box-shadow:0 4px 16px rgba(59,130,246,.3)">${initial}</div>`}
-    <h3 style="font-size:20px;font-weight:800;letter-spacing:-.3px;color:var(--text)">${esc(name)}</h3>
-    ${bioState.bio?`<p style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5;max-width:260px">${esc(bioState.bio)}</p>`:''}
-    <div style="width:40px;height:3px;background:var(--accent);border-radius:2px;margin:16px 0;opacity:.4"></div>
-    <div style="display:flex;flex-direction:column;gap:10px;width:100%;flex:1">
-      ${links.map(l=>`<a href="${esc(l.url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:#fff;border:1px solid ${l.color}18;border-radius:14px;text-decoration:none;color:var(--text);font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.04)"><div style="width:36px;height:36px;border-radius:10px;background:${l.color}12;color:${l.color};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0"><i class="${l.icon}"></i></div><span style="flex:1;text-align:left">${esc(l.title)}</span><i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--text-muted)"></i></a>`).join('')}
-    </div>
-    ${isFree?`<p style="font-size:10px;color:var(--text-muted);margin-top:20px;opacity:.6">Powered by Appluviio</p>`:''}
-  </div>`;
-}
-
-function refreshBioPreview() { const p=$('bio-preview'); if(p) p.innerHTML=bioPreviewContent(); }
-
-function setupBioDragDrop() {
-  const list=$('bio-links-list'); if(!list)return;
-  let dragIdx=null;
-  list.querySelectorAll('.link-item').forEach(item=>{
-    item.addEventListener('dragstart',e=>{dragIdx=+item.dataset.idx;item.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
-    item.addEventListener('dragend',()=>{item.classList.remove('dragging');dragIdx=null;});
-    item.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';});
-    item.addEventListener('drop',e=>{e.preventDefault();const dropIdx=+item.dataset.idx;if(dragIdx!==null&&dragIdx!==dropIdx){const[moved]=bioState.links.splice(dragIdx,1);bioState.links.splice(dropIdx,0,moved);renderBio();}});
-  });
-}
-
-/* ═══════════════ QR CODE ═══════════════ */
-function renderQR() {
-  appEl.innerHTML = `${appNav()}
-  <main style="padding-top:80px;padding-bottom:100px;max-width:700px;margin:0 auto;padding-left:24px;padding-right:24px">
-    <div style="margin-bottom:24px"><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">QR Code Generator</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create and download beautiful QR codes</p></div>
-    <div class="card" style="padding:28px">
-      <div style="margin-bottom:20px"><label class="label">Content (URL or Text)</label><input class="input" id="qr-input" placeholder="Enter URL or text" value="${userData?'https://'+BIO_DOMAIN+'/'+userData.username+'/bio':''}"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
-        <div><label class="label">Size</label><select class="input" id="qr-size"><option value="200">200px</option><option value="300" selected>300px</option><option value="400">400px</option><option value="500">500px</option></select></div>
-        <div><label class="label">FG Color</label><input type="color" id="qr-color" value="#0F172A" style="width:100%;height:42px;border:1.5px solid var(--border);border-radius:12px;padding:4px;cursor:pointer"></div>
-        <div><label class="label">BG Color</label><input type="color" id="qr-bg" value="#FFFFFF" style="width:100%;height:42px;border:1.5px solid var(--border);border-radius:12px;padding:4px;cursor:pointer"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
-        <div><label class="label">Corner Radius</label><select class="input" id="qr-radius"><option value="0">Sharp</option><option value="8" selected>Rounded</option><option value="50">Circle</option></select></div>
-        <div><label class="label">Error Correction</label><select class="input" id="qr-ec"><option value="L">Low (7%)</option><option value="M" selected>Medium (15%)</option><option value="Q">Quartile (25%)</option><option value="H">High (30%)</option></select></div>
-      </div>
-      <button class="btn btn-primary" style="width:100%;margin-bottom:24px" onclick="window._generateQR()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate QR Code</button>
-      <div id="qr-output" style="display:flex;flex-direction:column;align-items:center;gap:16px">
-        <div style="color:var(--text-muted);font-size:14px;padding:40px 0;text-align:center"><i class="fa-solid fa-qrcode" style="font-size:48px;opacity:.2;display:block;margin-bottom:12px"></i>Your QR code will appear here</div>
-      </div>
-    </div>
-  </main>`;
-}
-
-window._generateQR = () => {
-  const input=$('qr-input')?.value?.trim(); if(!input){toast('Enter a URL or text','error');return;}
-  const size=+($('qr-size')?.value||300); const fg=$('qr-color')?.value||'#0F172A'; const bg=$('qr-bg')?.value||'#FFFFFF';
-  const radius=+($('qr-radius')?.value||8);
-  const ecMap={L:QRCode.CorrectLevel.L,M:QRCode.CorrectLevel.M,Q:QRCode.CorrectLevel.Q,H:QRCode.CorrectLevel.H};
-  const ec=ecMap[$('qr-ec')?.value||'M']||QRCode.CorrectLevel.M;
-  const output=$('qr-output');
-  output.innerHTML=`<div id="qr-code" style="padding:24px;background:${bg};border-radius:20px;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,.08)"></div><div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="window._downloadQR('png')"><i class="fa-solid fa-download"></i> PNG</button><button class="btn btn-secondary btn-sm" onclick="window._downloadQR('svg')"><i class="fa-solid fa-download"></i> SVG</button></div>`;
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  if (!email || !password) { showToast('Please fill in all fields', 'error'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
   try {
-    new QRCode($('qr-code'),{text:input,width:size,height:size,colorDark:fg,colorLight:bg,correctLevel:ec});
-    const canvas=$('qr-code')?.querySelector('canvas');
-    if(canvas&&radius>0){const ctx=canvas.getContext('2d');const mc=canvas.width/size*21;const ms=canvas.width/mc;const r=Math.min(radius,ms*0.45);const id=ctx.getImageData(0,0,canvas.width,canvas.height);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);for(let row=0;row<mc;row++){for(let col=0;col<mc;col++){const x=col*ms;const y=row*ms;const idx=(Math.floor(y)*canvas.width+Math.floor(x))*4;if(id.data[idx+3]>128){ctx.fillStyle=fg;ctx.beginPath();ctx.roundRect(x+.5,y+.5,ms-1,ms-1,r);ctx.fill();}}}}
-    track('generate_qr'); toast('QR code generated!','success');
-  } catch(e){toast('Failed to generate QR','error');}
-};
-
-window._downloadQR = (fmt) => {
-  const canvas=$('qr-code')?.querySelector('canvas'); if(!canvas){toast('Generate a QR code first','error');return;}
-  if(fmt==='svg'){const sz=canvas.width;const fg=$('qr-color')?.value||'#0F172A';const bg=$('qr-bg')?.value||'#FFFFFF';const ctx=canvas.getContext('2d');const id=ctx.getImageData(0,0,sz,sz);const mc=21;const ms=sz/mc;let rects='';for(let r=0;r<mc;r++){for(let c=0;c<mc;c++){const x=Math.floor(c*ms);const y=Math.floor(r*ms);const i=(y*sz+x)*4;if(id.data[i+3]>128)rects+=`<rect x="${(c*ms).toFixed(1)}" y="${(r*ms).toFixed(1)}" width="${ms.toFixed(1)}" height="${ms.toFixed(1)}" fill="${fg}"/>`;}}const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}"><rect width="${sz}" height="${sz}" fill="${bg}"/>${rects}</svg>`;const b=new Blob([svg],{type:'image/svg+xml'});const a=document.createElement('a');a.download='luviio-qr.svg';a.href=URL.createObjectURL(b);a.click();toast('SVG downloaded!','success');}
-  else{const a=document.createElement('a');a.download='luviio-qr.png';a.href=canvas.toDataURL('image/png');a.click();toast('PNG downloaded!','success');}
-  track('download_qr');
-};
-
-/* ═══════════════ RESUME BUILDER ═══════════════ */
-function renderResume() {
-  const templates=[{id:'standard',name:'Standard',desc:'Classic professional layout'}];
-  if(userData?.plan==='pro') templates.push({id:'modern',name:'Modern',desc:'Clean modern design'});
-  appEl.innerHTML = `${appNav()}
-  <main style="padding-top:80px;padding-bottom:100px;max-width:1200px;margin:0 auto;padding-left:24px;padding-right:24px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-      <div><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">Resume Builder</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create a professional resume</p></div>
-      <div style="display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="window._saveResume()"><i class="fa-solid fa-floppy-disk"></i> Save</button><button class="btn btn-primary btn-sm" onclick="window._exportResumePDF()"><i class="fa-solid fa-file-pdf"></i> Export PDF</button></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
-      ${templates.map(t=>`<div class="template-card ${resumeState.template===t.id?'selected':''}" onclick="window._selectResumeTemplate('${t.id}')" style="min-width:140px"><div style="font-size:14px;font-weight:700">${t.name}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${t.desc}</div></div>`).join('')}
-      ${userData?.plan!=='pro'?`<div class="template-card" style="min-width:140px;opacity:.5;cursor:not-allowed;position:relative"><div style="font-size:14px;font-weight:700">Modern</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">Clean modern design</div><span class="badge" style="position:absolute;top:8px;right:8px;background:#FEF3C7;color:#92400E;font-size:9px">PRO</span></div>`:''}
-    </div>
-    <div style="display:grid;grid-template-columns:1fr;gap:24px;align-items:start" class="lg-grid-equal">
-      <div class="card" style="padding:24px;max-height:calc(100vh - 180px);overflow-y:auto">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div><label class="label">Full Name</label><input class="input" value="${esc(resumeState.fullName)}" oninput="window._updateResume('fullName',this.value)"></div>
-          <div><label class="label">Email</label><input class="input" value="${esc(resumeState.email)}" oninput="window._updateResume('email',this.value)"></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div><label class="label">Phone</label><input class="input" value="${esc(resumeState.phone)}" oninput="window._updateResume('phone',this.value)"></div>
-          <div><label class="label">Address</label><input class="input" value="${esc(resumeState.address)}" oninput="window._updateResume('address',this.value)"></div>
-        </div>
-        <div style="margin-bottom:14px"><label class="label">Photo URL</label><input class="input" value="${esc(resumeState.photo)}" placeholder="https://..." oninput="window._updateResume('photo',this.value)"></div>
-        <div style="margin-bottom:14px"><label class="label">Skills (comma-separated)</label><input class="input" value="${esc(resumeState.skills.join(', '))}" oninput="window._updateResumeSkills(this.value)"></div>
-        <div style="margin-bottom:20px"><label class="label">Professional Summary</label><textarea class="input" rows="3" oninput="window._updateResume('summary',this.value)" style="resize:vertical">${esc(resumeState.summary)}</textarea></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><label class="label" style="margin-bottom:0">Work Experience</label><button class="btn btn-secondary btn-sm" onclick="window._addExp()"><i class="fa-solid fa-plus"></i></button></div>
-        <div id="resume-exp-list" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
-          ${resumeState.experiences.map((e,i)=>`<div style="padding:14px;border:1px solid var(--border);border-radius:12px;position:relative">${resumeState.experiences.length>1?`<button style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px" onclick="window._removeExp(${i})"><i class="fa-solid fa-xmark"></i></button>`:''}<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px"><input class="input" style="padding:6px 10px;font-size:13px" placeholder="Company" value="${esc(e.company)}" oninput="window._updateExp(${i},'company',this.value)"><input class="input" style="padding:6px 10px;font-size:13px" placeholder="Role" value="${esc(e.role)}" oninput="window._updateExp(${i},'role',this.value)"></div><input class="input" style="padding:6px 10px;font-size:13px;margin-bottom:8px" placeholder="Period" value="${esc(e.period)}" oninput="window._updateExp(${i},'period',this.value)"><textarea class="input" style="padding:6px 10px;font-size:13px;resize:vertical" rows="3" placeholder="Responsibilities (one per line)" oninput="window._updateExp(${i},'desc',this.value)">${esc(e.desc)}</textarea></div>`).join('')}
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><label class="label" style="margin-bottom:0">Education</label><button class="btn btn-secondary btn-sm" onclick="window._addEdu()"><i class="fa-solid fa-plus"></i></button></div>
-        <div id="resume-edu-list" style="display:flex;flex-direction:column;gap:12px">
-          ${resumeState.education.map((e,i)=>`<div style="padding:14px;border:1px solid var(--border);border-radius:12px;position:relative">${resumeState.education.length>1?`<button style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px" onclick="window._removeEdu(${i})"><i class="fa-solid fa-xmark"></i></button>`:''}<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px"><input class="input" style="padding:6px 10px;font-size:13px" placeholder="School" value="${esc(e.school)}" oninput="window._updateEdu(${i},'school',this.value)"><input class="input" style="padding:6px 10px;font-size:13px" placeholder="Degree" value="${esc(e.degree)}" oninput="window._updateEdu(${i},'degree',this.value)"></div><input class="input" style="padding:6px 10px;font-size:13px" placeholder="Year" value="${esc(e.year)}" oninput="window._updateEdu(${i},'year',this.value)"></div>`).join('')}
-        </div>
-      </div>
-      <div style="position:sticky;top:90px">
-        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Live Preview</p>
-        <div id="resume-preview" style="background:#f9fafb;border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.06);overflow:hidden">${resumePreviewContent()}</div>
-      </div>
-    </div>
-  </main>`;
+    await auth.signInWithEmailAndPassword(email, password);
+    showToast('Welcome back!', 'success');
+  } catch (err) {
+    const msgs = {
+      'auth/user-not-found': 'No account found with this email',
+      'auth/wrong-password': 'Incorrect password',
+      'auth/invalid-email': 'Invalid email address',
+      'auth/invalid-credential': 'Invalid email or password',
+      'auth/too-many-requests': 'Too many attempts. Try again later.'
+    };
+    showToast(msgs[err.code] || 'Login failed. Please try again.', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<span>Sign In</span>';
 }
 
-function resumePreviewContent() { return resumeState.template==='modern'?resumeModernTemplate():resumeStandardTemplate(); }
-
-function resumeStandardTemplate() {
-  const r=resumeState;const isFree=userData?.plan!=='pro';
-  const exps=r.experiences.filter(e=>e.company||e.role);const edus=r.education.filter(e=>e.school||e.degree);
-  return `<div style="background:#fff;padding:40px 36px;font-family:Arial,sans-serif;color:#222;font-size:12px;line-height:1.6;min-height:600px">
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #eee;padding-bottom:18px;margin-bottom:20px"><div style="flex:1"><div style="font-size:22px;font-weight:bold;letter-spacing:-.3px;color:#111">${esc(r.fullName)||'Your Name'}</div><div style="font-size:12px;color:#555;margin-top:6px">${[r.address,r.phone,r.email].filter(Boolean).join(' | ')}</div></div>${r.photo?`<img src="${esc(r.photo)}" style="width:100px;height:100px;border-radius:8px;object-fit:cover;border:1px solid #ccc;margin-left:20px" onerror="this.style.display='none'">`:''}</div>
-    ${r.summary?`<div style="margin-bottom:22px"><div style="font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px">PROFESSIONAL SUMMARY</div><p style="font-size:12px;line-height:1.6">${esc(r.summary)}</p></div>`:''}
-    ${exps.length?`<div style="margin-bottom:22px"><div style="font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px">WORK EXPERIENCE</div>${exps.map(e=>`<div style="margin-bottom:16px"><div style="font-weight:bold;font-size:13px">${esc(e.role)}<span style="float:right;font-size:12px;color:#777;font-weight:normal">${esc(e.period)}</span></div><div style="color:#555;font-size:12px">${esc(e.company)}</div>${e.desc?`<ul style="margin:5px 0 0 18px;padding:0">${e.desc.split('\n').filter(l=>l.trim()).map(l=>`<li style="font-size:12px;margin-bottom:4px;line-height:1.4">${esc(l.trim())}</li>`).join('')}</ul>`:''}</div>`).join('')}</div>`:''}
-    ${edus.length?`<div style="margin-bottom:22px"><div style="font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px">EDUCATION</div>${edus.map(e=>`<div style="margin-bottom:12px"><p style="margin:0"><b style="font-size:13px">${esc(e.degree)}</b><span style="float:right;font-size:12px;color:#777">${esc(e.year)}</span></p><div style="color:#555;font-size:12px">${esc(e.school)}</div></div>`).join('')}</div>`:''}
-    ${r.skills.length?`<div style="margin-bottom:22px"><div style="font-size:14px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px">KEY SKILLS</div><div style="columns:2;column-gap:20px;font-size:12px">${r.skills.map(s=>`${esc(s)}<br>`).join('')}</div></div>`:''}
-    ${isFree?`<div style="text-align:center;margin-top:20px;padding-top:12px;border-top:1px solid #eee"><span style="font-size:10px;color:#aaa">Made with Appluviio</span></div>`:''}</div>`;
+async function handleGoogleSignIn() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+    showToast('Welcome!', 'success');
+  } catch (err) {
+    if (err.code !== 'auth/popup-closed-by-user') {
+      showToast('Google sign-in failed. Try again.', 'error');
+    }
+  }
 }
 
-function resumeModernTemplate() {
-  const r=resumeState;const isFree=userData?.plan!=='pro';
-  const exps=r.experiences.filter(e=>e.company||e.role);const edus=r.education.filter(e=>e.school||e.degree);
-  return `<div style="background:#fff;min-height:600px;display:flex;font-family:Arial,sans-serif">
-    <div style="width:200px;background:linear-gradient(180deg,#0F172A,#1E293B);color:#fff;padding:36px 24px;flex-shrink:0">
-      ${r.photo?`<img src="${esc(r.photo)}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.2);margin:0 auto 16px;display:block" onerror="this.style.display='none'">`:`<div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;font-weight:bold">${(r.fullName||'U')[0]}</div>`}
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:8px;margin-top:20px">Contact</div>
-      <div style="font-size:11px;line-height:2;color:rgba(255,255,255,.8)">${r.phone?`<div><i class="fa-solid fa-phone" style="width:14px;margin-right:6px;font-size:10px;color:#3B82F6"></i>${esc(r.phone)}</div>`:''}${r.email?`<div><i class="fa-solid fa-envelope" style="width:14px;margin-right:6px;font-size:10px;color:#3B82F6"></i>${esc(r.email)}</div>`:''}${r.address?`<div><i class="fa-solid fa-location-dot" style="width:14px;margin-right:6px;font-size:10px;color:#3B82F6"></i>${esc(r.address)}</div>`:''}</div>
-      ${r.skills.length?`<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:8px;margin-top:24px">Skills</div><div style="display:flex;flex-wrap:wrap;gap:4px">${r.skills.map(s=>`<span style="padding:3px 10px;background:rgba(59,130,246,.2);color:#93C5FD;border-radius:20px;font-size:10px;font-weight:600">${esc(s)}</span>`).join('')}</div>`:''}
-    </div>
-    <div style="flex:1;padding:36px 32px;color:#222;font-size:12px;line-height:1.6">
-      <div style="font-size:26px;font-weight:800;color:#0F172A;letter-spacing:-.5px;margin-bottom:4px">${esc(r.fullName)||'Your Name'}</div>
-      ${r.summary?`<div style="margin-bottom:24px;margin-top:20px"><div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">About Me</div><p>${esc(r.summary)}</p></div>`:''}
-      ${exps.length?`<div style="margin-bottom:24px"><div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Experience</div>${exps.map((e,i)=>`<div style="margin-bottom:16px;${i<exps.length-1?'padding-bottom:12px;border-left:2px solid #E2E8F0;padding-left:14px;':''}"><div style="font-weight:bold;font-size:13px;color:#0F172A">${esc(e.role)}</div><div style="font-size:11px;color:#3B82F6;font-weight:600">${esc(e.company)} <span style="color:#94A3B8;font-weight:normal;margin-left:6px">${esc(e.period)}</span></div>${e.desc?`<ul style="margin:6px 0 0 16px;padding:0">${e.desc.split('\n').filter(l=>l.trim()).map(l=>`<li style="font-size:11px;margin-bottom:3px;color:#555">${esc(l.trim())}</li>`).join('')}</ul>`:''}</div>`).join('')}</div>`:''}
-      ${edus.length?`<div><div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Education</div>${edus.map(e=>`<div style="margin-bottom:10px"><div style="font-weight:bold;font-size:13px">${esc(e.degree)} <span style="font-size:11px;color:#94A3B8;font-weight:normal">${esc(e.year)}</span></div><div style="font-size:11px;color:#555">${esc(e.school)}</div></div>`).join('')}</div>`:''}
-      ${isFree?`<div style="text-align:center;margin-top:30px;padding-top:12px;border-top:1px solid #eee"><span style="font-size:10px;color:#aaa">Made with Appluviio</span></div>`:''}
-    </div></div>`;
+async function handleRegister() {
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regConfirm').value;
+  const btn = document.getElementById('regBtn');
+  if (!email || !password || !confirm) { showToast('Please fill in all fields', 'error'); return; }
+  if (password.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
+  if (password !== confirm) { showToast('Passwords do not match', 'error'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
+  try {
+    await auth.createUserWithEmailAndPassword(email, password);
+    showToast('Account created! Welcome to Appluvii.', 'success');
+  } catch (err) {
+    const msgs = {
+      'auth/email-already-in-use': 'This email is already registered',
+      'auth/weak-password': 'Password is too weak',
+      'auth/invalid-email': 'Invalid email address'
+    };
+    showToast(msgs[err.code] || 'Registration failed. Try again.', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<span>Create Account</span>';
 }
 
-function refreshResumePreview() { const p=$('resume-preview'); if(p) p.innerHTML=resumePreviewContent(); }
-
-/* ═══════════════ INVOICE BUILDER ═══════════════ */
-function renderInvoice() {
-  const isPro=userData?.plan==='pro';
-  appEl.innerHTML = `${appNav()}
-  <main style="padding-top:80px;padding-bottom:100px;max-width:1100px;margin:0 auto;padding-left:24px;padding-right:24px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-      <div><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">Invoice Generator</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create professional invoices</p></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="window._saveInvoice()"><i class="fa-solid fa-floppy-disk"></i> Save</button><button class="btn btn-primary btn-sm" onclick="window._exportInvoicePDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button><button class="btn btn-sm" style="background:#25D366;color:#fff" onclick="window._sendInvoiceWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Send</button></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr;gap:24px;align-items:start" class="lg-grid-equal">
-      <div class="card" style="padding:24px;max-height:calc(100vh - 140px);overflow-y:auto">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
-          <div><label class="label">Invoice No</label><input class="input" value="${esc(invoiceState.invoiceNo)}" oninput="window._updateInv('invoiceNo',this.value)"></div>
-          <div><label class="label">Currency ${!isPro?'<span style="color:var(--warning);font-size:10px">(Pro)</span>':''}</label><select class="input" onchange="window._updateInv('currency',this.value)" ${!isPro?'disabled':''}>${CURRENCIES.map(c=>`<option value="${c.code}" ${invoiceState.currency===c.code?'selected':''}>${c.code} — ${c.symbol} ${c.name}</option>`).join('')}</select></div>
-        </div>
-        <div><label class="label">Date</label><input class="input" type="date" value="${invoiceState.date}" oninput="window._updateInv('date',this.value)" style="margin-bottom:20px"></div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent)">From</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px"><div><label class="label">Name</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.from.name)}" oninput="window._updateInvFrom('name',this.value)"></div><div><label class="label">Email</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.from.email)}" oninput="window._updateInvFrom('email',this.value)"></div></div>
-        <div style="margin-bottom:20px"><label class="label">Phone / Address</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.from.phone)}" oninput="window._updateInvFrom('phone',this.value)"></div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent)">To</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px"><div><label class="label">Name</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.to.name)}" oninput="window._updateInvTo('name',this.value)"></div><div><label class="label">Email</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.to.email)}" oninput="window._updateInvTo('email',this.value)"></div></div>
-        <div style="margin-bottom:20px"><label class="label">Phone / Address</label><input class="input" style="font-size:13px;padding:8px 12px" value="${esc(invoiceState.to.phone)}" oninput="window._updateInvTo('phone',this.value)"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h3 style="font-size:14px;font-weight:700;color:var(--accent);margin:0">Items</h3><button class="btn btn-secondary btn-sm" onclick="window._addInvItem()"><i class="fa-solid fa-plus"></i> Add</button></div>
-        <div id="inv-items-list" style="margin-bottom:20px">${invoiceState.items.map((item,i)=>`<div style="display:grid;grid-template-columns:1fr 65px 90px 32px;gap:8px;margin-bottom:8px;align-items:end"><div><label class="label" style="font-size:11px">${i===0?'Description':''}</label><input class="input" style="padding:8px 10px;font-size:13px" placeholder="Item" value="${esc(item.desc)}" oninput="window._updateInvItem(${i},'desc',this.value)"></div><div><label class="label" style="font-size:11px">${i===0?'Qty':''}</label><input class="input" type="number" min="1" style="padding:8px 10px;font-size:13px" value="${item.qty}" oninput="window._updateInvItem(${i},'qty',+this.value)"></div><div><label class="label" style="font-size:11px">${i===0?'Price':''}</label><input class="input" type="number" min="0" step="0.01" style="padding:8px 10px;font-size:13px" value="${item.price}" oninput="window._updateInvItem(${i},'price',+this.value)"></div><button style="width:32px;height:36px;border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:13px;border-radius:8px" onclick="window._removeInvItem(${i})"><i class="fa-solid fa-trash"></i></button></div>`).join('')}</div>
-        <div><label class="label">Notes</label><textarea class="input" rows="2" oninput="window._updateInv('notes',this.value)" style="resize:vertical">${esc(invoiceState.notes)}</textarea></div>
-      </div>
-      <div style="position:sticky;top:90px">
-        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Live Preview</p>
-        <div id="invoice-preview" style="background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.06);overflow:hidden">${invoicePreviewContent()}</div>
-      </div>
-    </div>
-  </main>`;
+async function handleSignOut() {
+  try {
+    await auth.signOut();
+    showToast('Signed out successfully', 'info');
+    closeUserMenu();
+  } catch (err) {
+    showToast('Sign out failed', 'error');
+  }
 }
 
-function invoicePreviewContent() {
-  const inv=invoiceState;const sym=getCurSymbol();const subtotal=inv.items.reduce((s,i)=>s+(i.qty*i.price||0),0);
-  return `<div style="padding:36px;font-size:13px;line-height:1.6;font-family:Arial,sans-serif">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px"><div><div style="font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--accent)">Invoice</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">${esc(inv.invoiceNo)}</div></div><div style="text-align:right"><div style="font-weight:600">${inv.date}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${inv.currency}</div></div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px"><div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px">From</div><div style="font-weight:600">${esc(inv.from.name)||'-'}</div><div style="color:var(--text-secondary);font-size:12px">${esc(inv.from.email)||''}</div><div style="color:var(--text-secondary);font-size:12px">${esc(inv.from.phone)||''}</div></div><div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px">To</div><div style="font-weight:600">${esc(inv.to.name)||'-'}</div><div style="color:var(--text-secondary);font-size:12px">${esc(inv.to.email)||''}</div><div style="color:var(--text-secondary);font-size:12px">${esc(inv.to.phone)||''}</div></div></div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px"><thead><tr style="border-bottom:2px solid var(--accent)"><th style="text-align:left;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)">Description</th><th style="text-align:right;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:55px">Qty</th><th style="text-align:right;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:85px">Price</th><th style="text-align:right;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:85px">Total</th></tr></thead><tbody>${inv.items.map(i=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 0">${esc(i.desc)||'-'}</td><td style="text-align:right;padding:10px 0">${i.qty}</td><td style="text-align:right;padding:10px 0">${sym}${(i.price||0).toFixed(2)}</td><td style="text-align:right;padding:10px 0;font-weight:600">${sym}${(i.qty*i.price||0).toFixed(2)}</td></tr>`).join('')}</tbody></table>
-    <div style="display:flex;justify-content:flex-end"><div style="width:220px"><div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px"><span style="color:var(--text-secondary)">Subtotal</span><span>${sym}${subtotal.toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;padding:12px 0;border-top:2px solid var(--text);font-size:18px;font-weight:800"><span>Total</span><span>${sym}${subtotal.toFixed(2)}</span></div></div></div>
-    ${inv.notes?`<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:4px">Notes</div><p style="color:var(--text-secondary)">${esc(inv.notes)}</p></div>`:''}
-    ${userData?.plan!=='pro'?`<div style="text-align:center;margin-top:20px;padding-top:12px;border-top:1px solid var(--border)"><span style="font-size:10px;color:var(--text-muted)">Made with Appluviio</span></div>`:''}</div>`;
+function showRegister() { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; }
+function showLogin() { document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; }
+
+/* ========================================
+   App UI Setup
+   ======================================== */
+function setupAppUI() {
+  if (!userData) return;
+  const badge = document.getElementById('planBadge');
+  if (userData.plan === 'pro') {
+    badge.className = 'badge badge-pro';
+    badge.innerHTML = '<i class="fa-solid fa-crown mr-1"></i>Pro';
+    document.getElementById('proBanner').style.display = 'none';
+    document.getElementById('qrWatermark').style.display = 'none';
+  } else {
+    badge.className = 'badge badge-free';
+    badge.textContent = 'Free';
+    document.getElementById('proBanner').style.display = 'flex';
+    document.getElementById('qrWatermark').style.display = 'block';
+  }
+  const initial = (userData.displayName || userData.email)[0].toUpperCase();
+  document.getElementById('userMenuBtn').textContent = initial;
+  document.getElementById('userMenuEmail').textContent = userData.email;
+  document.getElementById('adminMenuBtn').style.display = userData.role === 'superadmin' ? 'block' : 'none';
+  updateActionButton();
 }
 
-function refreshInvoicePreview() { const p=$('invoice-preview'); if(p) p.innerHTML=invoicePreviewContent(); }
+function toggleUserMenu() {
+  const menu = document.getElementById('userMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+function closeUserMenu() { document.getElementById('userMenu').style.display = 'none'; }
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#userMenuBtn') && !e.target.closest('#userMenu')) closeUserMenu();
+});
 
-/* ═══════════════ WHATSAPP LINK ═══════════════ */
-function renderWaLink() {
-  const isPro=userData?.plan==='pro';
-  const selTemplate=waTemplates.find(t=>t.id===waState.templateId)||waTemplates[0];
-  const fullPhone=waState.countryCode.replace('+','')+waState.phone;
-  const generatedLink=selTemplate.generate(fullPhone,waState.message);
-  const isLocked=!isPro&&!selTemplate.free;
-  appEl.innerHTML = `${appNav()}
-  <main style="padding-top:80px;padding-bottom:100px;max-width:900px;margin:0 auto;padding-left:24px;padding-right:24px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-      <div><h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">WhatsApp Link Generator</h1><p style="font-size:14px;color:var(--text-secondary);margin-top:4px">Create clickable WhatsApp chat links</p></div>
-      <button class="btn btn-secondary btn-sm" onclick="window._saveWaLink()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr;gap:24px;align-items:start" class="lg-grid-equal">
-      <div class="card" style="padding:24px">
-        <div style="margin-bottom:20px"><label class="label">Phone Number</label><div class="phone-input-wrapper"><select class="country-select" onchange="window._updateWa('countryCode',this.value)">${COUNTRY_CODES.map(c=>`<option value="${c.code}" ${waState.countryCode===c.code?'selected':''}>${c.flag} ${c.code}</option>`).join('')}</select><input class="phone-input" id="wa-phone" value="${esc(waState.phone)}" placeholder="1234567890" oninput="window._updateWa('phone',this.value)"></div><p style="font-size:11px;color:var(--text-muted);margin-top:4px">Without country code</p></div>
-        <div style="margin-bottom:20px"><label class="label">Choose Template</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${waTemplates.map(t=>{const locked=!isPro&&!t.free;return `<div class="wa-template-card ${waState.templateId===t.id?'selected':''}" onclick="${locked?'':'window._selectWaTemplate('+t.id+')'}" style="${locked?'opacity:.5;cursor:not-allowed;':''}position:relative">${locked?`<span class="badge" style="position:absolute;top:8px;right:8px;background:#FEF3C7;color:#92400E;font-size:9px">PRO</span>`:''}<div style="font-size:14px;font-weight:700">${t.name}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${t.desc}</div>${t.free?`<span style="font-size:10px;color:var(--success);font-weight:600">Free</span>`:''}</div>`;}).join('')}</div></div>
-        ${!selTemplate.free?`<div style="margin-bottom:20px"><label class="label">Custom Message</label><textarea class="input" id="wa-message" rows="4" placeholder="Type your message..." oninput="window._updateWa('message',this.value)" style="resize:vertical" ${isLocked?'disabled':''}>${esc(waState.message)}</textarea>${isLocked?`<p style="font-size:11px;color:var(--warning);margin-top:4px"><i class="fa-solid fa-lock" style="margin-right:3px"></i>Upgrade to Pro</p>`:''}</div>`:''}
-        <div style="padding:14px;background:var(--bg-secondary);border-radius:12px;margin-bottom:16px"><label class="label" style="margin-bottom:8px">Generated Link</label><div style="display:flex;gap:8px;align-items:center"><input class="input" id="wa-link-output" value="${esc(generatedLink)}" readonly style="font-size:12px;font-family:monospace"><button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="window._copyText(document.getElementById('wa-link-output').value)"><i class="fa-solid fa-copy"></i></button></div></div>
-        <div style="display:flex;gap:10px"><a href="${esc(generatedLink)}" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;flex:1;text-decoration:none"><i class="fa-brands fa-whatsapp"></i> Test Link</a><button class="btn btn-secondary btn-sm" style="flex:1" onclick="window._shareWaLink()"><i class="fa-solid fa-share-nodes"></i> Share</button></div>
-      </div>
-      <div style="position:sticky;top:90px">
-        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Chat Preview</p>
-        <div class="wa-preview-box">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #D4CCD3"><div class="wa-avatar">${fullPhone?fullPhone.slice(-2):'W'}</div><div><div style="font-weight:700;font-size:15px;color:#111">${fullPhone?'+('+waState.countryCode+') '+waState.phone:'Phone number'}</div><div style="font-size:11px;color:#8B9DA5">online</div></div></div>
-          <div style="display:flex;justify-content:flex-end"><div style="max-width:90%"><div class="wa-bubble">${fullPhone?(selTemplate.generate(fullPhone,waState.message).split('?text=')[1]?decodeURIComponent(selTemplate.generate(fullPhone,waState.message).split('?text=')[1]):'Tap to start chat'):'Enter a phone number'}</div><div class="wa-bubble-time">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div>
-        </div>
-        ${!isPro?`<div class="card" style="margin-top:16px;background:linear-gradient(135deg,#F0FDF4,#ECFDF5);border-color:#BBF7D0;display:flex;align-items:center;gap:12px"><i class="fa-solid fa-crown" style="color:#F59E0B;font-size:18px"></i><div style="flex:1"><div style="font-size:14px;font-weight:700">Unlock all templates</div><div style="font-size:12px;color:var(--text-secondary)">Custom messages & more</div></div><button class="btn btn-primary btn-sm" onclick="window._nav('pricing')">Upgrade</button></div>`:''}
-      </div>
-    </div>
-  </main>`;
+/* ========================================
+   Tab Navigation
+   ======================================== */
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  const tabMap = { qr: 'tabQr', whatsapp: 'tabWhatsapp', pdf: 'tabPdf' };
+  const panelMap = { qr: 'qrPanel', whatsapp: 'whatsappPanel', pdf: 'pdfPanel' };
+  document.getElementById(tabMap[tab]).classList.add('active');
+  document.getElementById(tabMap[tab]).setAttribute('aria-selected', 'true');
+  document.getElementById(panelMap[tab]).style.display = 'block';
+  updateActionButton();
 }
 
-/* ═══════════════ PUBLIC BIO PAGE (the export-style version) ═══════════════ */
-async function renderPublicBio(slug) {
-  // slug can be "username" or "username/bio"
-  const username = slug.split('/')[0];
-  if(!username || username==='bio') { navigate('landing'); return; }
+function updateActionButton() {
+  const text = document.getElementById('mainActionText');
+  const btn = document.getElementById('mainActionBtn');
+  const actions = {
+    qr: { text: 'Generate QR Code', icon: 'fa-qrcode' },
+    whatsapp: { text: 'Generate WhatsApp Link', icon: 'fa-link' },
+    pdf: { text: 'Convert to PDF', icon: 'fa-file-pdf' }
+  };
+  const a = actions[currentTab];
+  text.textContent = a.text;
+  btn.querySelector('i').className = `fa-solid ${a.icon}`;
+}
 
-  const profile = await loadPublicProfile(username);
-  if(!profile) {
-    appEl.innerHTML = `<div class="pub-bio-page">
-      <div class="pub-bio-container">
-        <div style="text-align:center;margin-bottom:24px"><a onclick="window._nav('landing')" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#6a8dff;text-decoration:none"><img src="${LOGO_URL}" style="width:20px;height:20px;border-radius:4px" onerror="this.style.display='none'"><span>Appluviio</span></a></div>
-        <div style="background:#fff;border-radius:24px;padding:48px 28px;box-shadow:0 4px 30px rgba(0,0,0,.06);text-align:center">
-          <div style="width:72px;height:72px;background:#f2f2f7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><i class="fa-solid fa-user-slash" style="font-size:28px;color:#8e8e93"></i></div>
-          <h1 style="font-size:20px;font-weight:600;margin-bottom:8px;color:#1d1d1f">Profile not found</h1>
-          <p style="color:#8e8e93;font-size:14px;margin-bottom:24px">This profile doesn't exist or hasn't been published yet.</p>
-          <a class="btn btn-primary" onclick="window._nav('landing')" style="cursor:pointer">Go to Appluviio</a>
-        </div>
-      </div>
-    </div>`;
+/* ========================================
+   QR Code Generator — uses qrcodejs library
+   qrcodejs creates both a <canvas> and an <img>
+   inside the target container div.
+   ======================================== */
+function selectSize(btn) {
+  document.querySelectorAll('.size-btn[data-size]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedQrSize = parseInt(btn.dataset.size);
+}
+
+function generateQR() {
+  const input = document.getElementById('qrInput').value.trim();
+
+  if (!input) {
+    showToast('Please enter a URL or text', 'error');
     return;
   }
 
-  const bio = profile.bio || {};
-  const name = bio.name || profile.name || 'User';
-  const avatar = bio.avatar;
-  const initial = name[0].toUpperCase();
-  const links = (bio.links || []).filter(l => l.url);
-  const isFree = profile.plan !== 'pro';
+  if (typeof QRCode === 'undefined') {
+    showToast('QR library is still loading. Please try again.', 'error');
+    return;
+  }
 
-  appEl.innerHTML = `<div class="pub-bio-page">
-    <div class="pub-bio-container">
-      <!-- Avatar -->
-      <div class="pub-avatar">
-        ${avatar
-          ? `<img src="${esc(avatar)}" onerror="this.outerHTML='<span style=\\'font-size:34px;font-weight:700\\'>${initial}</span>'">`
-          : `<span style="font-size:34px;font-weight:700">${initial}</span>`
-        }
-      </div>
-      <!-- Name -->
-      <div class="pub-name">${esc(name)}</div>
-      <!-- Bio text -->
-      ${bio.bio ? `<div class="pub-bio-text">${esc(bio.bio)}</div>` : ''}
-      <div class="pub-divider"></div>
-      <!-- Links -->
-      ${links.map(l => `
-        <a href="${esc(l.url)}" target="_blank" rel="noopener" class="pub-card">
-          <div class="pub-left">
-            <div class="pub-icon" style="background:${l.color}14;color:${l.color}">
-              <i class="${l.icon}"></i>
-            </div>
-            <span>${esc(l.title)}</span>
-          </div>
-          <span class="pub-arrow">›</span>
-        </a>
-      `).join('')}
-      ${!links.length ? `<p style="color:#8e8e93;font-size:14px;padding:24px 0">No links added yet</p>` : ''}
-      <!-- Footer -->
-      <div class="pub-footer">Powered by <a onclick="window._nav('landing')" style="color:#6a8dff;cursor:pointer;font-weight:600;text-decoration:none">Appluviio</a>${isFree ? ' by Luviio' : ''}</div>
-    </div>
-  </div>`;
+  /* Clear previous QR code from the container */
+  const qrContainer = document.getElementById('qrcodeContainer');
+  qrContainer.innerHTML = '';
+
+  /* Show the preview section first so the container has layout */
+  const section = document.getElementById('qrPreviewSection');
+  section.style.display = 'block';
+
+  /* qrcodejs renders into the div — it creates canvas + img internally */
+  new QRCode(qrContainer, {
+    text: input,
+    width: selectedQrSize,
+    height: selectedQrSize,
+    colorDark: '#1e1b3a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+  showToast('QR code generated!', 'success');
 }
 
-/* ═══════════════ GLOBAL HANDLERS ═══════════════ */
-window._nav = page => navigate(page);
-window._logout = () => logoutUser();
-window._googleLogin = () => loginGoogle();
-window._emailLogin = () => {
-  const email=$('login-email')?.value?.trim(); const pass=$('login-pass')?.value;
-  if(!email||!pass){toast('Please fill in all fields','error');return;}
-  loginEmail(email,pass);
-};
-window._emailRegister = () => {
-  const name=$('reg-name')?.value?.trim(); const email=$('reg-email')?.value?.trim(); const pass=$('reg-pass')?.value;
-  if(!name||!email||!pass){toast('Please fill in all fields','error');return;}
-  if(pass.length<6){toast('Password must be at least 6 characters','error');return;}
-  registerEmail(name,email,pass);
-};
-window._tryDemo = tool => {
-  if(!currentUser){toast('Please sign in to access tools','info');navigate('login');return;}
-  navigate(tool);
-};
-window._copyText = text => {
-  navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard!','success')).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Copied!','success');
+function downloadQR() {
+  /* qrcodejs creates a <canvas> and an <img> inside the container.
+     We grab the <img> since it's always available as a rendered element. */
+  const qrContainer = document.getElementById('qrcodeContainer');
+  const qrImg = qrContainer.querySelector('img');
+
+  if (!qrImg || !qrImg.src) {
+    showToast('Generate a QR code first', 'error');
+    return;
+  }
+
+  const isPro = userData && userData.plan === 'pro';
+
+  /* Draw onto an offscreen canvas to add padding + optional watermark */
+  const dlCanvas = document.createElement('canvas');
+  const padding = 40;
+  const wmHeight = isPro ? 0 : 24;
+  dlCanvas.width = qrImg.naturalWidth + padding * 2;
+  dlCanvas.height = qrImg.naturalHeight + padding * 2 + wmHeight;
+  const ctx = dlCanvas.getContext('2d');
+
+  /* White background */
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, dlCanvas.width, dlCanvas.height);
+
+  /* Draw QR image centered */
+  ctx.drawImage(qrImg, padding, padding);
+
+  /* Watermark for free users */
+  if (!isPro) {
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('Appluvii Free', dlCanvas.width - padding, dlCanvas.height - 12);
+  }
+
+  const link = document.createElement('a');
+  link.download = 'appluvii-qrcode.png';
+  link.href = dlCanvas.toDataURL('image/png');
+  link.click();
+  showToast('QR code downloaded!', 'success');
+}
+
+/* ========================================
+   WhatsApp Link Generator
+   ======================================== */
+function generateWaLink() {
+  const phone = document.getElementById('waPhone').value.replace(/[^0-9]/g, '');
+  const message = document.getElementById('waMessage').value.trim();
+  if (!phone) { showToast('Please enter a phone number', 'error'); return; }
+  if (phone.length < 7) { showToast('Please enter a valid phone number', 'error'); return; }
+  const link = `https://wa.me/${phone}${message ? '?text=' + encodeURIComponent(message) : ''}`;
+  document.getElementById('waLink').value = link;
+  document.getElementById('waResultSection').style.display = 'block';
+  setTimeout(() => document.getElementById('waResultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  showToast('WhatsApp link generated!', 'success');
+}
+
+function copyWaLink() {
+  const link = document.getElementById('waLink').value;
+  if (!link) return;
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('Link copied to clipboard!', 'success');
+  }).catch(() => {
+    const input = document.getElementById('waLink');
+    input.select();
+    document.execCommand('copy');
+    showToast('Link copied!', 'success');
   });
-};
-window._resendVerify = async () => {
-  if(currentUser) { try { await sendEmailVerification(currentUser); toast('Verification email sent!','success'); } catch(e) { toast(e.message,'error'); } }
-};
-window._checkVerify = async () => {
-  if(!currentUser) return;
-  try { await currentUser.reload(); if(currentUser.emailVerified) { await updateDoc(doc(db,'users',currentUser.uid),{emailVerified:true}); userData.emailVerified=true; toast('Verified!','success'); navigate('dashboard'); } else toast('Email not verified yet. Check your inbox.','info'); } catch(e) { toast(e.message,'error'); }
-};
+}
 
-/* ═══════════════ USERNAME / NAME EDIT ═══════════════ */
-window._editUsername = async () => {
-  if(!currentUser) return;
-  const overlay=document.createElement('div');overlay.className='modal-overlay';
-  overlay.innerHTML=`<div class="modal">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Edit Username</h3>
-    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">Your public bio link will be:<br><strong style="color:var(--accent)">https://${BIO_DOMAIN}/<span id="un-preview">${userData?.username||''}</span>/bio</strong></p>
-    <input class="input" id="un-input" value="${userData?.username||''}" placeholder="username (min 3 chars)" style="margin-bottom:6px">
-    <p style="font-size:11px;color:var(--text-muted);margin-bottom:20px">Only lowercase letters, numbers, dots, underscores, and hyphens.</p>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn btn-secondary btn-sm" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
-      <button class="btn btn-primary btn-sm" id="un-save">Save Username</button>
-    </div>
-  </div>`;
-  document.body.appendChild(overlay);
-  const inp=$('un-input'); const preview=$('un-preview');
-  inp.addEventListener('input',()=>{ preview.textContent = inp.value.toLowerCase().replace(/[^a-z0-9._-]/g,''); });
-  $('un-save').onclick = async () => {
-    const ok = await updateUsername(currentUser.uid, inp.value);
-    if(ok) { overlay.remove(); render(); }
-  };
-  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
-  inp.focus();
-};
+function openWaLink() {
+  const link = document.getElementById('waLink').value;
+  if (!link) { showToast('Generate a link first', 'error'); return; }
+  window.open(link, '_blank');
+}
 
-window._editName = async () => {
-  if(!currentUser) return;
-  const overlay=document.createElement('div');overlay.className='modal-overlay';
-  overlay.innerHTML=`<div class="modal">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Edit Display Name</h3>
-    <input class="input" id="name-input" value="${userData?.name||''}" placeholder="Your display name" style="margin-bottom:20px">
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn btn-secondary btn-sm" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
-      <button class="btn btn-primary btn-sm" id="name-save">Save Name</button>
+/* ========================================
+   PDF Converter
+   ======================================== */
+function switchPdfMode(mode) {
+  pdfMode = mode;
+  document.getElementById('pdfModeImage').classList.toggle('active', mode === 'image');
+  document.getElementById('pdfModeText').classList.toggle('active', mode === 'text');
+  document.getElementById('pdfImageMode').style.display = mode === 'image' ? 'block' : 'none';
+  document.getElementById('pdfTextMode').style.display = mode === 'text' ? 'block' : 'none';
+  document.getElementById('pdfPreviewSection').style.display = 'none';
+  pdfFiles = [];
+  generatedPdfBlob = null;
+  renderFileList();
+}
+
+function handleFileSelect(e) {
+  const files = Array.from(e.target.files);
+  const validTypes = ['image/jpeg', 'image/png'];
+  const maxSize = 10 * 1024 * 1024;
+  for (const file of files) {
+    if (!validTypes.includes(file.type)) { showToast(`${file.name} is not a supported format`, 'error'); continue; }
+    if (file.size > maxSize) { showToast(`${file.name} exceeds 10MB limit`, 'error'); continue; }
+    pdfFiles.push(file);
+  }
+  renderFileList();
+  e.target.value = '';
+}
+
+function removeFile(index) {
+  pdfFiles.splice(index, 1);
+  renderFileList();
+}
+
+function renderFileList() {
+  const container = document.getElementById('pdfFileList');
+  if (pdfFiles.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = pdfFiles.map((f, i) => `
+    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/40 border border-gray-200/40">
+      <i class="fa-regular fa-image text-primary-500"></i>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-gray-800 truncate">${f.name}</p>
+        <p class="text-xs text-gray-400">${(f.size / 1024).toFixed(1)} KB</p>
+      </div>
+      <button onclick="removeFile(${i})" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors" aria-label="Remove file">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
-  </div>`;
-  document.body.appendChild(overlay);
-  const inp=$('name-input');
-  $('name-save').onclick = async () => {
-    const newName = inp.value.trim();
-    if(!newName){toast('Name cannot be empty','error');return;}
+  `).join('');
+}
+
+/* Drag & Drop */
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFileSelect({ target: { files: e.dataTransfer.files, value: '' } });
+});
+
+async function generatePDF() {
+  const isPro = userData && userData.plan === 'pro';
+
+  if (pdfMode === 'image') {
+    if (pdfFiles.length === 0) { showToast('Please upload at least one image', 'error'); return; }
     try {
-      await updateProfile(currentUser, { displayName: newName });
-      await updateDoc(doc(db,'users',currentUser.uid), { name: newName });
-      userData.name = newName;
-      toast('Name updated!','success');
-      overlay.remove();
-      render();
-    } catch(e) { toast(e.message,'error'); }
-  };
-  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
-  inp.focus();
-};
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 10;
 
-/* ═══════════════ ADMIN HANDLERS ═══════════════ */
-window._viewUserDetails = async (uid) => {
-  const s = await getDoc(doc(db,'users',uid));
-  if(!s.exists()) return;
-  const u=s.data();
-  const overlay=document.createElement('div');overlay.className='modal-overlay';
-  overlay.innerHTML=`<div class="modal" style="max-width:520px">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px">User: ${esc(u.name||'N/A')}</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;margin-bottom:16px">
-      <div><strong>UID:</strong><br><span style="font-family:monospace;font-size:11px;color:var(--text-muted);word-break:break-all">${uid}</span></div>
-      <div><strong>Email:</strong><br>${esc(u.email||'N/A')}</div>
-      <div><strong>Username:</strong><br>@${esc(u.username||'...')}</div>
-      <div><strong>Plan:</strong><br>${u.plan==='pro'?'<span style="color:#F59E0B;font-weight:700">PRO</span>':'FREE'}</div>
-      <div><strong>Verified:</strong><br>${u.emailVerified?'<span style="color:#22C55E">Yes</span>':'<span style="color:#EF4444">No</span>'}</div>
-      <div><strong>Created:</strong><br>${u.createdAt?.toDate()?.toLocaleDateString()||'N/A'}</div>
+      for (let i = 0; i < pdfFiles.length; i++) {
+        if (i > 0) pdf.addPage();
+        const file = pdfFiles[i];
+        const dataUrl = await readFileAsDataURL(file);
+        const img = await loadImage(dataUrl);
+        const imgAspect = img.width / img.height;
+        const maxW = pageW - margin * 2;
+        const maxH = pageH - margin * 2 - (isPro ? 0 : 8);
+        let w, h;
+        if (imgAspect > maxW / maxH) { w = maxW; h = maxW / imgAspect; }
+        else { h = maxH; w = maxH * imgAspect; }
+        const x = (pageW - w) / 2;
+        const y = (pageH - h) / 2;
+        pdf.addImage(dataUrl, 'JPEG', x, y, w, h);
+        if (!isPro) {
+          pdf.setFontSize(8);
+          pdf.setTextColor(200, 200, 200);
+          pdf.text('Appluvii Free', pageW - margin - 20, pageH - 5);
+        }
+      }
+      generatedPdfBlob = pdf.output('blob');
+      showPdfPreview();
+      showToast('PDF created successfully!', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to create PDF', 'error');
+    }
+  } else {
+    const title = document.getElementById('pdfTitle').value.trim();
+    const text = document.getElementById('pdfText').value.trim();
+    if (!text) { showToast('Please enter some text content', 'error'); return; }
+    try {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const margin = 20;
+      const maxW = pageW - margin * 2;
+      let y = margin;
+
+      if (title) {
+        pdf.setFontSize(20);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(30, 27, 58);
+        const titleLines = pdf.splitTextToSize(title, maxW);
+        pdf.text(titleLines, margin, y);
+        y += titleLines.length * 8 + 6;
+        pdf.setDrawColor(99, 102, 241);
+        pdf.setLineWidth(0.5);
+        pdf.line(margin, y - 2, margin + 40, y - 2);
+        y += 6;
+      }
+
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(60, 55, 80);
+      const paragraphs = text.split('\n');
+      for (const para of paragraphs) {
+        if (para.trim() === '') { y += 4; continue; }
+        const lines = pdf.splitTextToSize(para, maxW);
+        for (const line of lines) {
+          if (y > 275) { pdf.addPage(); y = margin; }
+          pdf.text(line, margin, y);
+          y += 5.5;
+        }
+        y += 3;
+      }
+      if (!isPro) {
+        const pages = pdf.internal.getNumberOfPages();
+        for (let p = 1; p <= pages; p++) {
+          pdf.setPage(p);
+          pdf.setFontSize(8);
+          pdf.setTextColor(200, 200, 200);
+          pdf.text('Appluvii Free', pageW - margin - 20, 290);
+        }
+      }
+      generatedPdfBlob = pdf.output('blob');
+      showPdfPreview();
+      showToast('PDF created successfully!', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to create PDF', 'error');
+    }
+  }
+}
+
+function showPdfPreview() {
+  const section = document.getElementById('pdfPreviewSection');
+  const area = document.getElementById('pdfPreviewArea');
+  section.style.display = 'block';
+  if (generatedPdfBlob) {
+    const url = URL.createObjectURL(generatedPdfBlob);
+    area.innerHTML = `<iframe src="${url}" width="100%" height="350" style="border:none;border-radius:8px;"></iframe>`;
+  }
+  setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+function downloadPDF() {
+  if (!generatedPdfBlob) { showToast('Create a PDF first', 'error'); return; }
+  const link = document.createElement('a');
+  link.download = 'appluvii-document.pdf';
+  link.href = URL.createObjectURL(generatedPdfBlob);
+  link.click();
+  showToast('PDF downloaded!', 'success');
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+/* ========================================
+   Main Action Handler
+   ======================================== */
+function handleMainAction() {
+  switch (currentTab) {
+    case 'qr': generateQR(); break;
+    case 'whatsapp': generateWaLink(); break;
+    case 'pdf': generatePDF(); break;
+  }
+}
+
+/* ========================================
+   Plan Modal
+   ======================================== */
+function openPlanModal() { document.getElementById('planModal').classList.add('open'); }
+function closePlanModal() { document.getElementById('planModal').classList.remove('open'); }
+
+async function handleProUpgrade() {
+  if (!currentUser) return;
+  const btn = document.getElementById('proUpgradeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
+  try {
+    await db.collection('users').doc(currentUser.uid).update({ plan: 'pro' });
+    userData.plan = 'pro';
+    setupAppUI();
+    closePlanModal();
+    showToast('Upgraded to Pro! Enjoy all features.', 'success');
+  } catch (err) {
+    showToast('Upgrade failed. Please try again.', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = 'Upgrade to Pro';
+}
+
+/* ========================================
+   SuperAdmin Panel
+   ======================================== */
+async function showAdminPanel() {
+  closeUserMenu();
+  showView('adminView');
+  await loadAdminUsers();
+}
+
+function closeAdminPanel() { showView('appView'); }
+
+async function loadAdminUsers() {
+  const tbody = document.getElementById('adminTableBody');
+  tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-400"><div class="spinner mx-auto" style="border-color:rgba(150,145,170,0.3);border-top-color:#6b6580;"></div></td></tr>';
+  try {
+    const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
+    allUsers = [];
+    snapshot.forEach(doc => allUsers.push({ id: doc.id, ...doc.data() }));
+    renderAdminTable();
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-400">Failed to load users</td></tr>';
+    console.error(err);
+  }
+}
+
+function renderAdminTable() {
+  const tbody = document.getElementById('adminTableBody');
+  let filtered = allUsers;
+  if (currentFilter !== 'all') filtered = allUsers.filter(u => u.status === currentFilter);
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-400">No users found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(u => {
+    const statusBadge = `<span class="badge badge-${u.status || 'active'}">${(u.status || 'active').charAt(0).toUpperCase() + (u.status || 'active').slice(1)}</span>`;
+    const planBadge = u.plan === 'pro' ? '<span class="badge badge-pro"><i class="fa-solid fa-crown mr-1"></i>Pro</span>' : '<span class="badge badge-free">Free</span>';
+    const roleIcon = u.role === 'superadmin' ? ' <i class="fa-solid fa-shield-halved text-purple-500 text-xs" title="SuperAdmin"></i>' : '';
+    return `
+      <tr>
+        <td>
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white text-xs font-bold shrink-0">
+              ${(u.displayName || u.email || '?')[0].toUpperCase()}
+            </div>
+            <div class="min-w-0">
+              <p class="font-semibold text-gray-800 text-sm truncate">${u.displayName || '—'}${roleIcon}</p>
+              <p class="text-xs text-gray-400 truncate">${u.email || '—'}</p>
+            </div>
+          </div>
+        </td>
+        <td>${planBadge}</td>
+        <td>${statusBadge}</td>
+        <td class="text-xs text-gray-500 whitespace-nowrap">${formatDate(u.createdAt)}</td>
+        <td>
+          <button onclick="openUserManage('${u.id}')" class="glass-btn btn-secondary !min-h-0 !py-1.5 !px-3 !rounded-lg !text-xs">
+            <i class="fa-solid fa-ellipsis"></i> Manage
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterUsers(btn, filter) {
+  currentFilter = filter;
+  document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAdminTable();
+}
+
+let managingUserId = null;
+
+function openUserManage(userId) {
+  managingUserId = userId;
+  const user = allUsers.find(u => u.id === userId);
+  if (!user) return;
+
+  const modal = document.getElementById('adminUserModal');
+  const details = document.getElementById('adminUserDetails');
+
+  details.innerHTML = `
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-bold text-lg">
+        ${(user.displayName || user.email || '?')[0].toUpperCase()}
+      </div>
+      <div>
+        <p class="font-bold text-gray-900">${user.displayName || 'Unknown'}</p>
+        <p class="text-sm text-gray-500">${user.email}</p>
+      </div>
     </div>
-    <div style="font-size:13px;margin-bottom:16px"><strong>Stats:</strong> Bio Views: ${u.stats?.bioViews||0} | QR Scans: ${u.stats?.qrScans||0} | Link Clicks: ${u.stats?.linkClicks||0}</div>
-    <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-secondary btn-sm" onclick="this.closest('.modal-overlay').remove()">Close</button></div>
-  </div>`;
-  document.body.appendChild(overlay);
-  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
-};
-
-window._togglePlan = async (uid, currentPlan) => {
-  const newPlan = currentPlan==='pro'?'free':'pro';
-  try { await updateDoc(doc(db,'users',uid),{plan:newPlan}); toast(`Plan changed to ${newPlan.toUpperCase()}!`,'success'); renderAdminPanel(); } catch(e) { toast(e.message,'error'); }
-};
-
-/* ═══════════════ BIO HANDLERS ═══════════════ */
-window._updateBio = (k,v) => { bioState[k]=v; refreshBioPreview(); };
-window._updateBioLink = (i,k,v) => { bioState.links[i][k]=v; refreshBioPreview(); };
-window._removeBioLink = i => { bioState.links.splice(i,1); renderBio(); };
-window._addBioLink = () => {
-  if(userData?.plan!=='pro'&&bioState.links.length>=5){toast('Upgrade to Pro for unlimited links','error');return;}
-  const overlay=document.createElement('div');overlay.className='modal-overlay';
-  overlay.innerHTML=`<div class="modal" style="max-width:420px">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Add Link</h3>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:300px;overflow-y:auto">
-      ${linkPresets.map((p,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent-subtle)';this.style.background='var(--accent-light)'" onmouseout="this.style.borderColor='var(--border)';this.style.background=''" onclick="window._selectLinkPreset(${i});this.closest('.modal-overlay').remove()">
-        <i class="${p.icon}" style="color:${p.color};font-size:16px;width:20px;text-align:center"></i>
-        <span style="font-size:14px;font-weight:600;flex:1">${p.title}</span>
-        <i class="fa-solid fa-plus" style="color:var(--text-muted);font-size:12px"></i>
-      </div>`).join('')}
+    <div class="glass-divider"></div>
+    <div class="grid grid-cols-2 gap-3 text-sm">
+      <div>
+        <p class="text-xs text-gray-400 font-semibold mb-1">Plan</p>
+        <span class="${user.plan === 'pro' ? 'badge badge-pro' : 'badge badge-free'}">${user.plan === 'pro' ? 'Pro' : 'Free'}</span>
+      </div>
+      <div>
+        <p class="text-xs text-gray-400 font-semibold mb-1">Status</p>
+        <span class="badge badge-${user.status || 'active'}">${(user.status || 'active').charAt(0).toUpperCase() + (user.status || 'active').slice(1)}</span>
+      </div>
+      <div>
+        <p class="text-xs text-gray-400 font-semibold mb-1">Role</p>
+        <span class="text-gray-700 font-medium">${user.role === 'superadmin' ? 'SuperAdmin' : 'User'}</span>
+      </div>
+      <div>
+        <p class="text-xs text-gray-400 font-semibold mb-1">Joined</p>
+        <span class="text-gray-700">${formatDate(user.createdAt)}</span>
+      </div>
     </div>
-    <button class="btn btn-secondary btn-sm" style="width:100%" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
-  </div>`;
-  document.body.appendChild(overlay);
-  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
-};
-window._selectLinkPreset = i => { bioState.links.push({...linkPresets[i],id:Date.now()}); renderBio(); };
-window._saveBio = async () => {
-  if(!currentUser){toast('Sign in to save','error');return;}
-  bioState.published = true;
-  await saveBioData(currentUser.uid);
-  toast('Bio saved & published!','success');
-  track('save_bio');
-  renderBio(); // re-render to show "Published" badge
-};
+    <div class="glass-divider"></div>
+    <div>
+      <p class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Plan Management</p>
+      <div class="flex gap-2">
+        ${user.plan !== 'pro' ? `<button onclick="adminSetPlan('pro')" class="glass-btn btn-primary !py-2 !text-xs flex-1"><i class="fa-solid fa-crown"></i> Give Pro</button>` :
+          `<button onclick="adminSetPlan('free')" class="glass-btn btn-secondary !py-2 !text-xs flex-1"><i class="fa-solid fa-arrow-down"></i> Remove Pro</button>`}
+      </div>
+    </div>
+    <div class="glass-divider"></div>
+    <div>
+      <p class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Account Status</p>
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="adminSetStatus('active')" class="glass-btn ${user.status === 'active' ? 'btn-primary' : 'btn-secondary'} !py-2 !text-xs">Active</button>
+        <button onclick="adminSetStatus('inactive')" class="glass-btn ${user.status === 'inactive' ? 'btn-primary' : 'btn-secondary'} !py-2 !text-xs">Inactive</button>
+        <button onclick="adminSetStatus('suspended')" class="glass-btn ${user.status === 'suspended' ? 'btn-primary' : 'btn-secondary'} !py-2 !text-xs">Suspended</button>
+      </div>
+    </div>
+    <div class="glass-divider"></div>
+    <div class="space-y-2">
+      <p class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Actions</p>
+      <button onclick="adminSendResetEmail()" class="glass-btn btn-secondary w-full !py-2.5 !text-sm">
+        <i class="fa-solid fa-envelope"></i> Send Password Reset Email
+      </button>
+      <button onclick="adminDeleteUser()" class="glass-btn btn-danger w-full !py-2.5 !text-sm" id="adminDeleteBtn">
+        <i class="fa-solid fa-trash"></i> Delete Account Permanently
+      </button>
+    </div>
+  `;
 
-/* ═══════════════ RESUME HANDLERS ═══════════════ */
-window._updateResume = (k,v) => { resumeState[k]=v; refreshResumePreview(); };
-window._updateResumeSkills = v => { resumeState.skills=v.split(',').map(s=>s.trim()).filter(Boolean); refreshResumePreview(); };
-window._updateExp = (i,k,v) => { resumeState.experiences[i][k]=v; refreshResumePreview(); };
-window._addExp = () => { resumeState.experiences.push({company:'',role:'',period:'',desc:''}); renderResume(); };
-window._removeExp = i => { resumeState.experiences.splice(i,1); renderResume(); };
-window._updateEdu = (i,k,v) => { resumeState.education[i][k]=v; refreshResumePreview(); };
-window._addEdu = () => { resumeState.education.push({school:'',degree:'',year:''}); renderResume(); };
-window._removeEdu = i => { resumeState.education.splice(i,1); renderResume(); };
-window._selectResumeTemplate = id => { if(id!=='standard'&&userData?.plan!=='pro'){toast('Upgrade to Pro','error');return;} resumeState.template=id; renderResume(); };
-window._saveResume = async () => { if(!currentUser){toast('Sign in to save','error');return;} await saveResumeData(currentUser.uid); toast('Resume saved!','success'); track('save_resume'); };
-window._exportResumePDF = () => {
-  const el=$('resume-preview'); if(!el)return;
-  toast('Generating PDF...','info');
-  html2pdf().set({margin:0,filename:'resume.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save().then(()=>{toast('Resume PDF exported!','success');track('export_resume_pdf');});
-};
+  modal.classList.add('open');
+}
 
-/* ═══════════════ INVOICE HANDLERS ═══════════════ */
-window._updateInv = (k,v) => { invoiceState[k]=v; refreshInvoicePreview(); };
-window._updateInvFrom = (k,v) => { invoiceState.from[k]=v; refreshInvoicePreview(); };
-window._updateInvTo = (k,v) => { invoiceState.to[k]=v; refreshInvoicePreview(); };
-window._updateInvItem = (i,k,v) => { invoiceState.items[i][k]=v; refreshInvoicePreview(); };
-window._addInvItem = () => { invoiceState.items.push({desc:'',qty:1,price:0}); renderInvoice(); };
-window._removeInvItem = i => { if(invoiceState.items.length>1){invoiceState.items.splice(i,1);renderInvoice();} };
-window._saveInvoice = async () => { if(!currentUser){toast('Sign in to save','error');return;} await saveInvoiceData(currentUser.uid); toast('Invoice saved!','success'); track('save_invoice'); };
-window._exportInvoicePDF = () => {
-  const el=$('invoice-preview'); if(!el)return;
-  toast('Generating PDF...','info');
-  html2pdf().set({margin:10,filename:`${invoiceState.invoiceNo||'invoice'}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save().then(()=>{toast('Invoice PDF exported!','success');track('export_invoice_pdf');});
-};
-window._sendInvoiceWhatsApp = () => {
-  const sym=getCurSymbol();const total=invoiceState.items.reduce((s,i)=>s+(i.qty*i.price||0),0);
-  const text=`Invoice ${invoiceState.invoiceNo}\nDate: ${invoiceState.date}\nTo: ${invoiceState.to.name}\nTotal: ${sym}${total.toFixed(2)}\n\nPlease find the full invoice in the attached PDF.`;
-  const phone=(invoiceState.to.phone||'').replace(/[^0-9]/g,'');
-  if(!phone){toast('Add client phone number to send via WhatsApp','error');return;}
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`,'_blank');
-  track('send_invoice_whatsapp');
-};
+function closeAdminUserModal() {
+  document.getElementById('adminUserModal').classList.remove('open');
+  managingUserId = null;
+}
 
-/* ═══════════════ WA LINK HANDLERS ═══════════════ */
-window._updateWa = (k,v) => { waState[k]=v; renderWaLink(); };
-window._selectWaTemplate = id => { if(!waTemplates.find(t=>t.id===id)?.free&&userData?.plan!=='pro'){toast('Upgrade to Pro','error');return;} waState.templateId=id; renderWaLink(); };
-window._saveWaLink = async () => { if(!currentUser){toast('Sign in to save','error');return;} await saveWaData(currentUser.uid); toast('WhatsApp link saved!','success'); track('save_wa_link'); };
-window._shareWaLink = () => {
-  const selTemplate=waTemplates.find(t=>t.id===waState.templateId)||waTemplates[0];
-  const fullPhone=waState.countryCode.replace('+','')+waState.phone;
-  const link=selTemplate.generate(fullPhone,waState.message);
-  if(navigator.share){navigator.share({title:'WhatsApp Link',url:link}).catch(()=>{});}
-  else window._copyText(link);
-};
+async function adminSetPlan(plan) {
+  if (!managingUserId) return;
+  try {
+    await db.collection('users').doc(managingUserId).update({ plan });
+    const user = allUsers.find(u => u.id === managingUserId);
+    if (user) user.plan = plan;
+    renderAdminTable();
+    closeAdminUserModal();
+    showToast(`User ${plan === 'pro' ? 'upgraded to' : 'downgraded from'} Pro`, 'success');
+  } catch (err) { showToast('Failed to update plan', 'error'); }
+}
 
-/* ═══════════════ RESPONSIVE GRID ═══════════════ */
-const style=document.createElement('style');
-style.textContent=`@media(min-width:1024px){.lg-grid{grid-template-columns:1fr 340px !important}.lg-grid-equal{grid-template-columns:1fr 1fr !important}}@media(max-width:639px){.sm\\:hidden{display:none!important}.hidden{display:none!important}.sm\\:inline{display:inline!important}}`;
-document.head.appendChild(style);
+async function adminSetStatus(status) {
+  if (!managingUserId) return;
+  try {
+    await db.collection('users').doc(managingUserId).update({ status });
+    const user = allUsers.find(u => u.id === managingUserId);
+    if (user) user.status = status;
+    renderAdminTable();
+    closeAdminUserModal();
+    showToast(`User status set to ${status}`, 'success');
+  } catch (err) { showToast('Failed to update status', 'error'); }
+}
 
-/* ═══════════════ INITIAL ROUTE RESOLVE ═══════════════ */
-(function initRoute() {
-  const path = window.location.pathname.replace(/\/$/,'');
-  // No path or just / → landing
-  if(path===''||path==='/') { render(); return; }
-  // Known app routes (only relevant if user is logged in)
-  const appRoutes = {'/login':'login','/register':'register','/dashboard':'dashboard','/bio':'bio','/qr':'qr','/resume':'resume','/invoice':'invoice','/pricing':'pricing','/walink':'walink','/verify-email':'verify-email','/profile':'profile','/admin':'admin'};
-  if(appRoutes[path]) { currentPage=appRoutes[path]; render(); return; }
-  // Everything else → public bio page
-  const slug = path.startsWith('/') ? path.slice(1) : path;
-  currentPage = 'public-bio';
-  renderPublicBio(slug);
-})();
+async function adminSendResetEmail() {
+  if (!managingUserId) return;
+  const user = allUsers.find(u => u.id === managingUserId);
+  if (!user || !user.email) { showToast('No email found for this user', 'error'); return; }
+  try {
+    await auth.sendPasswordResetEmail(user.email);
+    showToast(`Password reset email sent to ${user.email}`, 'success');
+  } catch (err) {
+    showToast('Failed to send reset email', 'error');
+    console.error(err);
+  }
+}
+
+async function adminDeleteUser() {
+  if (!managingUserId) return;
+  const btn = document.getElementById('adminDeleteBtn');
+  if (!btn.dataset.confirm) {
+    btn.dataset.confirm = 'true';
+    btn.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> Click again to confirm deletion';
+    btn.style.background = 'linear-gradient(135deg, #b91c1c, #991b1b)';
+    setTimeout(() => {
+      if (btn && btn.dataset.confirm) {
+        delete btn.dataset.confirm;
+        btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete Account Permanently';
+        btn.style.background = '';
+      }
+    }, 3000);
+    return;
+  }
+  try {
+    await db.collection('users').doc(managingUserId).delete();
+    allUsers = allUsers.filter(u => u.id !== managingUserId);
+    renderAdminTable();
+    closeAdminUserModal();
+    showToast('User account deleted', 'success');
+  } catch (err) { showToast('Failed to delete user', 'error'); }
+}
+
+/* ========================================
+   Keyboard Shortcuts
+   ======================================== */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('authView').classList.contains('active')) {
+      if (document.getElementById('loginForm').style.display !== 'none') handleLogin();
+      else handleRegister();
+    }
+  }
+  if (e.key === 'Escape') {
+    closePlanModal();
+    closeAdminUserModal();
+    closeUserMenu();
+  }
+});
+
+/* ========================================
+   Init
+   ======================================== */
+updateActionButton();
 </script>
 </body>
 </html>
