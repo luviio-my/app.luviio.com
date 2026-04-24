@@ -287,6 +287,68 @@ tailwind.config = {
   @media (min-width: 768px) {
     .glass-card { border-radius: 24px; }
   }
+
+  /* Landing Page Styles */
+  .hero-gradient {
+    background: linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(236,72,153,0.05) 100%);
+  }
+  .feature-card {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 20px;
+    padding: 28px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(99,102,241,0.12);
+  }
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .pricing-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .pricing-table th, .pricing-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(200,195,220,0.3);
+  }
+  .pricing-table th {
+    background: rgba(99,102,241,0.05);
+    font-weight: 700;
+    color: #4338ca;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pricing-table tr:hover td {
+    background: rgba(99,102,241,0.02);
+  }
+  .limit-banner {
+    background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.04));
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    font-size: 14px;
+    color: #dc2626;
+    font-weight: 600;
+  }
+  .countdown-timer {
+    font-family: monospace;
+    font-size: 1.1em;
+    color: #ef4444;
+    font-weight: 700;
+  }
 </style>
 </head>
 <body>
@@ -299,8 +361,244 @@ tailwind.config = {
 
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- ===== LANDING PAGE VIEW ===== -->
+<div class="view active" id="landingView">
+  <div class="relative z-10">
+    <!-- Navigation -->
+    <nav class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/20">
+          <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
+        </div>
+        <span class="font-bold text-xl text-gray-900 tracking-tight">Appluvii</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="navigateTo('/pricing')" class="glass-btn btn-secondary !py-2.5 !px-5 !text-sm !rounded-xl">
+          <i class="fa-solid fa-crown text-amber-500"></i> Pricing
+        </button>
+        <button onclick="showAuthFromLanding()" class="glass-btn btn-primary !py-2.5 !px-5 !text-sm !rounded-xl">
+          <i class="fa-solid fa-user"></i> Sign In
+        </button>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="max-w-6xl mx-auto px-4 pt-12 pb-20 hero-gradient rounded-3xl mt-4">
+      <div class="text-center max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 bg-white/60 backdrop-blur border border-white/50 rounded-full px-4 py-2 mb-6 text-sm font-medium text-gray-600">
+          <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          Trusted by 1000+ users worldwide
+        </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
+          Free Tools for <br>
+          <span class="bg-gradient-to-r from-primary-500 via-accent-500 to-primary-600 bg-clip-text text-transparent">Everyone</span>
+        </h1>
+        <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+          Generate QR Codes, WhatsApp Links & Convert to PDF — Instantly, No Signup Required.<br>
+          <strong class="text-primary-600">Free users get 5 generations per day.</strong> Unlimited with Pro.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <button onclick="navigateTo('/qr')" class="glass-btn btn-primary !text-base !px-8 !py-4 !rounded-2xl">
+            <i class="fa-solid fa-qrcode"></i> View Tools
+          </button>
+          <button onclick="navigateTo('/pricing')" class="glass-btn btn-secondary !text-base !px-8 !py-4 !rounded-2xl">
+            <i class="fa-solid fa-crown text-amber-500"></i> Upgrade Features
+          </button>
+        </div>
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-6 max-w-lg mx-auto">
+          <div>
+            <div class="stat-number">1000+</div>
+            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide mt-1">Active Users</p>
+          </div>
+          <div>
+            <div class="stat-number">3</div>
+            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide mt-1">Power Tools</p>
+          </div>
+          <div>
+            <div class="stat-number">Free</div>
+            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide mt-1">To Start</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tools Showcase -->
+    <section class="max-w-6xl mx-auto px-4 py-16">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-3">Our Tools</h2>
+        <p class="text-gray-600">Everything you need, completely free to start</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- QR Code Card -->
+        <div class="feature-card cursor-pointer" onclick="navigateTo('/qr')">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center mb-4 shadow-lg shadow-primary-500/20">
+            <i class="fa-solid fa-qrcode text-white text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">QR Generator</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">Create custom QR codes for URLs, text, or any content instantly. Multiple sizes available.</p>
+          <div class="flex items-center text-primary-600 font-semibold text-sm">
+            Try Now <i class="fa-solid fa-arrow-right ml-2"></i>
+          </div>
+        </div>
+        
+        <!-- WhatsApp Card -->
+        <div class="feature-card cursor-pointer" onclick="navigateTo('/wa-link')">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mb-4 shadow-lg shadow-green-500/20">
+            <i class="fa-brands fa-whatsapp text-white text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">WhatsApp Link</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">Generate direct WhatsApp message links with pre-filled messages. Perfect for businesses.</p>
+          <div class="flex items-center text-green-600 font-semibold text-sm">
+            Try Now <i class="fa-solid fa-arrow-right ml-2"></i>
+          </div>
+        </div>
+        
+        <!-- PDF Card -->
+        <div class="feature-card cursor-pointer" onclick="navigateTo('/pdf')">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center mb-4 shadow-lg shadow-red-500/20">
+            <i class="fa-solid fa-file-pdf text-white text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">PDF Converter</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">Convert images or text to professional PDF documents. Clean formatting included.</p>
+          <div class="flex items-center text-red-600 font-semibold text-sm">
+            Try Now <i class="fa-solid fa-arrow-right ml-2"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="max-w-4xl mx-auto px-4 py-16">
+      <div class="glass-card p-8 md:p-12">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-extrabold text-gray-900 mb-3">Why Use Our Tools?</h2>
+          <p class="text-gray-600">Because we believe in simplicity and privacy</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="flex gap-4">
+            <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-check text-green-600"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900 mb-1">Unlimited with Account</h4>
+              <p class="text-sm text-gray-600">Login to remove all daily limits and generate as much as you need.</p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-ban text-purple-600"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900 mb-1">100% Ad-Free Experience</h4>
+              <p class="text-sm text-gray-600">No annoying ads, pop-ups, or distractions. Clean tools only.</p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-shield-halved text-blue-600"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900 mb-1">Privacy First</h4>
+              <p class="text-sm text-gray-600">We don't sell your data. Your files are processed locally when possible.</p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-bolt text-amber-600"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-900 mb-1">Instant Generation</h4>
+              <p class="text-sm text-gray-600">No waiting queues. Generate your codes and files in milliseconds.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Buy Website CTA -->
+    <section class="max-w-4xl mx-auto px-4 py-8 mb-8">
+      <div class="glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-4 bg-gradient-to-r from-primary-500/5 to-accent-500/5">
+        <div>
+          <h3 class="font-bold text-gray-900 text-lg">Want a website like this?</h3>
+          <p class="text-sm text-gray-600">Visit our parent company for web development services</p>
+        </div>
+        <a href="https://luviio.com" target="_blank" rel="noopener noreferrer" class="glass-btn btn-primary whitespace-nowrap">
+          <i class="fa-solid fa-external-link-alt"></i> Visit Luviio.com
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white/40 backdrop-blur border-t border-white/50 mt-8">
+      <div class="max-w-6xl mx-auto px-4 py-12">
+        <div class="grid md:grid-cols-4 gap-8 mb-8">
+          <!-- Brand -->
+          <div>
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
+                <i class="fa-solid fa-wand-magic-sparkles text-white text-sm"></i>
+              </div>
+              <span class="font-bold text-gray-900">Appluvii</span>
+            </div>
+            <p class="text-sm text-gray-600 leading-relaxed">Free online tools for QR codes, WhatsApp links, and PDF conversion. Built with ❤️ by Luviio.</p>
+          </div>
+          
+          <!-- Details -->
+          <div>
+            <h4 class="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Details</h4>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li><a href="/home" onclick="navigateTo('/home'); return false;" class="hover:text-primary-600 transition-colors">Home</a></li>
+              <li><a href="/pricing" onclick="navigateTo('/pricing'); return false;" class="hover:text-primary-600 transition-colors">Pricing</a></li>
+              <li><a href="mailto:support@luviio.com" class="hover:text-primary-600 transition-colors">Support</a></li>
+            </ul>
+          </div>
+          
+          <!-- Company -->
+          <div>
+            <h4 class="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Company</h4>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li><a href="https://luviio.com" target="_blank" rel="noopener noreferrer" class="hover:text-primary-600 transition-colors">Luviio</a></li>
+              <li><a href="/terms" onclick="navigateTo('/terms'); return false;" class="hover:text-primary-600 transition-colors">Terms & Conditions</a></li>
+              <li><a href="/privacy" onclick="navigateTo('/privacy'); return false;" class="hover:text-primary-600 transition-colors">Privacy Policy</a></li>
+            </ul>
+          </div>
+          
+          <!-- Social -->
+          <div>
+            <h4 class="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Connect</h4>
+            <div class="flex gap-3">
+              <a href="#" class="w-9 h-9 rounded-lg bg-gray-100 hover:bg-primary-100 flex items-center justify-center text-gray-600 hover:text-primary-600 transition-all" aria-label="Facebook">
+                <i class="fa-brands fa-facebook-f"></i>
+              </a>
+              <a href="#" class="w-9 h-9 rounded-lg bg-gray-100 hover:bg-primary-100 flex items-center justify-center text-gray-600 hover:text-primary-600 transition-all" aria-label="Twitter">
+                <i class="fa-brands fa-twitter"></i>
+              </a>
+              <a href="#" class="w-9 h-9 rounded-lg bg-gray-100 hover:bg-primary-100 flex items-center justify-center text-gray-600 hover:text-primary-600 transition-all" aria-label="Instagram">
+                <i class="fa-brands fa-instagram"></i>
+              </a>
+              <a href="mailto:support@luviio.com" class="w-9 h-9 rounded-lg bg-gray-100 hover:bg-primary-100 flex items-center justify-center text-gray-600 hover:text-primary-600 transition-all" aria-label="Email">
+                <i class="fa-solid fa-envelope"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-200/50 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+          <p>&copy; <span id="currentYearFooter"></span> Luviio. All rights reserved.</p>
+          <div class="flex gap-6">
+            <a href="/terms" onclick="navigateTo('/terms'); return false;" class="hover:text-primary-600 transition-colors">Terms</a>
+            <a href="/privacy" onclick="navigateTo('/privacy'); return false;" class="hover:text-primary-600 transition-colors">Privacy</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>
+
 <!-- ===== AUTH VIEW ===== -->
-<div class="view active" id="authView">
+<div class="view" id="authView">
   <div class="min-h-[100dvh] flex flex-col items-center justify-center px-5 py-10 relative z-10">
     <div class="glass-card w-full max-w-md p-8">
       <div class="text-center mb-8">
@@ -379,10 +677,15 @@ tailwind.config = {
   <div class="relative z-10 max-w-2xl mx-auto px-4 pt-4 pb-40">
     <header class="flex items-center justify-between mb-5">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-md shadow-primary-500/20">
-          <i class="fa-solid fa-wand-magic-sparkles text-white text-sm"></i>
+        <button onclick="navigateTo('/home')" class="w-9 h-9 rounded-xl bg-white/50 backdrop-blur flex items-center justify-center text-gray-600 hover:text-primary-600 transition-colors" aria-label="Back to home">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-md shadow-primary-500/20">
+            <i class="fa-solid fa-wand-magic-sparkles text-white text-sm"></i>
+          </div>
+          <span class="font-bold text-lg text-gray-900 tracking-tight">Appluvii</span>
         </div>
-        <span class="font-bold text-lg text-gray-900 tracking-tight">Appluvii</span>
       </div>
       <div class="flex items-center gap-2">
         <span id="planBadge" class="badge badge-free">Free</span>
@@ -406,10 +709,17 @@ tailwind.config = {
       </div>
     </header>
 
+    <!-- Guest Limit Banner -->
+    <div id="guestLimitBanner" class="limit-banner mb-5" style="display:none;">
+      <i class="fa-solid fa-clock mr-2"></i>
+      Daily limit reached! Resets in: <span id="countdownTimer" class="countdown-timer">--:--:--</span>
+      <br><span class="text-xs font-normal mt-1 inline-block">Or <button onclick="showAuthFromLanding()" class="underline font-bold">sign in</button> for unlimited access</span>
+    </div>
+
     <div id="proBanner" class="pro-banner mb-5">
       <i class="fa-solid fa-crown text-amber-500 text-lg"></i>
       <span>Upgrade to <strong>Pro</strong> for watermark-free exports & advanced features</span>
-      <button onclick="openPlanModal()" class="ml-auto text-xs font-bold text-primary-600 hover:underline whitespace-nowrap">RM 9.90/mo</button>
+      <button onclick="navigateTo('/pricing')" class="ml-auto text-xs font-bold text-primary-600 hover:underline whitespace-nowrap">RM 9.90/mo</button>
     </div>
 
     <nav class="tab-bar mb-5" role="tablist">
@@ -554,6 +864,236 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- ===== PRICING VIEW ===== -->
+<div class="view" id="pricingView">
+  <div class="relative z-10 max-w-4xl mx-auto px-4 pt-6 pb-20">
+    <header class="flex items-center gap-3 mb-8">
+      <button onclick="navigateTo('/home')" class="glass-btn btn-secondary !min-h-0 !py-2 !px-3 !rounded-xl">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <h1 class="text-2xl font-extrabold text-gray-900">Pricing Plans</h1>
+    </header>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-12">
+      <!-- Free Plan -->
+      <div class="glass-card p-8">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-gray-900">Free</h3>
+          <span class="badge badge-free">Current</span>
+        </div>
+        <div class="mb-6">
+          <span class="text-4xl font-extrabold text-gray-900">RM 0</span>
+          <span class="text-gray-500">/month</span>
+        </div>
+        <ul class="space-y-3 mb-8 text-sm text-gray-600">
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> 5 generations per day per tool</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Basic QR sizes (S, M, L)</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Standard PDF quality</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-gray-300 mt-0.5"></i> Watermark on exports</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-gray-300 mt-0.5"></i> No priority support</li>
+        </ul>
+        <button onclick="navigateTo('/home')" class="glass-btn btn-secondary w-full">Current Plan</button>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="glass-card p-8 plan-highlight relative overflow-visible">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary-500 to-accent-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">RECOMMENDED</div>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-gray-900">Pro</h3>
+          <span class="badge badge-pro"><i class="fa-solid fa-crown mr-1"></i>Pro</span>
+        </div>
+        <div class="mb-6">
+          <span class="text-4xl font-extrabold text-gray-900">RM 9.90</span>
+          <span class="text-gray-500">/month</span>
+        </div>
+        <ul class="space-y-3 mb-8 text-sm text-gray-600">
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Unlimited generations</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> All sizes including HD</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> No watermark</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Advanced PDF formatting</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Priority support via email</li>
+        </ul>
+        <button onclick="startUpgradeFlow()" class="glass-btn btn-primary w-full" id="pricingUpgradeBtn">Upgrade to Pro</button>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="glass-card p-6 overflow-x-auto">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Feature Comparison</h3>
+      <table class="pricing-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="text-center">Free</th>
+            <th class="text-center">Pro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Daily Generations</td>
+            <td class="text-center font-medium">5 per tool</td>
+            <td class="text-center font-bold text-primary-600">Unlimited</td>
+          </tr>
+          <tr>
+            <td>QR Sizes</td>
+            <td class="text-center">S, M, L</td>
+            <td class="text-center font-bold text-primary-600">S, M, L, XL, HD</td>
+          </tr>
+          <tr>
+            <td>Watermark</td>
+            <td class="text-center"><i class="fa-solid fa-xmark text-red-500"></i></td>
+            <td class="text-center"><i class="fa-solid fa-check text-green-500"></i></td>
+          </tr>
+          <tr>
+            <td>PDF Quality</td>
+            <td class="text-center">Standard</td>
+            <td class="text-center font-bold text-primary-600">High Quality</td>
+          </tr>
+          <tr>
+            <td>Support</td>
+            <td class="text-center">Community</td>
+            <td class="text-center font-bold text-primary-600">Priority Email</td>
+          </tr>
+          <tr>
+            <td>Price</td>
+            <td class="text-center font-bold">RM 0</td>
+            <td class="text-center font-bold text-primary-600">RM 9.90/mo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="text-center text-sm text-gray-500 mt-6">Cancel anytime. Secure payment processing. Questions? <a href="mailto:support@luviio.com" class="text-primary-600 underline">support@luviio.com</a></p>
+  </div>
+</div>
+
+<!-- ===== TERMS VIEW ===== -->
+<div class="view" id="termsView">
+  <div class="relative z-10 max-w-3xl mx-auto px-4 pt-6 pb-20">
+    <header class="flex items-center gap-3 mb-8">
+      <button onclick="navigateTo('/home')" class="glass-btn btn-secondary !min-h-0 !py-2 !px-3 !rounded-xl">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <h1 class="text-2xl font-extrabold text-gray-900">Terms & Conditions</h1>
+    </header>
+    
+    <div class="glass-card p-8 prose prose-sm max-w-none">
+      <p class="text-sm text-gray-600 mb-6">Last updated: January 2025</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">1. Acceptance of Terms</h2>
+      <p class="text-sm text-gray-600 mb-4">By accessing and using Appluvii ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use the Service.</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">2. Use of Service</h2>
+      <ul class="text-sm text-gray-600 list-disc pl-5 space-y-2 mb-4">
+        <li>You must be at least 13 years old to use this Service.</li>
+        <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
+        <li>You agree not to misuse the Service or assist anyone else in doing so.</li>
+        <li>Free users are limited to 5 generations per tool per day.</li>
+      </ul>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">3. Subscription & Payment</h2>
+      <ul class="text-sm text-gray-600 list-disc pl-5 space-y-2 mb-4">
+        <li>Pro subscriptions are billed monthly at RM 9.90.</li>
+        <li>Subscriptions auto-renew unless cancelled before the renewal date.</li>
+        <li>All fees are non-refundable except as required by law.</li>
+        <li>We reserve the right to modify pricing with 30 days notice.</li>
+      </ul>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">4. Intellectual Property</h2>
+      <p class="text-sm text-gray-600 mb-4">The Service and its original content, features, and functionality are owned by Luviio and are protected by international copyright, trademark, and other intellectual property laws.</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">5. Limitation of Liability</h2>
+      <p class="text-sm text-gray-600 mb-4">In no event shall Luviio be liable for any indirect, incidental, special, consequential, or punitive damages arising out of your use of the Service.</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">6. Changes to Terms</h2>
+      <p class="text-sm text-gray-600 mb-4">We reserve the right to modify these terms at any time. Continued use of the Service after changes constitutes acceptance of the new terms.</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">7. Contact</h2>
+      <p class="text-sm text-gray-600">For questions about these terms, contact us at: <a href="mailto:support@luviio.com" class="text-primary-600 underline">support@luviio.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PRIVACY VIEW ===== -->
+<div class="view" id="privacyView">
+  <div class="relative z-10 max-w-3xl mx-auto px-4 pt-6 pb-20">
+    <header class="flex items-center gap-3 mb-8">
+      <button onclick="navigateTo('/home')" class="glass-btn btn-secondary !min-h-0 !py-2 !px-3 !rounded-xl">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <h1 class="text-2xl font-extrabold text-gray-900">Privacy Policy</h1>
+    </header>
+    
+    <div class="glass-card p-8 prose prose-sm max-w-none">
+      <p class="text-sm text-gray-600 mb-6">Last updated: January 2025</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">1. Introduction</h2>
+      <p class="text-sm text-gray-600 mb-4">Luviio ("we", "our", or "us") operates Appluvii (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service.</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">2. Data We Collect</h2>
+      <ul class="text-sm text-gray-600 list-disc pl-5 space-y-2 mb-4">
+        <li><strong>Email address:</strong> When you create an account or sign in with Google.</li>
+        <li><strong>Profile information:</strong> Display name and profile photo (if using Google Sign-In).</li>
+        <li><strong>Usage data:</strong> How you interact with our tools (generation counts, feature usage).</li>
+        <li><strong>Device information:</strong> Browser type, operating system, and general location for analytics.</li>
+      </ul>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">3. Google Account Data Safety</h2>
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+        <p class="text-sm text-blue-900 font-semibold mb-2"><i class="fa-solid fa-shield-halved mr-2"></i>Your Google Account Data is Safe With Us</p>
+        <ul class="text-sm text-blue-800 space-y-1 list-disc pl-5">
+          <li>We do NOT sell your personal data to third parties.</li>
+          <li>We do NOT share your email address with advertisers or marketers.</li>
+          <li>We do NOT access your Google Drive, Gmail, or other Google services beyond basic profile info.</li>
+          <li>Your authentication tokens are stored securely by Firebase Auth.</li>
+          <li>We use industry-standard encryption for data transmission (TLS/SSL).</li>
+        </ul>
+      </div>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">4. How We Use Your Data</h2>
+      <ul class="text-sm text-gray-600 list-disc pl-5 space-y-2 mb-4">
+        <li>To provide, maintain, and improve our Service.</li>
+        <li>To manage your account and subscription status.</li>
+        <li>To enforce our terms and conditions.</li>
+        <li>To respond to your support requests (via support@luviio.com).</li>
+        <li>To detect and prevent fraud or abuse of the Service.</li>
+      </ul>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">5. Data Sharing</h2>
+      <p class="text-sm text-gray-600 mb-4"><strong>We do not sell, trade, or rent your personal identification information to others.</strong> We may share generic aggregated demographic information with our business partners, but this does not include personally identifiable information.</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">6. Third-Party Services</h2>
+      <ul class="text-sm text-gray-600 list-disc pl-5 space-y-2 mb-4">
+        <li><strong>Firebase (Google):</strong> Used for authentication and database storage. <a href="https://firebase.google.com/terms" target="_blank" class="text-primary-600 underline">Their privacy policy</a>.</li>
+        <li><strong>Google Analytics:</strong> May be used for anonymous usage statistics.</li>
+      </ul>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">7. Your Rights</h2>
+      <ul class="text-sm text-gray-600 list-disc pl-5 space-y-2 mb-4">
+        <li>Request access to your personal data.</li>
+        <li>Request correction or deletion of your data.</li>
+        <li>Object to processing of your data.</li>
+        <li>Request data portability.</li>
+        <li>Withdraw consent at any time (by deleting your account).</li>
+      </ul>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">8. Data Security</h2>
+      <p class="text-sm text-gray-600 mb-4">We implement appropriate security measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction. However, no method of electronic storage is 100% secure.</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">9. Cookies</h2>
+      <p class="text-sm text-gray-600 mb-4">We use cookies for session management and preferences. You can control cookie settings through your browser.</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">10. Children's Privacy</h2>
+      <p class="text-sm text-gray-600 mb-4">Our Service does not address anyone under the age of 13. We do not knowingly collect personal information from children under 13.</p>
+      
+      <h2 class="text-lg font-bold text-gray-900 mt-6 mb-3">11. Contact Us</h2>
+      <p class="text-sm text-gray-600">If you have questions about this Privacy Policy, please contact us at: <br>
+      <strong>Email:</strong> <a href="mailto:support@luviio.com" class="text-primary-600 underline">support@luviio.com</a><br>
+      <strong>Company:</strong> Luviio (<a href="https://luviio.com" target="_blank" class="text-primary-600 underline">luviio.com</a>)</p>
+    </div>
+  </div>
+</div>
+
 <!-- ===== ADMIN PANEL VIEW ===== -->
 <div class="view" id="adminView">
   <div class="relative z-10 max-w-5xl mx-auto px-4 pt-4 pb-6">
@@ -594,7 +1134,7 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ===== PLAN MODAL ===== -->
+<!-- ===== PLAN MODAL (kept for quick upgrade from app) ===== -->
 <div class="modal-overlay" id="planModal">
   <div class="modal-content plan-highlight">
     <div class="flex items-center justify-between mb-6">
@@ -611,10 +1151,9 @@ tailwind.config = {
         </div>
         <div class="text-2xl font-extrabold text-gray-900">RM 0<span class="text-sm font-normal text-gray-500">/month</span></div>
         <ul class="mt-3 space-y-1.5 text-sm text-gray-600">
-          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Unlimited QR, WhatsApp, PDF</li>
+          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>5 generations per day</li>
           <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Basic features</li>
           <li><i class="fa-solid fa-xmark text-gray-300 mr-2"></i>Watermark on exports</li>
-          <li><i class="fa-solid fa-xmark text-gray-300 mr-2"></i>No priority support</li>
         </ul>
       </div>
       <div class="p-4 rounded-2xl border-2 border-primary-500/30 bg-gradient-to-br from-primary-500/5 to-accent-500/5 relative">
@@ -625,18 +1164,99 @@ tailwind.config = {
         </div>
         <div class="text-2xl font-extrabold text-gray-900">RM 9.90<span class="text-sm font-normal text-gray-500">/month</span></div>
         <ul class="mt-3 space-y-1.5 text-sm text-gray-600">
-          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Everything in Free</li>
+          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Unlimited everything</li>
           <li><i class="fa-solid fa-check text-green-500 mr-2"></i>No watermark</li>
           <li><i class="fa-solid fa-check text-green-500 mr-2"></i>HD quality exports</li>
-          <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Advanced PDF formatting</li>
           <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Priority support</li>
         </ul>
-        <button onclick="handleProUpgrade()" class="glass-btn btn-primary w-full mt-4" id="proUpgradeBtn">
+        <button onclick="startUpgradeFlow(); closePlanModal();" class="glass-btn btn-primary w-full mt-4" id="proUpgradeBtn">
           Upgrade to Pro
         </button>
       </div>
     </div>
     <p class="text-xs text-gray-400 text-center mt-4">Cancel anytime. Payment handled securely.</p>
+  </div>
+</div>
+
+<!-- ===== PAYMENT FLOW MODAL ===== -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal-content" style="max-width: 520px;">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-extrabold text-gray-900" id="paymentTitle">Upgrade to Pro</h3>
+      <button onclick="closePaymentModal()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    
+    <!-- Step 1: Form -->
+    <div id="paymentStep1">
+      <p class="text-sm text-gray-600 mb-6">Complete your details to proceed with RM 9.90/month subscription.</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Full Name</label>
+          <input type="text" id="payName" class="glass-input" placeholder="John Doe" value="">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Email (for receipt)</label>
+          <input type="email" id="payEmail" class="glass-input" placeholder="john@example.com" value="">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Phone Number</label>
+          <input type="tel" id="payPhone" class="glass-input" placeholder="+60123456789" value="">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Card Number (Demo)</label>
+          <input type="text" id="payCard" class="glass-input" placeholder="4242 4242 4242 4242" maxlength="19">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Expiry</label>
+            <input type="text" id="payExpiry" class="glass-input" placeholder="MM/YY" maxlength="5">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">CVC</label>
+            <input type="text" id="payCvc" class="glass-input" placeholder="123" maxlength="3">
+          </div>
+        </div>
+      </div>
+      <button onclick="processPayment()" class="glass-btn btn-primary w-full mt-6" id="paySubmitBtn">
+        <i class="fa-solid fa-lock"></i> Pay RM 9.90
+      </button>
+      <p class="text-xs text-gray-400 text-center mt-3"><i class="fa-solid fa-shield-halved mr-1"></i> Secured by 256-bit SSL encryption</p>
+    </div>
+    
+    <!-- Step 2: Processing -->
+    <div id="paymentStep2" style="display:none; text-align:center; padding: 40px 0;">
+      <div class="spinner mx-auto mb-4" style="width:40px;height:40px;border-width:3px;"></div>
+      <p class="text-gray-700 font-semibold">Processing payment...</p>
+      <p class="text-sm text-gray-500 mt-2">Please wait while we confirm your subscription</p>
+    </div>
+    
+    <!-- Step 3: Success -->
+    <div id="paymentStep3" style="display:none; text-align:center; padding: 20px 0;">
+      <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-check text-green-600 text-2xl"></i>
+      </div>
+      <h4 class="text-xl font-bold text-gray-900 mb-2">Payment Successful!</h4>
+      <p class="text-sm text-gray-600 mb-6">Welcome to Pro! You now have unlimited access to all features.</p>
+      <button onclick="closePaymentModal(); navigateTo('/home');" class="glass-btn btn-primary w-full">
+        Start Using Pro
+      </button>
+    </div>
+    
+    <!-- Step 4: Failed -->
+    <div id="paymentStep4" style="display:none; text-align:center; padding: 20px 0;">
+      <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-xmark text-red-600 text-2xl"></i>
+      </div>
+      <h4 class="text-xl font-bold text-gray-900 mb-2">Payment Failed</h4>
+      <p class="text-sm text-gray-600 mb-2">We couldn't process your payment. Please try again or use a different card.</p>
+      <p class="text-xs text-gray-400 mb-6">Error: Transaction declined by bank</p>
+      <div class="flex gap-3">
+        <button onclick="retryPayment()" class="glass-btn btn-secondary flex-1">Try Again</button>
+        <button onclick="closePaymentModal(); navigateTo('/pricing');" class="glass-btn btn-primary flex-1">View Plans</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -685,6 +1305,71 @@ let pdfFiles = [];
 let generatedPdfBlob = null;
 let currentFilter = 'all';
 let allUsers = [];
+let countdownInterval = null;
+
+// Guest usage tracking
+const DAILY_LIMIT = 5;
+const USAGE_KEY_PREFIX = 'luvtools_usage_';
+const GUEST_MODE_KEY = 'luvtools_guest_mode';
+
+/* ========================================
+   Router System
+   ======================================== */
+const routes = {
+  '/': 'landingView',
+  '/home': 'landingView',
+  '/qr': 'appView',
+  '/wa-link': 'appView',
+  '/pdf': 'appView',
+  '/pricing': 'pricingView',
+  '/terms': 'termsView',
+  '/privacy': 'privacyView',
+  '/auth': 'authView',
+  '/admin': 'adminView'
+};
+
+function getCurrentPath() {
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  // Handle local file serving fallback
+  if (path === '' || path.includes('.html')) return '/';
+  return path;
+}
+
+function navigateTo(path) {
+  window.history.pushState({}, '', path);
+  handleRoute();
+}
+
+function handleRoute() {
+  const path = getCurrentPath();
+  const viewId = routes[path];
+  
+  if (!viewId) {
+    navigateTo('/');
+    return;
+  }
+  
+  // Hide all views
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  
+  // Show target view
+  document.getElementById(viewId).classList.add('active');
+  
+  // Handle specific route initializations
+  if (path === '/qr' || path === '/wa-link' || path === '/pdf') {
+    const tabMap = { '/qr': 'qr', '/wa-link': 'whatsapp', '/pdf': 'pdf' };
+    switchTab(tabMap[path]);
+    checkGuestLimits();
+  }
+  
+  if (path === '/pricing' && currentUser && userData?.plan === 'pro') {
+    // Could show "you're already pro" state
+  }
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.addEventListener('popstate', handleRoute);
 
 /* ========================================
    Utilities
@@ -706,15 +1391,106 @@ function togglePwdVis(inputId, btn) {
   else { input.type = 'password'; icon.className = 'fa-regular fa-eye'; }
 }
 
-function showView(viewId) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById(viewId).classList.add('active');
-}
-
 function formatDate(ts) {
   if (!ts) return '—';
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/* ========================================
+   Guest Usage Limiting System
+   ======================================== */
+function getTodayKey() {
+  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
+function getUsageCount(tool) {
+  const key = `${USAGE_KEY_PREFIX}${tool}_${getTodayKey()}`;
+  return parseInt(localStorage.getItem(key) || '0', 10);
+}
+
+function incrementUsage(tool) {
+  const key = `${USAGE_KEY_PREFIX}${tool}_${getTodayKey()}`;
+  const current = parseInt(localStorage.getItem(key) || '0', 10);
+  localStorage.setItem(key, current + 1);
+  return current + 1;
+}
+
+function canUseTool(tool) {
+  if (currentUser && userData) return true; // Logged in users unlimited
+  return getUsageCount(tool) < DAILY_LIMIT;
+}
+
+function getTimeUntilReset() {
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  return tomorrow - now;
+}
+
+function formatTimeRemaining(ms) {
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minutes = Math.floor((ms / (1000 * 60)) % 60);
+  const hours = Math.floor(ms / (1000 * 60 * 60));
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function updateCountdownDisplay() {
+  const timerEl = document.getElementById('countdownTimer');
+  if (!timerEl) return;
+  const remaining = getTimeUntilReset();
+  if (remaining > 0) {
+    timerEl.textContent = formatTimeRemaining(remaining);
+  } else {
+    // Reset happened, clear old data
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith(USAGE_KEY_PREFIX)) {
+        const datePart = key.split('_').pop();
+        if (datePart !== getTodayKey()) localStorage.removeItem(key);
+      }
+    });
+    checkGuestLimits();
+  }
+}
+
+function startCountdown() {
+  if (countdownInterval) clearInterval(countdownInterval);
+  updateCountdownDisplay();
+  countdownInterval = setInterval(updateCountdownDisplay, 1000);
+}
+
+function stopCountdown() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+function checkGuestLimits() {
+  const banner = document.getElementById('guestLimitBanner');
+  const actionBtn = document.getElementById('mainActionBtn');
+  
+  if (!banner || !actionBtn) return;
+  
+  const toolMap = { qr: 'qr', whatsapp: 'wa', pdf: 'pdf' };
+  const tool = toolMap[currentTab] || 'qr';
+  
+  if (!canUseTool(tool)) {
+    banner.style.display = 'block';
+    actionBtn.disabled = true;
+    actionBtn.classList.add('opacity-50');
+    startCountdown();
+  } else {
+    banner.style.display = 'none';
+    actionBtn.disabled = false;
+    actionBtn.classList.remove('opacity-50');
+    stopCountdown();
+  }
+}
+
+function showAuthFromLanding() {
+  navigateTo('/auth');
 }
 
 /* ========================================
@@ -723,6 +1499,8 @@ function formatDate(ts) {
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     currentUser = user;
+    stopCountdown(); // Stop countdown for logged in users
+    
     try {
       const doc = await db.collection('users').doc(user.uid).get();
       if (doc.exists) {
@@ -750,12 +1528,31 @@ auth.onAuthStateChanged(async (user) => {
       console.error('Firestore error:', err);
       userData = { email: user.email, plan: 'free', role: 'user', status: 'active' };
     }
+    
     setupAppUI();
-    showView('appView');
+    
+    // If we were on landing page, go to app (or stay on current route)
+    const path = getCurrentPath();
+    if (path === '/' || path === '/home' || path === '/auth') {
+      navigateTo('/qr');
+    } else {
+      handleRoute();
+    }
   } else {
     currentUser = null;
     userData = null;
-    showView('authView');
+    const path = getCurrentPath();
+    if (path === '/auth') {
+      showView('authView');
+    } else if (['/qr', '/wa-link', '/pdf'].includes(path)) {
+      // Allow guest access to tools
+      showView('appView');
+      checkGuestLimits();
+    } else if (path === '/admin') {
+      navigateTo('/home');
+    } else {
+      showView('landingView');
+    }
   }
 });
 
@@ -825,6 +1622,7 @@ async function handleSignOut() {
     await auth.signOut();
     showToast('Signed out successfully', 'info');
     closeUserMenu();
+    navigateTo('/home');
   } catch (err) {
     showToast('Sign out failed', 'error');
   }
@@ -879,6 +1677,13 @@ function switchTab(tab) {
   document.getElementById(tabMap[tab]).setAttribute('aria-selected', 'true');
   document.getElementById(panelMap[tab]).style.display = 'block';
   updateActionButton();
+  checkGuestLimits();
+  
+  // Update URL without reload
+  const urlMap = { qr: '/qr', whatsapp: '/wa-link', pdf: '/pdf' };
+  if (getCurrentPath() !== urlMap[tab]) {
+    window.history.replaceState({}, '', urlMap[tab]);
+  }
 }
 
 function updateActionButton() {
@@ -895,9 +1700,7 @@ function updateActionButton() {
 }
 
 /* ========================================
-   QR Code Generator — uses qrcodejs library
-   qrcodejs creates both a <canvas> and an <img>
-   inside the target container div.
+   QR Code Generator
    ======================================== */
 function selectSize(btn) {
   document.querySelectorAll('.size-btn[data-size]').forEach(b => b.classList.remove('active'));
@@ -906,6 +1709,15 @@ function selectSize(btn) {
 }
 
 function generateQR() {
+  const tool = 'qr';
+  
+  // Check guest limit
+  if (!canUseTool(tool)) {
+    showToast(`Daily limit reached (${DAILY_LIMIT}/day). Sign in for unlimited!`, 'error');
+    checkGuestLimits();
+    return;
+  }
+  
   const input = document.getElementById('qrInput').value.trim();
 
   if (!input) {
@@ -926,7 +1738,7 @@ function generateQR() {
   const section = document.getElementById('qrPreviewSection');
   section.style.display = 'block';
 
-  /* qrcodejs renders into the div — it creates canvas + img internally */
+  /* qrcodejs renders into the div */
   new QRCode(qrContainer, {
     text: input,
     width: selectedQrSize,
@@ -936,13 +1748,17 @@ function generateQR() {
     correctLevel: QRCode.CorrectLevel.H
   });
 
+  // Increment usage count for guests
+  if (!currentUser) {
+    incrementUsage(tool);
+    checkGuestLimits();
+  }
+
   setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
   showToast('QR code generated!', 'success');
 }
 
 function downloadQR() {
-  /* qrcodejs creates a <canvas> and an <img> inside the container.
-     We grab the <img> since it's always available as a rendered element. */
   const qrContainer = document.getElementById('qrcodeContainer');
   const qrImg = qrContainer.querySelector('img');
 
@@ -987,6 +1803,15 @@ function downloadQR() {
    WhatsApp Link Generator
    ======================================== */
 function generateWaLink() {
+  const tool = 'wa';
+  
+  // Check guest limit
+  if (!canUseTool(tool)) {
+    showToast(`Daily limit reached (${DAILY_LIMIT}/day). Sign in for unlimited!`, 'error');
+    checkGuestLimits();
+    return;
+  }
+  
   const phone = document.getElementById('waPhone').value.replace(/[^0-9]/g, '');
   const message = document.getElementById('waMessage').value.trim();
   if (!phone) { showToast('Please enter a phone number', 'error'); return; }
@@ -994,6 +1819,13 @@ function generateWaLink() {
   const link = `https://wa.me/${phone}${message ? '?text=' + encodeURIComponent(message) : ''}`;
   document.getElementById('waLink').value = link;
   document.getElementById('waResultSection').style.display = 'block';
+  
+  // Increment usage count for guests
+  if (!currentUser) {
+    incrementUsage(tool);
+    checkGuestLimits();
+  }
+  
   setTimeout(() => document.getElementById('waResultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
   showToast('WhatsApp link generated!', 'success');
 }
@@ -1069,15 +1901,26 @@ function renderFileList() {
 
 /* Drag & Drop */
 const dropZone = document.getElementById('dropZone');
-dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-  if (e.dataTransfer.files.length) handleFileSelect({ target: { files: e.dataTransfer.files, value: '' } });
-});
+if (dropZone) {
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleFileSelect({ target: { files: e.dataTransfer.files, value: '' } });
+  });
+}
 
 async function generatePDF() {
+  const tool = 'pdf';
+  
+  // Check guest limit
+  if (!canUseTool(tool)) {
+    showToast(`Daily limit reached (${DAILY_LIMIT}/day). Sign in for unlimited!`, 'error');
+    checkGuestLimits();
+    return;
+  }
+  
   const isPro = userData && userData.plan === 'pro';
 
   if (pdfMode === 'image') {
@@ -1111,6 +1954,13 @@ async function generatePDF() {
       }
       generatedPdfBlob = pdf.output('blob');
       showPdfPreview();
+      
+      // Increment usage count for guests
+      if (!currentUser) {
+        incrementUsage(tool);
+        checkGuestLimits();
+      }
+      
       showToast('PDF created successfully!', 'success');
     } catch (err) {
       console.error(err);
@@ -1166,6 +2016,13 @@ async function generatePDF() {
       }
       generatedPdfBlob = pdf.output('blob');
       showPdfPreview();
+      
+      // Increment usage count for guests
+      if (!currentUser) {
+        incrementUsage(tool);
+        checkGuestLimits();
+      }
+      
       showToast('PDF created successfully!', 'success');
     } catch (err) {
       console.error(err);
@@ -1229,22 +2086,97 @@ function handleMainAction() {
 function openPlanModal() { document.getElementById('planModal').classList.add('open'); }
 function closePlanModal() { document.getElementById('planModal').classList.remove('open'); }
 
-async function handleProUpgrade() {
-  if (!currentUser) return;
-  const btn = document.getElementById('proUpgradeBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div>';
-  try {
-    await db.collection('users').doc(currentUser.uid).update({ plan: 'pro' });
-    userData.plan = 'pro';
-    setupAppUI();
-    closePlanModal();
-    showToast('Upgraded to Pro! Enjoy all features.', 'success');
-  } catch (err) {
-    showToast('Upgrade failed. Please try again.', 'error');
+/* ========================================
+   Payment Flow
+   ======================================== */
+function startUpgradeFlow() {
+  if (!currentUser) {
+    showToast('Please sign in first to upgrade', 'info');
+    navigateTo('/auth');
+    return;
   }
+  
+  // Pre-fill form if possible
+  const nameInput = document.getElementById('payName');
+  const emailInput = document.getElementById('payEmail');
+  if (userData) {
+    nameInput.value = userData.displayName || '';
+    emailInput.value = userData.email || '';
+  }
+  
+  // Reset to step 1
+  document.getElementById('paymentStep1').style.display = 'block';
+  document.getElementById('paymentStep2').style.display = 'none';
+  document.getElementById('paymentStep3').style.display = 'none';
+  document.getElementById('paymentStep4').style.display = 'none';
+  
+  document.getElementById('paymentModal').classList.add('open');
+}
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').classList.remove('open');
+}
+
+async function processPayment() {
+  const name = document.getElementById('payName').value.trim();
+  const email = document.getElementById('payEmail').value.trim();
+  const phone = document.getElementById('payPhone').value.trim();
+  const card = document.getElementById('payCard').value.trim();
+  const expiry = document.getElementById('payExpiry').value.trim();
+  const cvc = document.getElementById('payCvc').value.trim();
+  
+  if (!name || !email || !phone || !card || !expiry || !cvc) {
+    showToast('Please fill in all fields', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('paySubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Processing...';
+  
+  // Show step 2 (processing)
+  document.getElementById('paymentStep1').style.display = 'none';
+  document.getElementById('paymentStep2').style.display = 'block';
+  
+  // Simulate payment processing
+  await new Promise(resolve => setTimeout(resolve, 2500));
+  
+  // Simulate success/failure (90% success rate for demo)
+  const isSuccess = Math.random() > 0.1;
+  
+  if (isSuccess) {
+    // Success - upgrade user
+    try {
+      await db.collection('users').doc(currentUser.uid).update({ plan: 'pro' });
+      userData.plan = 'pro';
+      setupAppUI();
+    } catch (err) {
+      console.error(err);
+    }
+    
+    document.getElementById('paymentStep2').style.display = 'none';
+    document.getElementById('paymentStep3').style.display = 'block';
+    showToast('Successfully upgraded to Pro!', 'success');
+  } else {
+    // Failure
+    document.getElementById('paymentStep2').style.display = 'none';
+    document.getElementById('paymentStep4').style.display = 'block';
+    showToast('Payment failed. Please try again.', 'error');
+  }
+  
   btn.disabled = false;
-  btn.innerHTML = 'Upgrade to Pro';
+  btn.innerHTML = '<i class="fa-solid fa-lock"></i> Pay RM 9.90';
+}
+
+function retryPayment() {
+  document.getElementById('paymentStep4').style.display = 'none';
+  document.getElementById('paymentStep1').style.display = 'block';
+}
+
+async function handleProUpgrade() {
+  // Legacy function - redirect to new flow
+  startUpgradeFlow();
+  closePlanModal();
 }
 
 /* ========================================
@@ -1252,11 +2184,16 @@ async function handleProUpgrade() {
    ======================================== */
 async function showAdminPanel() {
   closeUserMenu();
-  showView('adminView');
-  await loadAdminUsers();
+  navigateTo('/admin');
 }
 
-function closeAdminPanel() { showView('appView'); }
+function closeAdminPanel() { 
+  if (userData) {
+    navigateTo('/qr');
+  } else {
+    navigateTo('/home');
+  }
+}
 
 async function loadAdminUsers() {
   const tbody = document.getElementById('adminTableBody');
@@ -1469,6 +2406,7 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') {
     closePlanModal();
+    closePaymentModal();
     closeAdminUserModal();
     closeUserMenu();
   }
@@ -1477,7 +2415,17 @@ document.addEventListener('keydown', (e) => {
 /* ========================================
    Init
    ======================================== */
+// Set current year in footer
+document.getElementById('currentYearFooter').textContent = new Date().getFullYear();
+
+// Initialize router
 updateActionButton();
+handleRoute();
+
+// Load admin users if on admin page
+if (getCurrentPath() === '/admin') {
+  loadAdminUsers();
+}
 </script>
 </body>
 </html>
