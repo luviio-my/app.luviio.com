@@ -767,6 +767,27 @@ tailwind.config = {
     color: #1e1b3a;
   }
 
+  /* Disabled/Payment Disabled State */
+  .payment-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    position: relative;
+  }
+  .payment-disabled::after {
+    content: 'Payment Temporarily Disabled';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b6580;
+    border-radius: inherit;
+    z-index: 10;
+  }
+
   @media (max-width: 480px) {
     .glass-card { border-radius: 18px; padding: 20px !important; }
     .modal-content { padding: 20px; border-radius: 22px; }
@@ -1056,7 +1077,7 @@ tailwind.config = {
           </button>
         </div>
         <div class="glass-divider"></div>
-<button onclick="handleGoogleSignIn()" class="glass-btn btn-secondary w-full !bg-white !border-gray-200 hover:!border-gray-300 !shadow-md">
+<button onclick="handleGoogleSignIn()" class="glass-btn btn-secondary w-full !bg-white !border-gray-200 hover:!border-gray-300 !shadow-md" id="googleSignInBtn">
   <svg width="18" height="18" viewBox="0 0 24 24" class="flex-shrink-0">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -1121,9 +1142,9 @@ tailwind.config = {
       </div>
       <div class="flex items-center gap-2 md:gap-3">
         <span id="planBadge" class="badge badge-free">Free</span>
-        <button onclick="openPlanModal()" class="glass-btn btn-secondary !py-2 !px-3 md:!py-2.5 md:!px-4 !text-[10px] md:!text-xs !min-h-0 !rounded-xl">
+        <button onclick="openPlanModal()" class="glass-btn btn-secondary !py-2 !px-3 md:!py-2.5 md:!px-4 !text-[10px] md:!text-xs !min-h-0 !rounded-xl" id="dashboardUpgradeBtn">
           <i class="fa-solid fa-crown text-amber-500"></i>
-          <span class="hidden sm:inline">Upgrade</span>
+          <span class="hidden sm:inline" id="dashboardUpgradeText">Upgrade</span>
         </button>
         <div class="relative">
           <button onclick="toggleUserMenu()" id="userMenuBtn" class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-primary-400 to-accent-500 flex items-center justify-center text-white font-bold shadow-lg shadow-primary-500/20 text-xs md:text-sm" aria-label="User menu">
@@ -1262,9 +1283,9 @@ tailwind.config = {
       </div>
       <div class="flex items-center gap-1.5 md:gap-2">
         <span id="planBadgeApp" class="badge badge-free !text-[9px] md:!text-[10px]">Free</span>
-        <button onclick="openPlanModal()" class="glass-btn btn-secondary !py-1.5 md:!py-2 !px-2.5 md:!px-3 !text-[10px] md:!text-xs !min-h-0 !rounded-xl">
+        <button onclick="openPlanModal()" class="glass-btn btn-secondary !py-1.5 md:!py-2 !px-2.5 md:!px-3 !text-[10px] md:!text-xs !min-h-0 !rounded-xl" id="appUpgradeBtn">
           <i class="fa-solid fa-crown text-amber-500 text-xs"></i>
-          <span class="hidden sm:inline">Upgrade</span>
+          <span class="hidden sm:inline" id="appUpgradeText">Upgrade</span>
         </button>
         <div class="relative">
           <button onclick="toggleUserMenu()" id="userMenuBtnApp" class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-primary-400 to-accent-500 flex items-center justify-center text-white font-bold shadow-lg shadow-primary-500/20 text-xs" aria-label="User menu">U</button>
@@ -1628,7 +1649,7 @@ tailwind.config = {
             <p class="text-[10px] md:text-xs text-gray-500 hidden sm:block">No limits, no watermarks, priority support</p>
           </div>
         </div>
-        <button onclick="navigateTo('/pricing')" class="glass-btn btn-primary !py-2.5 md:!py-3 !px-4 md:!px-6 !text-xs md:!text-sm !rounded-xl shrink-0 !from-amber-500 !to-orange-500 !shadow-amber-500/25">
+        <button onclick="navigateTo('/pricing')" class="glass-btn btn-primary !py-2.5 md:!py-3 !px-4 md:!px-6 !text-xs md:text-sm !rounded-xl shrink-0 !from-amber-500 !to-orange-500 !shadow-amber-500/25">
           <i class="fa-solid fa-crown"></i> <span class="hidden sm:inline">Upgrade Pro</span><span class="sm:hidden">Pro</span>
         </button>
       </div>
@@ -1651,7 +1672,7 @@ tailwind.config = {
       <div class="glass-card p-6 md:p-9">
         <div class="flex items-center justify-between mb-4 md:mb-5">
           <h3 class="text-xl md:text-2xl font-bold text-gray-900">Free</h3>
-          <span class="badge badge-free">Current</span>
+          <span class="badge badge-free" id="pricingFreeBadge">Current</span>
         </div>
         <div class="mb-5 md:mb-7">
           <span class="text-4xl md:text-5xl font-extrabold text-gray-900">RM 0</span>
@@ -1664,12 +1685,12 @@ tailwind.config = {
           <li class="flex items-start gap-2 md:gap-3"><i class="fa-solid fa-xmark text-gray-300 mt-0.5 md:mt-1 text-sm md:text-lg"></i> Watermark on exports</li>
           <li class="flex items-start gap-2 md:gap-3"><i class="fa-solid fa-xmark text-gray-300 mt-0.5 md:mt-1 text-sm md:text-lg"></i> No priority support</li>
         </ul>
-        <button onclick="navigateTo(currentUser ? '/dashboard' : '/home')" class="glass-btn btn-secondary w-full !py-3 md:!py-4 !text-xs md:!text-sm">Current Plan</button>
+        <button id="pricingFreeBtn" onclick="navigateTo(currentUser ? '/dashboard' : '/home')" class="glass-btn btn-secondary w-full !py-3 md:!py-4 !text-xs md:!text-sm">Current Plan</button>
       </div>
 
       <!-- Pro Plan -->
-      <div class="glass-card p-6 md:p-9 plan-highlight relative overflow-visible">
-        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary-500 via-accent-500 to-primary-500 text-white text-[10px] md:text-[11px] font-bold px-4 md:px-5 py-1.5 md:py-2 rounded-full shadow-xl shadow-primary-500/30 tracking-wide">RECOMMENDED</div>
+      <div class="glass-card p-6 md:p-9 plan-highlight relative overflow-visible" id="pricingProCard">
+        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary-500 via-accent-500 to-primary-500 text-white text-[10px] md:text-[11px] font-bold px-4 md:px-5 py-1.5 md:py-2 rounded-full shadow-xl shadow-primary-500/30 tracking-wide" id="pricingProLabel">RECOMMENDED</div>
         <div class="flex items-center justify-between mb-4 md:mb-5">
           <h3 class="text-xl md:text-2xl font-bold text-gray-900">Pro</h3>
           <span class="badge badge-pro"><i class="fa-solid fa-crown mr-1"></i>Pro</span>
@@ -1685,7 +1706,7 @@ tailwind.config = {
           <li class="flex items-start gap-2 md:gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5 md:mt-1 text-sm md:text-lg"></i> Advanced PDF formatting</li>
           <li class="flex items-start gap-2 md:gap-3"><i class="fa-solid fa-check text-green-500 mt-0.5 md:mt-1 text-sm md:text-lg"></i> Priority support via email</li>
         </ul>
-        <button onclick="startUpgradeFlow()" class="glass-btn btn-primary w-full !py-3 md:!py-4 !text-xs md:!text-sm" id="pricingUpgradeBtn">Upgrade to Pro</button>
+        <button id="pricingUpgradeBtn" onclick="startUpgradeFlow()" class="glass-btn btn-primary w-full !py-3 md:!py-4 !text-xs md:!text-sm">Upgrade to Pro</button>
       </div>
     </div>
 
@@ -1894,43 +1915,16 @@ tailwind.config = {
 <div class="modal-overlay" id="planModal">
   <div class="modal-content plan-highlight">
     <div class="flex items-center justify-between mb-5 md:mb-7">
-      <h3 class="text-lg md:text-2xl font-extrabold text-gray-900 tracking-tight">Choose Your Plan</h3>
+      <h3 class="text-lg md:text-2xl font-extrabold text-gray-900 tracking-tight" id="planModalTitle">Choose Your Plan</h3>
       <button onclick="closePlanModal()" class="w-9 h-9 md:w-10 md:h-10 rounded-xl hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-all" aria-label="Close">
         <i class="fa-solid fa-xmark text-base md:text-lg"></i>
       </button>
     </div>
-    <div class="space-y-3 md:space-y-4">
-      <div class="p-5 md:p-6 rounded-xl md:rounded-2xl border border-gray-200/60 bg-white/50 backdrop-blur">
-        <div class="flex items-center justify-between mb-2 md:mb-3">
-          <span class="font-bold text-gray-900 text-sm md:text-lg">Free</span>
-          <span class="badge badge-free">Current</span>
-        </div>
-        <div class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-3 md:mb-4">RM 0<span class="text-sm md:text-base font-normal text-gray-500">/month</span></div>
-        <ul class="mt-3 md:mt-4 space-y-2 md:space-y-2.5 text-xs md:text-sm text-gray-600">
-          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>5 generations per day</li>
-          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>Basic features</li>
-          <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-gray-300"></i>Watermark on exports</li>
-        </ul>
-      </div>
-      <div class="p-5 md:p-6 rounded-xl md:rounded-2xl border-2 border-primary-500/40 bg-gradient-to-br from-primary-500/5 to-accent-500/5 relative">
-        <div class="absolute -top-3 md:-top-3.5 right-4 md:right-5 bg-gradient-to-r from-primary-500 to-accent-500 text-white text-[9px] md:text-[11px] font-bold px-3.5 md:px-5 py-1.5 md:py-2 rounded-full shadow-lg tracking-wide">RECOMMENDED</div>
-        <div class="flex items-center justify-between mb-2 md:mb-3">
-          <span class="font-bold text-gray-900 text-sm md:text-lg">Pro</span>
-          <span class="badge badge-pro"><i class="fa-solid fa-crown mr-1"></i>Pro</span>
-        </div>
-        <div class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-3 md:mb-4">RM 9.90<span class="text-sm md:text-base font-normal text-gray-500">/month</span></div>
-        <ul class="mt-3 md:mt-4 space-y-2 md:space-y-2.5 text-xs md:text-sm text-gray-600">
-          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>Unlimited everything</li>
-          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>No watermark</li>
-          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>HD quality exports</li>
-          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>Priority support</li>
-        </ul>
-        <button onclick="startUpgradeFlow(); closePlanModal();" class="glass-btn btn-primary w-full mt-4 md:mt-6 !text-xs md:!text-sm" id="proUpgradeBtn">
-          Upgrade to Pro
-        </button>
-      </div>
+    
+    <!-- Dynamic Content Based on Current Plan -->
+    <div id="planModalContent">
+      <!-- Will be populated by JavaScript based on user's current plan -->
     </div>
-    <p class="text-[10px] md  text-gray-400 text-center mt-4 md:mt-5 font-medium">Cancel anytime. Payment handled securely.</p>
   </div>
 </div>
 
@@ -1968,6 +1962,13 @@ tailwind.config = {
       <button onclick="closePaymentModal()" class="w-9 h-9 md:w-10 md:h-10 rounded-xl hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-all" aria-label="Close">
         <i class="fa-solid fa-xmark text-base md:text-lg"></i>
       </button>
+    </div>
+    
+    <!-- Payment Disabled Notice -->
+    <div id="paymentDisabledNotice" style="display:none;" class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4 text-center">
+      <i class="fa-solid fa-triangle-exclamation text-yellow-500 text-2xl mb-2"></i>
+      <p class="text-sm font-bold text-yellow-800">Payment Temporarily Disabled</p>
+      <p class="text-xs text-yellow-600 mt-1">We're currently upgrading our payment system. Please check back later.</p>
     </div>
     
     <!-- Step 1: Form -->
@@ -2179,8 +2180,11 @@ const FREE_USER_HISTORY_DAYS = 7;
 // Current viewing history item for detail modal
 let currentViewingHistoryItem = null;
 
+// Payment disabled flag (UPDATE 3)
+const PAYMENT_DISABLED = true;
+
 /* ========================================
-   Router System - Fixed for Refresh
+   Router System - Fixed for Refresh & Mobile Google Auth
    ======================================== */
 const routes = {
   '/': 'landingView',
@@ -2284,6 +2288,8 @@ function handleRoute() {
     loadDashboardHistory();
   } else if (path === '/admin' || path === '/admin/dashboard') {
     loadAdminUsers();
+  } else if (path === '/pricing') {
+    updatePricingPage(); // UPDATE 1: Update pricing page based on plan
   }
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2443,7 +2449,7 @@ function showAuthFromLanding() {
 }
 
 /* ========================================
-   Authentication - FIXED FOR REFRESH
+   Authentication - FIXED FOR MOBILE GOOGLE SIGN-IN
    ======================================== */
 let authInitialized = false;
 
@@ -2494,12 +2500,19 @@ auth.onAuthStateChanged(async (user) => {
     setupUI();
     hideLoadingScreen();
     
-    // Navigate appropriately after auth
-    const path = getCurrentPath();
-    if (['/', '/home', '/login', '/auth'].includes(path) || path.startsWith('/free')) {
-      navigateTo('/dashboard');
+    // Navigate appropriately after auth - FIX FOR MOBILE GOOGLE AUTH STUCK ISSUE
+    // Check if we were trying to sign in from a specific page
+    const pendingRedirect = sessionStorage.getItem('pendingAuthRedirect');
+    if (pendingRedirect) {
+      sessionStorage.removeItem('pendingAuthRedirect');
+      navigateTo(pendingRedirect);
     } else {
-      handleRoute();
+      const path = getCurrentPath();
+      if (['/', '/home', '/login', '/auth'].includes(path) || path.startsWith('/free')) {
+        navigateTo('/dashboard');
+      } else {
+        handleRoute();
+      }
     }
   } else {
     currentUser = null;
@@ -2548,26 +2561,57 @@ async function handleLogin() {
 }
 
 async function handleGoogleSignIn() {
+  // FIX FOR MOBILE: Store intended redirect before starting Google Auth flow
+  // This ensures we know where to go after the redirect comes back
+  const currentPath = getCurrentPath();
+  if (currentPath !== '/login' && currentPath !== '/auth') {
+    sessionStorage.setItem('pendingAuthRedirect', '/dashboard');
+  } else {
+    sessionStorage.setItem('pendingAuthRedirect', '/dashboard');
+  }
+
   try {
-    // Create the provider
     const provider = new firebase.auth.GoogleAuthProvider();
     
     // Add these parameters to force account selection (no auto-login)
     provider.setCustomParameters({
-      prompt: 'select_account',  // This forces the Google account picker to show
-      login_hint: ''             // Clear any previous hints
+      prompt: 'select_account',
+      login_hint: ''
     });
     
-    // Show a brief loading state while redirecting
-    showToast('Opening Google Sign-In...', 'info');
+    // Show loading state on button
+    const googleBtn = document.getElementById('googleSignInBtn');
+    if (googleBtn) {
+      googleBtn.disabled = true;
+      googleBtn.innerHTML = '<div class="spinner mx-auto" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:16px;height:16px;"></div> Connecting...';
+    }
     
-    // Use signInWithRedirect for better mobile support and forced selection
-    await auth.signInWithRedirect(provider);
+    showToast('Connecting to Google...', 'info');
     
-    // Note: After redirect, auth.onAuthStateChanged will handle the rest
+    // Use signInWithPopup for better mobile support and immediate feedback
+    // Popup works better on mobile than redirect because:
+    // 1. It doesn't leave the app context
+    // 2. It returns immediately with credentials
+    // 3. No need to handle redirect URL parsing
+    await auth.signInWithPopup(provider);
+    
+    // Success will be handled by onAuthStateChanged above
+    showToast('Welcome!', 'success');
     
   } catch (err) {
     console.error('Google Sign-In Error:', err);
+    
+    // Restore button state
+    const googleBtn = document.getElementById('googleSignInBtn');
+    if (googleBtn) {
+      googleBtn.disabled = false;
+      googleBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" class="flex-shrink-0">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg><span class="!text-gray-700 font-semibold">Sign in with Google</span>`;
+    }
     
     // Handle specific errors gracefully
     if (err.code === 'auth/popup-closed-by-user') {
@@ -2578,23 +2622,30 @@ async function handleGoogleSignIn() {
       return; // Multiple popups blocked
     }
     
-    // Fallback: If redirect fails on certain environments, try popup with select_account
+    // If popup fails on certain environments (like some mobile browsers that block popups)
+    // Fall back to redirect method but ensure we handle the return properly
     if (err.code === 'auth/operation-not-supported-in-this-environment' || 
-        err.code === 'auth/operation-not-supported') {
+        err.code === 'auth/popup-blocked') {
+      
+      showToast('Popup blocked. Trying alternative sign-in...', 'info');
+      
       try {
         const fallbackProvider = new firebase.auth.GoogleAuthProvider();
         fallbackProvider.setCustomParameters({
           prompt: 'select_account'
         });
-        await auth.signInWithPopup(fallbackProvider);
-        showToast('Welcome!', 'success');
-        return;
-      } catch (popupErr) {
-        if (popupErr.code !== 'auth/popup-closed-by-user') {
-          showToast('Google sign-in failed. Please try again.', 'error');
-        }
-        return;
+        
+        // For redirect, we need to ensure the auth state change handles navigation
+        await auth.signInWithRedirect(fallbackProvider);
+        
+        // Note: After redirect, onAuthStateChanged will fire
+        // The pendingAuthRedirect in sessionStorage will handle navigation
+        
+      } catch (redirectErr) {
+        console.error('Redirect auth also failed:', redirectErr);
+        showToast('Google sign-in failed. Please try again or use email/password.', 'error');
       }
+      return;
     }
     
     showToast('Google sign-in failed. Please try again.', 'error');
@@ -2641,16 +2692,18 @@ function showRegister() { document.getElementById('loginForm').style.display = '
 function showLogin() { document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; }
 
 /* ========================================
-   UI Setup
+   UI Setup - UPDATE 1: Pro User Handling
    ======================================== */
 function setupUI() {
   if (!userData) return;
+  
+  const isPro = userData.plan === 'pro';
   
   // Update badges
   ['planBadge', 'planBadgeApp'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      if (userData.plan === 'pro') {
+      if (isPro) {
         el.className = 'badge badge-pro';
         el.innerHTML = '<i class="fa-solid fa-crown mr-1"></i>Pro';
       } else {
@@ -2663,8 +2716,38 @@ function setupUI() {
   // Update pro banner and watermark
   const proBanner = document.getElementById('proBanner');
   const watermark = document.getElementById('qrWatermark');
-  if (proBanner) proBanner.style.display = userData.plan === 'pro' ? 'none' : 'flex';
-  if (watermark) watermark.style.display = userData.plan === 'pro' ? 'none' : 'block';
+  if (proBanner) proBanner.style.display = isPro ? 'none' : 'flex';
+  if (watermark) watermark.style.display = isPro ? 'none' : 'block';
+  
+  // UPDATE 1: Handle Upgrade/Downgrade buttons based on current plan
+  // Dashboard upgrade button
+  const dashUpgradeBtn = document.getElementById('dashboardUpgradeBtn');
+  const dashUpgradeText = document.getElementById('dashboardUpgradeText');
+  if (dashUpgradeBtn && dashUpgradeText) {
+    if (isPro) {
+      // User is Pro - Show Downgrade option instead of Upgrade
+      dashUpgradeBtn.className = 'glass-btn !py-2 !px-3 md:!py-2.5 md:!px-4 !text-[10px] md:!text-xs !min-h-0 !rounded-xl btn-secondary';
+      dashUpgradeText.textContent = 'Downgrade';
+      dashUpgradeBtn.onclick = openPlanModal; // Will show downgrade option in modal
+    } else {
+      // User is Free - Show Upgrade
+      dashUpgradeBtn.className = 'glass-btn btn-secondary !py-2 !px-3 md:!py-2.5 md:!px-4 !text-[10px] md:!text-xs !min-h-0 !rounded-xl';
+      dashUpgradeText.textContent = 'Upgrade';
+      dashUpgradeBtn.onclick = openPlanModal;
+    }
+  }
+  
+  // App header upgrade button
+  const appUpgradeBtn = document.getElementById('appUpgradeBtn');
+  const appUpgradeText = document.getElementById('appUpgradeText');
+  if (appUpgradeBtn && appUpgradeText) {
+    if (isPro) {
+      appUpgradeBtn.style.display = 'none'; // Hide upgrade button entirely for Pro users in app view
+    } else {
+      appUpgradeBtn.style.display = 'inline-flex';
+      appUpgradeText.textContent = 'Upgrade';
+    }
+  }
   
   // Update user menu info
   const initials = (userData.displayName || userData.email)[0].toUpperCase();
@@ -2687,6 +2770,106 @@ function setupUI() {
   updateDashboardUI();
   
   updateActionButton();
+  
+  // Update pricing page if visible
+  if (document.getElementById('pricingView').classList.contains('active')) {
+    updatePricingPage();
+  }
+}
+
+// UPDATE 1: Function to update Pricing Page based on current plan
+function updatePricingPage() {
+  if (!userData) return;
+  
+  const isPro = userData.plan === 'pro';
+  
+  // Update Free Plan Card
+  const freeBadge = document.getElementById('pricingFreeBadge');
+  const freeBtn = document.getElementById('pricingFreeBtn');
+  if (freeBadge) {
+    freeBadge.className = isPro ? 'badge badge-inactive' : 'badge badge-free';
+    freeBadge.textContent = isPro ? 'Previous' : 'Current';
+  }
+  if (freeBtn) {
+    if (isPro) {
+      freeBtn.className = 'glass-btn btn-secondary w-full !py-3 md:!py-4 !text-xs md:!text-sm opacity-50 cursor-not-allowed';
+      freeBtn.textContent = 'Current: Pro Plan';
+      freeBtn.disabled = true;
+      freeBtn.onclick = null;
+    } else {
+      freeBtn.className = 'glass-btn btn-secondary w-full !py-3 md:!py-4 !text-xs md:!text-sm';
+      freeBtn.textContent = 'Current Plan';
+      freeBtn.disabled = false;
+      freeBtn.onclick = () => navigateTo(currentUser ? '/dashboard' : '/home');
+    }
+  }
+  
+  // Update Pro Plan Card
+  const proLabel = document.getElementById('pricingProLabel');
+  const proCard = document.getElementById('pricingProCard');
+  const upgradeBtn = document.getElementById('pricingUpgradeBtn');
+  
+  if (proLabel) {
+    if (isPro) {
+      proLabel.textContent = 'CURRENT PLAN';
+      proLabel.className = 'absolute -top-3.5 left-1/2 -translate-x-1/2 bg-green-500 text-white text-[10px] md:text-[11px] font-bold px-4 md:px-5 py-1.5 md:py-2 rounded-full shadow-xl shadow-green-500/30 tracking-wide';
+    } else {
+      proLabel.textContent = 'RECOMMENDED';
+      proLabel.className = 'absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary-500 via-accent-500 to-primary-500 text-white text-[10px] md:text-[11px] font-bold px-4 md:px-5 py-1.5 md:py-2 rounded-full shadow-xl shadow-primary-500/30 tracking-wide';
+    }
+  }
+  
+  if (upgradeBtn) {
+    if (isPro) {
+      // UPDATE 1: Show Downgrade button for Pro users
+      upgradeBtn.className = 'glass-btn btn-secondary w-full !py-3 md:!py-4 !text-xs md:!text-sm border-orange-300 text-orange-700 hover:bg-orange-50';
+      upgradeBtn.innerHTML = '<i class="fa-solid fa-arrow-down mr-2"></i>Downgrade to Free';
+      upgradeBtn.onclick = () => {
+        if (confirm('Are you sure you want to downgrade to Free? You will lose Pro benefits.')) {
+          downgradePlan();
+        }
+      };
+    } else {
+      // UPDATE 3: Disable payment or allow based on PAYMENT_DISABLED flag
+      if (PAYMENT_DISABLED) {
+        upgradeBtn.className = 'glass-btn w-full !py-3 md:!py-4 !text-xs md:!text-sm opacity-60 cursor-not-allowed relative overflow-hidden payment-disabled';
+        upgradeBtn.innerHTML = '<span>Upgrade to Pro (Coming Soon)</span>';
+        upgradeBtn.onclick = (e) => {
+          e.preventDefault();
+          showToast('Payment is currently disabled. Please check back later.', 'info');
+        };
+      } else {
+        upgradeBtn.className = 'glass-btn btn-primary w-full !py-3 md:!py-4 !text-xs md:!text-sm';
+        upgradeBtn.innerHTML = 'Upgrade to Pro';
+        upgradeBtn.onclick = startUpgradeFlow;
+      }
+    }
+  }
+  
+  // Highlight current plan card
+  if (proCard) {
+    if (isPro) {
+      proCard.className = 'glass-card p-6 md:p-9 relative overflow-visible border-2 border-green-500 bg-gradient-to-br from-green-50 to-white';
+    } else {
+      proCard.className = 'glass-card p-6 md:p-9 plan-highlight relative overflow-visible';
+    }
+  }
+}
+
+// UPDATE 1: Downgrade function
+async function downgradePlan() {
+  if (!currentUser) return;
+  
+  try {
+    await db.collection('users').doc(currentUser.uid).update({ plan: 'free' });
+    userData.plan = 'free';
+    setupUI();
+    updatePricingPage();
+    showToast('Successfully downgraded to Free plan.', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Failed to downgrade plan.', 'error');
+  }
 }
 
 function updateDashboardUI() {
@@ -2721,11 +2904,16 @@ function updateDashboardUI() {
   const displayName = document.getElementById('dashDisplayName');
   if (displayName) displayName.textContent = userData.displayName || '—';
   
-  // Plan badge on dashboard
+  // Plan badge on dashboard - UPDATE 1: Show exact current plan
   const dashPlan = document.getElementById('dashPlanBadge');
   if (dashPlan) {
-    dashPlan.className = userData.plan === 'pro' ? 'badge badge-pro' : 'badge badge-free';
-    dashPlan.innerHTML = userData.plan === 'pro' ? '<i class="fa-solid fa-crown mr-1"></i>Pro' : 'Free';
+    if (userData.plan === 'pro') {
+      dashPlan.className = 'badge badge-pro';
+      dashPlan.innerHTML = '<i class="fa-solid fa-crown mr-1"></i>Pro';
+    } else {
+      dashPlan.className = 'badge badge-free';
+      dashPlan.textContent = 'Free';
+    }
   }
   
   // Joined date
@@ -3307,8 +3495,6 @@ async function loadFullHistory(filter = 'all') {
       .collection('history')
       .orderBy('createdAt', 'desc');
     
-    // Note: If using both orderBy and where, you may need a composite index
-    // Firebase will show an error link in console if index is missing
     if (filter !== 'all') {
       query = query.where('type', '==', filter);
     }
@@ -3331,26 +3517,10 @@ async function loadFullHistory(filter = 'all') {
   } catch (err) {
     console.error('Full History Load Error:', err);
     
-    let errorMsg = 'Failed to load history';
-    let errorIcon = 'fa-triangle-exclamation';
-    let errorColor = 'text-yellow-500';
-    
-    if (err.code === 'permission-denied') {
-      errorMsg = 'Permission denied. Check your login status.';
-      errorIcon = 'fa-lock';
-      errorColor = 'text-red-500';
-    } else if (err.code === 'failed-precondition') {
-      errorMsg = 'Database index required. Check console for link.';
-      errorIcon = 'fa-database';
-      errorColor = 'text-orange-500';
-    } else if (err.message) {
-      errorMsg = err.message;
-    }
-    
     container.innerHTML = `
       <div class="empty-state py-8">
-        <i class="fa-solid ${errorIcon} text-3xl ${errorColor}"></i>
-        <p class="text-xs font-bold mt-2">${errorMsg}</p>
+        <i class="fa-solid fa-triangle-exclamation text-3xl text-red-400"></i>
+        <p class="text-xs font-bold mt-2">${err.message || 'Failed to load history'}</p>
         <button onclick="loadFullHistory('${filter}')" class="mt-3 glass-btn btn-secondary !py-1.5 !px-4 !text-[10px]">Retry</button>
       </div>`;
   }
@@ -3418,7 +3588,6 @@ async function cleanupOldHistory(userId) {
     if (!oldItems.empty) {
       const batch = db.batch();
       oldItems.docs.forEach(doc => {
-        // Move to recently_deleted before removing
         const data = doc.data();
         db.collection('recently_deleted').add({
           ...data,
@@ -3782,7 +3951,7 @@ async function loadDeletedHistory() {
       <div class="empty-state py-8">
         <i class="fa-solid fa-shield-halved text-3xl text-red-300"></i>
         <p class="text-xs font-medium mt-2">Access Denied</p>
-        <p class="text-[10px] mt-1">Only SuperAdmins can view deleted items</p>
+        <p class="text-[10px] mt-1 text-gray-400">Only SuperAdmins can view deleted items</p>
       </div>`;
     return;
   }
@@ -3794,8 +3963,6 @@ async function loadDeletedHistory() {
     </div>`;
   
   try {
-    // This query requires the recently_deleted collection to exist
-    // and security rules to allow superadmin reads
     const snapshot = await db.collection('recently_deleted')
       .orderBy('deletedAt', 'desc')
       .limit(100)
@@ -3817,42 +3984,11 @@ async function loadDeletedHistory() {
   } catch (err) {
     console.error('Deleted History Error:', err.code, err.message);
     
-    // Provide helpful error messages
-    let errorMsg = 'Failed to load deleted items';
-    let errorDetail = '';
-    let errorIcon = 'fa-triangle-exclamation';
-    let errorColor = 'text-red-400';
-    
-    if (err.code === 'permission-denied') {
-      errorMsg = 'Insufficient Permissions';
-      errorDetail = 'Your account may not have SuperAdmin role in Firestore security rules.';
-      errorIcon = 'fa-shield-halved';
-      errorColor = 'text-red-400';
-    } else if (err.code === 'not-found') {
-      errorMsg = 'Collection Not Found';
-      errorDetail = 'The recently_deleted collection may not exist yet. It is created automatically when items are deleted.';
-      errorIcon = 'fa-folder-open';
-      errorColor = 'text-orange-400';
-    } else if (err.code === 'failed-precondition') {
-      errorMsg = 'Index Required';
-      errorDetail = 'Please create the composite index shown in the Firebase console error. This is a one-time setup.';
-      errorIcon = 'fa-database';
-      errorColor = 'text-orange-400';
-    } else if (err.code === 'unavailable') {
-      errorMsg = 'Service Temporarily Unavailable';
-      errorDetail = 'Firestore may be experiencing issues. Please retry in a moment.';
-      errorIcon = 'fa-cloud-slash';
-      errorColor = 'text-yellow-400';
-    } else {
-      errorDetail = err.message || 'Unknown error occurred';
-    }
-    
     container.innerHTML = `
       <div class="empty-state py-8">
-        <i class="fa-solid ${errorIcon} text-3xl ${errorColor}"></i>
-        <p class="text-xs font-bold mt-2" style="color:${errorColor.replace('text-','')}">${errorMsg}</p>
-        ${errorDetail ? `<p class="text-[10px] mt-1 text-gray-500 leading-relaxed">${errorDetail}</p>` : ''}
-        <p class="text-[9px] mt-2 text-gray-400 font-mono break-all opacity-70">${err.code || ''}</p>
+        <i class="fa-solid fa-triangle-exclamation text-3xl text-red-400"></i>
+        <p class="text-xs font-bold mt-2" style="color:${err.code === 'permission-denied' ? '#dc2626' : '#f59e0b'}">${err.code === 'permission-denied' ? 'Permission Denied' : 'Load Failed'}</p>
+        <p class="text-[10px] mt-1 text-gray-500 leading-relaxed">${err.message || 'Unknown error'}</p>
         <button onclick="loadDeletedHistory()" class="mt-4 glass-btn btn-secondary !py-1.5 !px-4 !text-[10px]">
           <i class="fa-solid fa-rotate-right mr-1"></i> Retry
         </button>
@@ -4330,15 +4466,164 @@ function handleMainAction() {
 }
 
 /* ========================================
-   Plan Modal
+   Plan Modal - UPDATE 1: Dynamic Content Based on Plan
    ======================================== */
-function openPlanModal() { document.getElementById('planModal').classList.add('open'); }
-function closePlanModal() { document.getElementById('planModal').classList.remove('open'); }
+function openPlanModal() { 
+  closeUserMenu(); 
+  updatePlanModalContent();
+  document.getElementById('planModal').classList.add('open'); 
+}
+
+function closePlanModal() { 
+  document.getElementById('planModal').classList.remove('open'); 
+}
+
+// UPDATE 1: Generate dynamic modal content based on current plan
+function updatePlanModalContent() {
+  const container = document.getElementById('planModalContent');
+  const title = document.getElementById('planModalTitle');
+  
+  if (!userData) {
+    title.textContent = 'Choose Your Plan';
+    container.innerHTML = `
+      <p class="text-xs md:text-sm text-gray-600 mb-4 text-center">Please sign in to manage your plan.</p>
+      <button onclick="closePlanModal(); navigateTo('/login');" class="glass-btn btn-primary w-full !text-xs md:!text-sm">Sign In to Continue</button>
+    `;
+    return;
+  }
+  
+  const isPro = userData.plan === 'pro';
+  
+  if (isPro) {
+    // UPDATE 1: Pro user sees downgrade option
+    title.textContent = 'Manage Your Plan';
+    container.innerHTML = `
+      <div class="space-y-4 md:space-y-5">
+        <div class="text-center p-4 md:p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl md:rounded-2xl border border-green-200">
+          <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg shadow-green-500/20">
+            <i class="fa-solid fa-crown text-white text-2xl md:text-3xl"></i>
+          </div>
+          <h4 class="text-lg md:text-xl font-bold text-green-800 mb-1">You are on Pro Plan</h4>
+          <p class="text-xs md:text-sm text-green-600">Enjoying unlimited access to all features!</p>
+        </div>
+        
+        <div class="bg-white/50 p-4 md:p-5 rounded-xl border border-gray-200">
+          <h5 class="font-bold text-gray-900 text-sm mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-arrow-down text-orange-500"></i> Change Plan
+          </h5>
+          
+          <div class="p-4 md:p-5 rounded-xl border border-gray-200 bg-white mb-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-gray-900 text-sm">Free Plan</span>
+              <span class="badge badge-free">Downgrade</span>
+            </div>
+            <div class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2">RM 0<span class="text-sm md:text-base font-normal text-gray-500">/month</span></div>
+            <ul class="mt-2 space-y-1.5 text-xs text-gray-600">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> 5 generations per day</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-gray-300"></i> Watermark on exports</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-gray-300"></i> Limited features</li>
+            </ul>
+          </div>
+          
+          <button onclick="downgradePlan(); closePlanModal();" class="glass-btn w-full !py-3 md:!py-4 !text-xs md:!text-sm border-orange-300 text-orange-700 hover:bg-orange-50 font-semibold">
+            <i class="fa-solid fa-arrow-down mr-2"></i> Downgrade to Free
+          </button>
+          
+          <p class="text-[10px] text-gray-400 text-center mt-3 italic">Note: You will lose Pro benefits immediately upon downgrade.</p>
+        </div>
+      </div>
+    `;
+  } else {
+    // Free user sees upgrade option (or disabled notice)
+    title.textContent = 'Choose Your Plan';
+    
+    if (PAYMENT_DISABLED) {
+      // UPDATE 3: Payment disabled - show coming soon
+      container.innerHTML = `
+        <div class="space-y-4 md:space-y-5">
+          <div class="text-center p-4 md:p-6 bg-yellow-50 rounded-xl md:rounded-2xl border border-yellow-200 mb-4">
+            <i class="fa-solid fa-triangle-exclamation text-yellow-500 text-3xl mb-2"></i>
+            <h4 class="text-base md:text-lg font-bold text-yellow-800">Payment Temporarily Disabled</h4>
+            <p class="text-xs md:text-sm text-yellow-600 mt-1">We're upgrading our payment system. Please check back later.</p>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3 md:gap-4">
+            <div class="p-4 md:p-5 rounded-xl border border-gray-200 bg-white/70 relative overflow-hidden">
+              <div class="absolute top-2 right-2">
+                <span class="badge badge-free !text-[8px]">Current</span>
+              </div>
+              <h4 class="font-bold text-gray-900 text-sm mb-1">Free</h4>
+              <div class="text-xl md:text-2xl font-extrabold text-gray-900">RM 0<span class="text-xs font-normal text-gray-500">/mo</span></div>
+              <p class="text-[10px] text-gray-500 mt-2">Limited features</p>
+            </div>
+            
+            <div class="p-4 md:p-5 rounded-xl border-2 border-primary-300 bg-gradient-to-br from-primary-50 to-purple-50 relative overflow-hidden opacity-60">
+              <div class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
+                <span class="text-xs font-bold text-gray-600 px-3 py-1 bg-gray-100 rounded-full">Coming Soon</span>
+              </div>
+              <h4 class="font-bold text-gray-900 text-sm mb-1">Pro</h4>
+              <div class="text-xl md:text-2xl font-extrabold text-primary-600">RM 9.90<span class="text-xs font-normal text-gray-500">/mo</span></div>
+              <p class="text-[10px] text-gray-500 mt-2">Unlimited everything</p>
+            </div>
+          </div>
+          
+          <button disabled class="glass-btn w-full !py-3 md:!py-4 !text-xs md:!text-sm opacity-50 cursor-not-allowed">
+            <i class="fa-solid fa-lock mr-2"></i> Upgrade Unavailable
+          </button>
+          
+          <p class="text-[10px] text-gray-400 text-center">We'll notify you when payments are re-enabled.</p>
+        </div>
+      `;
+    } else {
+      // Normal upgrade flow (payment enabled)
+      container.innerHTML = `
+        <div class="space-y-3 md:space-y-4">
+          <div class="p-5 md:p-6 rounded-xl md:rounded-2xl border border-gray-200/60 bg-white/50 backdrop-blur">
+            <div class="flex items-center justify-between mb-2 md:mb-3">
+              <span class="font-bold text-gray-900 text-sm md:text-lg">Free</span>
+              <span class="badge badge-free">Current</span>
+            </div>
+            <div class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-3 md:mb-4">RM 0<span class="text-sm md:text-base font-normal text-gray-500">/month</span></div>
+            <ul class="mt-3 md:mt-4 space-y-2 md:space-y-2.5 text-xs md:text-sm text-gray-600">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>5 generations per day</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>Basic features</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-gray-300"></i>Watermark on exports</li>
+            </ul>
+          </div>
+          <div class="p-5 md:p-6 rounded-xl md:rounded-2xl border-2 border-primary-500/40 bg-gradient-to-br from-primary-500/5 to-accent-500/5 relative">
+            <div class="absolute -top-3 md:-top-3.5 right-4 md:right-5 bg-gradient-to-r from-primary-500 to-accent-500 text-white text-[9px] md:text-[11px] font-bold px-3.5 md:px-5 py-1.5 md:py-2 rounded-full shadow-lg tracking-wide">RECOMMENDED</div>
+            <div class="flex items-center justify-between mb-2 md:mb-3">
+              <span class="font-bold text-gray-900 text-sm md:text-lg">Pro</span>
+              <span class="badge badge-pro"><i class="fa-solid fa-crown mr-1"></i>Pro</span>
+            </div>
+            <div class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-3 md:mb-4">RM 9.90<span class="text-sm md:text-base font-normal text-gray-500">/month</span></div>
+            <ul class="mt-3 md:mt-4 space-y-2 md:space-y-2.5 text-xs md:text-sm text-gray-600">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>Unlimited everything</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>No watermark</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>HD quality exports</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i>Priority support</li>
+            </ul>
+            <button onclick="startUpgradeFlow(); closePlanModal();" class="glass-btn btn-primary w-full mt-4 md:mt-6 !text-xs md:!text-sm" id="proUpgradeBtn">
+              Upgrade to Pro
+            </button>
+          </div>
+        </div>
+        <p class="text-[10px] md:text-xs text-gray-400 text-center mt-4 md:mt-5 font-medium">Cancel anytime. Payment handled securely.</p>
+      `;
+    }
+  }
+}
 
 /* ========================================
-   Payment Flow
+   Payment Flow - UPDATE 3: Disabled by default
    ======================================== */
 function startUpgradeFlow() {
+  // UPDATE 3: Check if payment is disabled
+  if (PAYMENT_DISABLED) {
+    showToast('Payment is currently disabled. Please check back later.', 'info');
+    return;
+  }
+  
   if (!currentUser) {
     showToast('Please sign in first to upgrade', 'info');
     navigateTo('/login');
@@ -4352,10 +4637,25 @@ function startUpgradeFlow() {
     emailInput.value = userData.email || '';
   }
   
-  document.getElementById('paymentStep1').style.display = 'block';
+  // Show disabled notice if applicable
+  const disabledNotice = document.getElementById('paymentDisabledNotice');
+  if (disabledNotice) {
+    disabledNotice.style.display = PAYMENT_DISABLED ? 'block' : 'none';
+  }
+  
+  document.getElementById('paymentStep1').style.display = PAYMENT_DISABLED ? 'none' : 'block';
   document.getElementById('paymentStep2').style.display = 'none';
   document.getElementById('paymentStep3').style.display = 'none';
   document.getElementById('paymentStep4').style.display = 'none';
+  
+  // If payment disabled, show message instead of form
+  if (PAYMENT_DISABLED) {
+    document.getElementById('paymentTitle').textContent = 'Payment Unavailable';
+    document.getElementById('paymentDisabledNotice').style.display = 'block';
+  } else {
+    document.getElementById('paymentTitle').textContent = 'Upgrade to Pro';
+    document.getElementById('paymentDisabledNotice').style.display = 'none';
+  }
   
   document.getElementById('paymentModal').classList.add('open');
 }
@@ -4365,6 +4665,12 @@ function closePaymentModal() {
 }
 
 async function processPayment() {
+  // UPDATE 3: Prevent processing if disabled
+  if (PAYMENT_DISABLED) {
+    showToast('Payment processing is currently disabled.', 'error');
+    return;
+  }
+  
   const name = document.getElementById('payName').value.trim();
   const email = document.getElementById('payEmail').value.trim();
   const phone = document.getElementById('payPhone').value.trim();
@@ -4443,8 +4749,6 @@ async function loadAdminUsers() {
   }
   
   try {
-    // Use get() instead of relying solely on orderBy which requires indexes
-    // This provides better error handling for missing indexes
     const snapshot = await db.collection('users')
       .orderBy('createdAt', 'desc')
       .limit(100)
@@ -4461,7 +4765,6 @@ async function loadAdminUsers() {
   } catch (err) {
     console.error('Admin Users Load Error:', err.code, err.message);
     
-    // Provide detailed error feedback
     let errorHTML = '';
     
     if (err.code === 'permission-denied') {
@@ -4477,7 +4780,6 @@ async function loadAdminUsers() {
         <button onclick="loadAdminUsers()" class="mt-4 glass-btn btn-secondary !py-2 !px-4 !text-xs">Retry</button>
       </td></tr>`;
     } else if (err.code === 'failed-precondition') {
-      // Index required - provide helpful guidance
       const indexUrl = err.message.match(/https:\/\/console\.firebase\.google\.com[^\s]*/);
       errorHTML = `<tr><td colspan="6" class="text-center py-10 md:py-12">
         <div class="text-orange-400 mb-3">
@@ -4493,19 +4795,6 @@ async function loadAdminUsers() {
         </a>` : ''}
         <p class="text-[10px] text-gray-400 mt-3">After creating the index, wait 1-2 minutes then retry.</p>
         <button onclick="loadAdminUsers()" class="mt-3 glass-btn btn-secondary !py-2 !px-4 !text-xs">Retry After Index Created</button>
-      </td></tr>`;
-    } else if (err.code === 'unavailable' || err.code === 'resource-exhausted') {
-      errorHTML = `<tr><td colspan="6" class="text-center py-10 md:py-12">
-        <div class="text-yellow-500 mb-3">
-          <i class="fa-solid fa-cloud-slash text-3xl md:text-4xl block mb-2"></i>
-          <p class="font-bold text-sm md:text-base">Service Unavailable</p>
-        </div>
-        <p class="text-xs md:text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
-          Firestore is temporarily unavailable. Please try again in a moment.
-        </p>
-        <button onclick="loadAdminUsers()" class="mt-4 glass-btn btn-secondary !py-2 !px-4 !text-xs">
-          <i class="fa-solid fa-rotate-right mr-1"></i> Retry Now
-        </button>
       </td></tr>`;
     } else {
       errorHTML = `<tr><td colspan="6" class="text-center py-10 md:py-12">
@@ -4695,7 +4984,7 @@ function openUserManage(userId) {
     <div class="glass-divider"></div>
     
     <div class="mb-4 md:mb-5">
-      <p class="text-[10px] md:text-xs font-black text-gray-500 mb-2 md:mb-3 uppercase tracking-wider flex items-center gap-2">
+      <p class="text-[10px] md:text-xs font-black text-gray-500 uppercase tracking-wider flex items-center gap-2">
         <i class="fa-solid fa-shield-halved text-purple-500"></i> Role Assignment
       </p>
       <div class="grid grid-cols-2 gap-2 md:gap-3">
@@ -4849,6 +5138,59 @@ if (getCurrentPath() === '/admin' || getCurrentPath() === '/admin/dashboard') {
     if (userData?.role === 'superadmin') loadAdminUsers();
   }, 1000);
 }
+
+// Handle visibility change for mobile Google Auth fix
+// This ensures the app updates when returning from a background state (like Google Sign-In redirect)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && authInitialized) {
+    // Re-check auth state when page becomes visible again
+    // This helps with mobile browsers that may suspend the page during OAuth flows
+    const currentPath = getCurrentPath();
+    
+    // If we're stuck on login page but user is actually logged in now, redirect
+    if ((currentPath === '/login' || currentPath === '/auth') && currentUser) {
+      // Check if there's a pending redirect from Google Auth
+      const pendingRedirect = sessionStorage.getItem('pendingAuthRedirect');
+      if (pendingRedirect) {
+        sessionStorage.removeItem('pendingAuthRedirect');
+        navigateTo(pendingRedirect);
+      } else {
+        navigateTo('/dashboard');
+      }
+    }
+  }
+});
+
+// Prevent zoom on double-tap for iOS (common issue with mobile web apps)
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
+
+// Service Worker Registration for PWA-like behavior (optional enhancement)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Uncomment below to enable service worker for offline capability
+    /*
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('SW registered:', registration.scope);
+      })
+      .catch(error => {
+        console.log('SW registration failed:', error);
+      });
+    */
+  });
+}
+
+// Console welcome message for developers
+console.log('%c🚀 LuvTools by luviio', 'font-size: 20px; font-weight: bold; color: #6366f1;');
+console.log('%cFree QR Generator • WhatsApp Links • PDF Tools', 'font-size: 12px; color: #9ca3af;');
+console.log('%c⚠️ Developer Mode Active', 'font-size: 10px; color: #f59e0b; font-style: italic;');
 </script>
 </body>
 </html>
